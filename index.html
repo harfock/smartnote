@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"/>
+<title>智醒長者・自由空間數位照護日誌</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Inter:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  /* Solar Atmospheric Tokens - High Contrast Cataract Friendly */
+  --bg-surface: #FAF8F5;
+  --bg-card: #FFFFFF;
+  --text-main: #0F172A;
+  --text-muted: #334155;
+  --border-color: #0F172A;
+  --accent-gold: #D97706;
+  --accent-gold-bg: #FEF3C7;
+  --accent-blue: #1E40AF;
+  --accent-blue-bg: #EFF6FF;
+  --accent-green: #047857;
+  --accent-green-bg: #D1FAE5;
+  --accent-red: #B91C1C;
+  --accent-red-bg: #FEE2E2;
+  --accent-purple: #7C3AED;
+  --accent-purple-bg: #F3E8FF;
+  
+  --shadow-elevation: 0 8px 24px -4px rgba(0, 0, 0, 0.16), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
+  --shadow-active: 0 18px 36px -6px rgba(0, 0, 0, 0.3);
+  
+  --font-serif: 'Noto Serif TC', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Fluid Responsive Card Sizing Token */
+  --widget-width: clamp(280px, 92vw, 360px);
+  
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+body.theme-night {
+  --bg-surface: #0B0F17;
+  --bg-card: #151D2A;
+  --text-main: #F8FAFC;
+  --text-muted: #CBD5E1;
+  --border-color: #475569;
+  --shadow-elevation: 0 8px 24px -4px rgba(0, 0, 0, 0.7);
+}
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  font-family: var(--font-serif);
+  touch-action: none;
+  transition: background-color 0.8s ease;
+}
+
+.svg-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+#ambient-edge-strobe {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: inset 0 0 0 0px transparent;
+  transition: box-shadow 0.4s ease;
+}
+
+#app-root {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* Off-canvas Responsive Sidebar Drawer */
+#sidebar-dock {
+  width: 290px;
+  max-width: 85vw;
+  background: var(--bg-card);
+  border-right: 3.5px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 4000;
+  box-shadow: 6px 0 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  user-select: none;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  #sidebar-dock {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  #sidebar-dock.open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 769px) {
+  #sidebar-dock.collapsed {
+    transform: translateX(-290px);
+    margin-right: -290px;
+  }
+}
+
+#sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 3900;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dock-header {
+  padding: 14px 16px;
+  background: #0F172A;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--border-color);
+}
+
+.dock-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #FBBF24;
+}
+
+.dock-toggle-btn {
+  background: #334155;
+  color: #FFF;
+  border: 2px solid #FBBF24;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.dock-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.btn-primary-add {
+  background: var(--accent-gold);
+  color: #FFFFFF;
+  border: 3px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  white-space: nowrap;
+}
+
+.btn-primary-add:active {
+  transform: scale(0.97);
+  background: #B45309;
+}
+
+.dock-section-title {
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid rgba(0,0,0,0.12);
+  padding-bottom: 4px;
+}
+
+.quick-stickers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.sticker-btn {
+  background: var(--bg-surface);
+  border: 2.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.sticker-btn:active {
+  background: var(--accent-gold-bg);
+  border-color: var(--accent-gold);
+}
+
+#main-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.12) 1px, transparent 0);
+  background-size: 28px 28px;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#main-canvas:active {
+  cursor: grabbing;
+}
+
+body.theme-night #main-canvas {
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0);
+}
+
+.canvas-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(250, 248, 245, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.theme-night .canvas-top-bar {
+  background: rgba(11, 15, 23, 0.88);
+}
+
+.instruction-guide-banner {
+  background: #0F172A;
+  color: #FBBF24;
+  border: 2px solid #FBBF24;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: var(--shadow-elevation);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#widgets-container {
+  position: absolute;
+  width: 5000px;
+  height: 5000px;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transition: transform 0.05s ease-out;
+  pointer-events: none;
+}
+
+#widgets-container .canvas-widget {
+  pointer-events: auto;
+}
+
+.canvas-widget {
+  position: absolute;
+  width: var(--widget-width);
+  max-width: calc(100vw - 20px);
+  background: var(--bg-card);
+  border: 3.5px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-elevation);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  touch-action: none;
+  user-select: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform, left, top;
+  cursor: grab;
+}
+
+.canvas-widget:active {
+  cursor: grabbing;
+}
+
+.canvas-widget.dragging {
+  box-shadow: var(--shadow-active);
+  border-color: var(--accent-gold);
+  z-index: 3000 !important;
+}
+
+.canvas-widget.type-meds { border-left: 10px solid var(--accent-red); }
+.canvas-widget.type-clinic { border-left: 10px solid var(--accent-blue); }
+.canvas-widget.type-note { border-left: 10px solid var(--accent-green); }
+.canvas-widget.type-clock { border-left: 10px solid var(--accent-gold); }
+.canvas-widget.type-todo { border-left: 10px solid var(--accent-green); }
+.canvas-widget.type-media { border-left: 10px solid var(--accent-purple); }
+
+.widget-header {
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.04);
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: move;
+}
+
+.widget-category-tag {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #FFF;
+  white-space: nowrap;
+}
+
+.type-meds .widget-category-tag { background: var(--accent-red); }
+.type-clinic .widget-category-tag { background: var(--accent-blue); }
+.type-note .widget-category-tag { background: var(--accent-green); }
+.type-clock .widget-category-tag { background: var(--accent-gold); }
+.type-todo .widget-category-tag { background: var(--accent-green); }
+.type-media .widget-category-tag { background: var(--accent-purple); }
+
+.widget-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.widget-btn {
+  background: rgba(0,0,0,0.06);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.widget-btn:active {
+  background: var(--accent-gold-bg);
+  border-color: var(--accent-gold);
+}
+
+.widget-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.widget-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--accent-gold);
+}
+
+.widget-content-text {
+  font-weight: 900;
+  line-height: 1.25;
+  color: var(--text-main);
+  word-break: break-all;
+  white-space: pre-wrap;
+  letter-spacing: 0.02em;
+}
+
+/* To-Do List Card Specific Styles */
+.todo-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.todo-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.todo-item-row.completed {
+  opacity: 0.65;
+  background: rgba(0,0,0,0.02);
+}
+
+.todo-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2.5px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.todo-item-row.completed .todo-checkbox {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #FFF;
+}
+
+.todo-item-text {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text-main);
+  word-break: break-all;
+  flex: 1;
+}
+
+.todo-item-row.completed .todo-item-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Media Card Specific Styles */
+.media-thumbnail-container {
+  width: 100%;
+  height: 140px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  background: #000;
+  position: relative;
+}
+
+.media-thumbnail-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-link-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--accent-purple-bg);
+  border: 2px solid var(--accent-purple);
+  border-radius: 10px;
+  color: var(--accent-purple);
+  font-weight: 900;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ack-button {
+  width: 100%;
+  height: 48px;
+  background: var(--accent-gold-bg);
+  border: 3px solid var(--accent-gold);
+  border-radius: 10px;
+  color: var(--accent-gold);
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.ack-button.acknowledged {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  color: #FFFFFF;
+}
+
+.canvas-widget.collapsed-mode {
+  padding: 2px;
+}
+
+.collapsed-pill-box {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.collapsed-pill-title {
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.widget-footer-stamp {
+  padding: 8px 12px;
+  border-top: 2px dashed rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 800;
+}
+
+.author-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--border-color);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.clock-display-main {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: clamp(2.5rem, 8vw, 3.6rem);
+  line-height: 1;
+  color: var(--text-main);
+  text-align: center;
+  margin: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: var(--bg-card);
+  border: 4px solid var(--border-color);
+  border-radius: 18px;
+  width: min(520px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-active);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 14px;
+  background: #0F172A;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3.5px solid var(--border-color);
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #FBBF24;
+}
+
+.modal-close-btn {
+  background: #334155;
+  color: #FFF;
+  border: 2px solid #FBBF24;
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 3px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.type-option-btn {
+  border: 2.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 4px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-weight: 900;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.type-option-btn.selected {
+  background: var(--border-color);
+  color: #FFF;
+}
+
+#toast-notification {
+  position: fixed;
+  top: clamp(60px, 10vh, 80px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #0F172A;
+  color: #FBBF24;
+  border: 3px solid #FBBF24;
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-weight: 900;
+  font-size: 0.92rem;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.35);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+#toast-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div id="app-root">
+
+  <div id="ambient-edge-strobe"></div>
+  <div id="toast-notification">備忘錄已更新 ‧ UPDATED</div>
+  <div id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+
+  <!-- SIDEBAR TOOL DOCK -->
+  <aside id="sidebar-dock">
+    <div class="dock-header">
+      <span class="dock-title">工具箱 TOOLBOX</span>
+      <button class="dock-toggle-btn" id="dockToggleBtn" onclick="toggleSidebar(false)">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="dock-body">
+      <button class="btn-primary-add" onclick="openAddNoteModal()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>新增自訂叮囑 ‧ ADD</span>
+      </button>
+
+      <div class="dock-section-title">快捷貼紙 ‧ 1-TAP STICKERS</div>
+      <div class="quick-stickers-grid">
+        <button class="sticker-btn" onclick="spawnQuickSticker('water')">
+          <svg class="svg-icon" style="color: var(--accent-blue);" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <span>記得飲水 💧</span>
+        </button>
+        <button class="sticker-btn" onclick="spawnQuickSticker('dinner')">
+          <svg class="svg-icon" style="color: var(--accent-gold);" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+          <span>返嚟食飯 🍚</span>
+        </button>
+        <button class="sticker-btn" onclick="spawnQuickSticker('clothes')">
+          <svg class="svg-icon" style="color: var(--accent-red);" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+          <span>天冷穿衣 🧥</span>
+        </button>
+        <button class="sticker-btn" onclick="spawnQuickSticker('bp')">
+          <svg class="svg-icon" style="color: var(--accent-green);" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span>量度血壓 🩺</span>
+        </button>
+      </div>
+
+      <div class="dock-section-title">排版整理 ‧ ORGANIZE</div>
+      <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; background: var(--accent-gold-bg); border-color: var(--accent-gold); color: var(--accent-gold);" onclick="resetCardArrangement()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>🔄 自動重設排列卡片 (RESET GRID)</span>
+      </button>
+
+      <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; margin-top: 4px;" onclick="toggleCollapseAll()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
+        <span id="collapseAllBtnText">全部折疊 / 展開 (省空間)</span>
+      </button>
+
+      <div class="dock-section-title">每行字數 ‧ TEXT PER ROW</div>
+      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數 (預設8個字自動放大):</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <button class="widget-btn" onclick="changeCharsPerLine(-1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">-</button>
+          <span id="chars-per-line-val" style="font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); min-width: 36px; text-align: center;">8</span>
+          <button class="widget-btn" onclick="changeCharsPerLine(1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">+</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main-canvas">
+
+    <div class="canvas-top-bar">
+      <button class="btn-primary-add" onclick="toggleSidebar(true)" style="padding: 6px 10px; font-size: 0.82rem; flex-shrink: 0;">
+        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span>工具箱</span>
+      </button>
+
+      <div class="instruction-guide-banner">
+        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span style="overflow: hidden; text-overflow: ellipsis;">💡 自由拖動畫布四周・支援待辦清單與網頁相片卡片</span>
+      </div>
+
+      <div id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none;" role="button">100%</div>
+
+      <button class="btn-primary-add" id="themeToggleBtn" style="padding: 6px 10px; font-size: 0.82rem; background: var(--bg-card); color: var(--text-main); flex-shrink: 0;">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="themeToggleText">護眼</span>
+      </button>
+    </div>
+
+    <div id="widgets-container"></div>
+
+  </main>
+</div>
+
+<div class="modal-backdrop" id="note-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title-text">編輯叮囑 ‧ EDIT REMINDER</span>
+      <button class="modal-close-btn" onclick="closeNoteModal()">關閉 X</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-target-id" value=""/>
+
+      <div class="form-group">
+        <label class="form-label">選擇分類 CATEGORY</label>
+        <div class="form-type-selector" style="grid-template-columns: repeat(5, 1fr);">
+          <button type="button" class="type-option-btn selected" data-type="meds" onclick="selectTypeOption(this, 'meds')">💊 食藥</button>
+          <button type="button" class="type-option-btn" data-type="clinic" onclick="selectTypeOption(this, 'clinic')">🏥 覆診</button>
+          <button type="button" class="type-option-btn" data-type="note" onclick="selectTypeOption(this, 'note')">💌 家書</button>
+          <button type="button" class="type-option-btn" data-type="todo" onclick="selectTypeOption(this, 'todo')">📋 待辦</button>
+          <button type="button" class="type-option-btn" data-type="media" onclick="selectTypeOption(this, 'media')">🌐 網頁</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">主要標題 / 內容 TITLE / CONTENT</label>
+        <textarea class="form-textarea" id="note-content-input" placeholder="例如：記得食降血壓藥1丸與胃藥..."></textarea>
+      </div>
+
+      <!-- Dynamic fields for Todo -->
+      <div class="form-group" id="group-todo-fields" style="display: none;">
+        <label class="form-label">待辦事項清單 (每行一項)</label>
+        <textarea class="form-textarea" id="todo-items-input" placeholder="飲一杯溫開水&#10;客廳散步15分鐘&#10;量度血壓"></textarea>
+      </div>
+
+      <!-- Dynamic fields for Media & Link -->
+      <div class="form-group" id="group-media-fields" style="display: none;">
+        <label class="form-label">相片網址 IMAGE URL (選填)</label>
+        <input type="text" class="form-input" id="media-image-input" placeholder="https://images.unsplash.com/..."/>
+        <label class="form-label" style="margin-top: 4px;">外部網頁連結 URL (選填)</label>
+        <input type="text" class="form-input" id="media-url-input" placeholder="https://www.ha.org.hk"/>
+        <label class="form-label" style="margin-top: 4px;">網頁標題 LINK TITLE (選填)</label>
+        <input type="text" class="form-input" id="media-linktitle-input" placeholder="醫院管理局健康資訊"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">即時預覽 ‧ LIVE PREVIEW</label>
+        <div id="modal-live-preview" style="background: var(--bg-surface); border: 3px solid var(--border-color); border-radius: 10px; padding: 12px; font-weight: 900; line-height: 1.25; word-break: break-all; white-space: pre-wrap; color: var(--text-main);">...</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">提示時間 TIME / PHASE</label>
+        <input type="text" class="form-input" id="note-time-input" placeholder="例如：09:00 AM / 今日事項"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">叮囑者姓名 AUTHOR NAME</label>
+        <input type="text" class="form-input" id="note-author-input" placeholder="例如：女兒 阿玲 / 兒子 阿明"/>
+      </div>
+
+      <button class="btn-primary-add" style="margin-top: 6px;" onclick="saveNoteChanges()">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>儲存叮囑 ‧ SAVE REMINDER</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="magnifier-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title">超大字閱讀 ‧ MAGNIFIED VIEW</span>
+      <button class="modal-close-btn" onclick="closeMagnifierModal()">關閉 X</button>
+    </div>
+    <div class="modal-body" style="gap: 14px;">
+      <div style="font-size: 1.1rem; font-weight: 900; color: var(--accent-gold);" id="mag-time-badge">09:00 AM</div>
+      <div style="font-weight: 900; line-height: 1.25; color: #FBBF24; padding: 16px; background: #0F172A; border-radius: 12px; word-break: break-all; white-space: pre-wrap;" id="mag-content-box">---</div>
+      <div style="font-size: 1rem; font-weight: 900; color: var(--text-muted);" id="mag-author-badge">---</div>
+      <button class="ack-button" id="mag-ack-btn" style="height: 52px; font-size: 1.1rem;" onclick="toggleAckFromMagnifier()">
+        <span>【 👍 我看到了 ‧ ACKNOWLEDGED 】</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+let canvasScale = 1.0;
+let panX = 100;
+let panY = 80;
+let isPanningCanvas = false;
+let panStartX = 0;
+let panStartY = 0;
+
+let initialPinchDistance = null;
+let initialScaleOnPinch = 1.0;
+
+const DEFAULT_WIDGETS = [
+  {
+    id: 'widget-clock',
+    type: 'clock',
+    x: 40,
+    y: 80,
+    collapsed: false
+  },
+  {
+    id: 'widget-sample-1',
+    type: 'meds',
+    x: 410,
+    y: 80,
+    time: '09:00 AM (早餐後)',
+    content: '食降血壓丸與胃藥',
+    author: '大女 阿玲',
+    authorRole: '玲',
+    acknowledged: false,
+    collapsed: false
+  },
+  {
+    id: 'widget-sample-todo',
+    type: 'todo',
+    x: 780,
+    y: 80,
+    time: '今日日常事項',
+    content: '早晨健康打卡清單',
+    author: '大女 阿玲',
+    authorRole: '玲',
+    tasks: [
+      { id: 't1', text: '飲一杯溫開水', done: true },
+      { id: 't2', text: '客廳散步 15 分鐘', done: false },
+      { id: 't3', text: '量度血壓並記錄', done: false }
+    ],
+    acknowledged: false,
+    collapsed: false
+  },
+  {
+    id: 'widget-sample-media',
+    type: 'media',
+    x: 1150,
+    y: 80,
+    time: '健康小百科',
+    content: '降血壓飲食原則：每日鹽分攝取小於5克，多食新鮮蔬菜與高鉀水果。',
+    author: '細仔 阿明',
+    authorRole: '明',
+    imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
+    linkUrl: 'https://www.ha.org.hk',
+    linkTitle: '醫院管理局健康資訊網',
+    acknowledged: false,
+    collapsed: false
+  },
+  {
+    id: 'widget-sample-2',
+    type: 'clinic',
+    x: 40,
+    y: 460,
+    time: '下午 02:30 (眼科)',
+    content: '威爾斯醫院眼科覆診',
+    author: '細仔 阿明',
+    authorRole: '明',
+    acknowledged: false,
+    collapsed: false
+  },
+  {
+    id: 'widget-sample-3',
+    type: 'note',
+    x: 410,
+    y: 460,
+    time: '08:00 AM 叮囑',
+    content: '水壺已裝滿溫開水',
+    author: '細仔 阿明',
+    authorRole: '明',
+    acknowledged: false,
+    collapsed: false
+  }
+];
+
+let widgetsState = [];
+let selectedNoteType = 'meds';
+let activeMagnifiedCardId = null;
+let maxZIndex = 100;
+let isAllCollapsed = false;
+let charsPerLine = 8;
+
+function loadWidgetsFromStorage() {
+  try {
+    const saved = localStorage.getItem('care_canvas_widgets_v7');
+    if (saved) {
+      widgetsState = JSON.parse(saved);
+    } else {
+      widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+    }
+  } catch(e) {
+    widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+  }
+
+  try {
+    const savedChars = localStorage.getItem('care_canvas_chars_per_line');
+    if (savedChars) {
+      charsPerLine = parseInt(savedChars, 10) || 8;
+    }
+  } catch(e) {
+    charsPerLine = 8;
+  }
+  updateCharsPerLineDisplay();
+}
+
+function updateCharsPerLineDisplay() {
+  const el = document.getElementById('chars-per-line-val');
+  if (el) el.textContent = charsPerLine;
+}
+
+function changeCharsPerLine(delta) {
+  charsPerLine = Math.max(3, Math.min(20, charsPerLine + delta));
+  try {
+    localStorage.setItem('care_canvas_chars_per_line', charsPerLine.toString());
+  } catch(e) {}
+  updateCharsPerLineDisplay();
+  renderAllWidgets();
+  updateModalLivePreview();
+  showToast(`每行字數已設定為 ${charsPerLine} 字 (自動放大字型)`);
+}
+
+function escapeHTML(str) {
+  return String(str || '')
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
+  if (!text) return { html: '', fontSize: '32px' };
+  const limit = maxChars || 8;
+  const width = cardWidthPx || 320;
+  
+  const availableWidth = width - 24;
+  let calculatedFontSizePx = Math.floor(availableWidth / (limit * 0.95));
+  calculatedFontSizePx = Math.max(22, Math.min(52, calculatedFontSizePx));
+
+  const lines = String(text).split('\n');
+  const formatted = lines.map(line => {
+    let result = '';
+    const cleanLine = line.replace(/\s+/g, '');
+    for (let i = 0; i < cleanLine.length; i += limit) {
+      const chunk = cleanLine.slice(i, i + limit);
+      result += escapeHTML(chunk);
+      if (i + limit < cleanLine.length) {
+        result += '<br>';
+      }
+    }
+    return result;
+  });
+
+  return {
+    html: formatted.join('<br>'),
+    fontSize: `${calculatedFontSizePx}px`
+  };
+}
+
+function updateCanvasTransform() {
+  const container = document.getElementById('widgets-container');
+  if (container) {
+    container.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
+  }
+  const indicator = document.getElementById('zoom-level-indicator');
+  if (indicator) indicator.textContent = `${Math.round(canvasScale * 100)}%`;
+}
+
+function resetZoom() {
+  canvasScale = 1.0;
+  panX = 40;
+  panY = 70;
+  updateCanvasTransform();
+  showToast('畫面縮放與中心已重置 ‧ ZOOM RESET');
+}
+
+function resetCardArrangement() {
+  const startX = 40;
+  const startY = 80;
+  const colWidth = 370;
+  const rowHeight = 380;
+  const maxCols = 3;
+
+  widgetsState.forEach((w, index) => {
+    const col = index % maxCols;
+    const row = Math.floor(index / maxCols);
+    w.x = startX + col * colWidth;
+    w.y = startY + row * rowHeight;
+    w.collapsed = false;
+  });
+
+  panX = 20;
+  panY = 70;
+  canvasScale = 1.0;
+  saveWidgetsToStorage();
+  renderAllWidgets();
+  updateCanvasTransform();
+  showToast('卡片已自動整齊排列 ‧ GRID RESET');
+}
+
+function saveWidgetsToStorage() {
+  try {
+    localStorage.setItem('care_canvas_widgets_v7', JSON.stringify(widgetsState));
+  } catch(e) {
+    console.warn('LocalStorage save skipped', e);
+  }
+}
+
+function renderAllWidgets() {
+  const container = document.getElementById('widgets-container');
+  container.innerHTML = '';
+
+  widgetsState.forEach(w => {
+    const el = createWidgetDOM(w);
+    container.appendChild(el);
+    initDraggableWidget(el);
+  });
+
+  updateClock();
+}
+
+function createWidgetDOM(w) {
+  const card = document.createElement('div');
+  card.id = w.id;
+  card.style.left = `${w.x}px`;
+  card.style.top = `${w.y}px`;
+
+  card.addEventListener('pointerdown', (e) => bringToFront(card));
+
+  if (w.type === 'clock') {
+    card.className = `canvas-widget type-clock ${w.collapsed ? 'collapsed-mode' : ''}`;
+    if (w.collapsed) {
+      card.innerHTML = `
+        <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <svg class="svg-icon" style="color:var(--accent-gold);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="collapsed-pill-title">🕒 智醒大時鐘</span>
+          </div>
+          <button class="widget-btn">展開</button>
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="widget-header">
+          <span class="widget-category-tag">CLOCK ‧ 時鐘</span>
+          <div class="widget-controls">
+            <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
+          </div>
+        </div>
+        <div class="widget-body">
+          <div class="clock-display-main" id="clock-time-val">00:00</div>
+          <div style="text-align:center; font-weight:900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月17日</div>
+
+          <div style="margin-top: 10px; padding: 8px 6px; background: rgba(0,0,0,0.03); border: 2.5px solid var(--border-color); border-radius: 12px; text-align: center;">
+            <div style="font-size: 0.76rem; font-family: var(--font-sans); font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
+              晝夜太陽軌跡 ‧ SOLAR ARC OF THE DAY
+            </div>
+            <svg id="solar-arc-svg" viewBox="0 0 300 115" style="width: 100%; max-width: 280px; height: auto; overflow: visible; display: block; margin: 0 auto;">
+              <line x1="15" y1="85" x2="285" y2="85" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"/>
+              <path id="day-arc-path" d="M 30 85 A 120 70 0 0 1 270 85" fill="none" stroke="var(--accent-gold)" stroke-width="3.5" stroke-linecap="round"/>
+              <path id="night-arc-path" d="M 270 85 A 120 25 0 0 1 30 85" fill="none" stroke="#64748B" stroke-width="2" stroke-dasharray="3 3" opacity="0.6"/>
+              
+              <g id="solar-indicator-group">
+                <circle id="solar-indicator-glow" cx="30" cy="85" r="13" fill="#FBBF24" opacity="0.45"/>
+                <circle id="solar-indicator-core" cx="30" cy="85" r="7.5" fill="#D97706" stroke="#FFFFFF" stroke-width="2"/>
+              </g>
+
+              <circle cx="30" cy="85" r="3.5" fill="var(--text-main)"/>
+              <text x="30" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">06:00 晨</text>
+
+              <circle cx="150" cy="15" r="3.5" fill="var(--accent-gold)"/>
+              <text x="150" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--accent-gold)">12:00 午</text>
+
+              <circle cx="270" cy="85" r="3.5" fill="var(--text-main)"/>
+              <text x="270" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">18:00 昏</text>
+            </svg>
+            <div id="solar-phase-badge" style="font-size: 0.9rem; font-weight: 900; color: var(--accent-gold); margin-top: 2px;">
+              ☀️ 早上 ‧ Morning
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    return card;
+  }
+
+  let tagTitle = 'MESSAGE ‧ 叮囑';
+  let categoryClass = 'type-note';
+  let badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+
+  if (w.type === 'meds') {
+    categoryClass = 'type-meds';
+    tagTitle = 'MEDS ‧ 食藥';
+    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+  } else if (w.type === 'clinic') {
+    categoryClass = 'type-clinic';
+    tagTitle = 'CLINIC ‧ 覆診';
+    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+  } else if (w.type === 'todo') {
+    categoryClass = 'type-todo';
+    tagTitle = 'TODO ‧ 待辦';
+    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+  } else if (w.type === 'media') {
+    categoryClass = 'type-media';
+    tagTitle = 'MEDIA ‧ 網頁筆記';
+    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+  }
+
+  card.className = `canvas-widget ${categoryClass} ${w.collapsed ? 'collapsed-mode' : ''}`;
+
+  if (w.collapsed) {
+    card.innerHTML = `
+      <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
+        <div style="display:flex; align-items:center; gap:6px;">
+          ${badgeIcon}
+          <span class="collapsed-pill-title">${w.content}</span>
+        </div>
+        <button class="widget-btn">展開</button>
+      </div>
+    `;
+    return card;
+  }
+
+  const ackClass = w.acknowledged ? 'acknowledged' : '';
+  const ackText = w.acknowledged ? '【 已收到 ‧ ACKNOWLEDGED 】' : '【 👍 我看到了 ‧ ACKNOWLEDGED 】';
+
+  // Specific rendering for To-Do List Template
+  if (w.type === 'todo') {
+    const tasks = w.tasks || [];
+    const completedCount = tasks.filter(t => t.done).length;
+    const totalCount = tasks.length;
+
+    let tasksHTML = tasks.map(t => `
+      <div class="todo-item-row ${t.done ? 'completed' : ''}" onclick="toggleTaskDone('${w.id}', '${t.id}')">
+        <div class="todo-checkbox">
+          ${t.done ? '<svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+        </div>
+        <span class="todo-item-text">${escapeHTML(t.text)}</span>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="widget-header" style="cursor: inherit;">
+        <span class="widget-category-tag">${tagTitle}</span>
+        <div class="widget-controls">
+          <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯待辦">
+            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>編輯</span>
+          </button>
+          <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
+          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
+            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="widget-time-badge">
+            ${badgeIcon}
+            <span>${w.time || '待辦事項'}</span>
+          </div>
+          <span style="font-size: 0.85rem; font-weight: 900; color: var(--accent-green); background: var(--accent-green-bg); padding: 3px 8px; border-radius: 6px;">已完成 ${completedCount}/${totalCount}</span>
+        </div>
+        <div style="font-weight: 900; font-size: 1.1rem; color: var(--text-main); margin-top: 2px;">${escapeHTML(w.content)}</div>
+        <div class="todo-items-list">${tasksHTML}</div>
+        <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')" style="margin-top: 4px;">
+          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>${ackText}</span>
+        </button>
+      </div>
+      <div class="widget-footer-stamp">
+        <span>家人待辦事項</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="author-avatar">${w.authorRole || '家'}</div>
+          <span>${w.author || '家人'}</span>
+        </div>
+      </div>
+    `;
+    return card;
+  }
+
+  // Specific rendering for Media & Web Bookmark Template
+  if (w.type === 'media') {
+    const hasImg = w.imageUrl && w.imageUrl.trim().length > 0;
+    const hasLink = w.linkUrl && w.linkUrl.trim().length > 0;
+    const renderedContent = formatContentWithDynamicFont(w.content, charsPerLine, 320);
+
+    card.innerHTML = `
+      <div class="widget-header" style="cursor: inherit;">
+        <span class="widget-category-tag">${tagTitle}</span>
+        <div class="widget-controls">
+          <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯網頁筆記">
+            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>編輯</span>
+          </button>
+          <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
+          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
+            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="widget-body">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="widget-time-badge">
+            ${badgeIcon}
+            <span>${w.time || '網頁筆記'}</span>
+          </div>
+          <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
+            <svg class="svg-icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <span>放大</span>
+          </button>
+        </div>
+        ${hasImg ? `
+          <div class="media-thumbnail-container">
+            <img src="${escapeHTML(w.imageUrl)}" alt="Media photo" onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80'"/>
+          </div>
+        ` : ''}
+        <div class="widget-content-text" style="font-size: ${renderedContent.fontSize};">${renderedContent.html}</div>
+        ${hasLink ? `
+          <a href="${escapeHTML(w.linkUrl)}" target="_blank" rel="noopener noreferrer" class="media-link-badge">
+            <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+              <svg class="svg-icon" style="color:var(--accent-purple);" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(w.linkTitle || w.linkUrl)}</span>
+            </div>
+            <span style="font-size:0.75rem; white-space:nowrap;">開啟 🚀</span>
+          </a>
+        ` : ''}
+        <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
+          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>${ackText}</span>
+        </button>
+      </div>
+      <div class="widget-footer-stamp">
+        <span>網端精選內容</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <div class="author-avatar">${w.authorRole || '家'}</div>
+          <span>${w.author || '家人'}</span>
+        </div>
+      </div>
+    `;
+    return card;
+  }
+
+  // Standard Note, Meds, Clinic rendering
+  const renderedContent = formatContentWithDynamicFont(w.content, charsPerLine, 320);
+
+  card.innerHTML = `
+    <div class="widget-header" style="cursor: inherit;">
+      <span class="widget-category-tag">${tagTitle}</span>
+      <div class="widget-controls">
+        <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯內容">
+          <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span>編輯</span>
+        </button>
+        <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
+        <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
+          <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="widget-body">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div class="widget-time-badge">
+          ${badgeIcon}
+          <span>${w.time || '即時提醒'}</span>
+        </div>
+        <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
+          <svg class="svg-icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          <span>放大</span>
+        </button>
+      </div>
+      <div class="widget-content-text" style="font-size: ${renderedContent.fontSize};">${renderedContent.html}</div>
+      <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
+        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>${ackText}</span>
+      </button>
+    </div>
+    <div class="widget-footer-stamp">
+      <span>家人關懷叮囑</span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <div class="author-avatar">${w.authorRole || '家'}</div>
+        <span>${w.author || '家人'}</span>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+function toggleTaskDone(widgetId, taskId) {
+  const w = widgetsState.find(item => item.id === widgetId);
+  if (!w || !w.tasks) return;
+  const task = w.tasks.find(t => t.id === taskId);
+  if (task) {
+    task.done = !task.done;
+    saveWidgetsToStorage();
+    renderAllWidgets();
+    showToast('待辦進度已更新');
+  }
+}
+
+function bringToFront(cardEl) {
+  maxZIndex++;
+  cardEl.style.zIndex = maxZIndex;
+}
+
+function toggleCardCollapse(id) {
+  const target = widgetsState.find(w => w.id === id);
+  if (target) {
+    target.collapsed = !target.collapsed;
+    saveWidgetsToStorage();
+    renderAllWidgets();
+  }
+}
+
+function toggleCollapseAll() {
+  isAllCollapsed = !isAllCollapsed;
+  widgetsState.forEach(w => w.collapsed = isAllCollapsed);
+  saveWidgetsToStorage();
+  renderAllWidgets();
+  showToast(isAllCollapsed ? '已全部折疊成圖標' : '已全部展開大字卡片');
+}
+
+function openAddNoteModal() {
+  document.getElementById('edit-target-id').value = '';
+  document.getElementById('modal-title-text').textContent = '新增叮囑 ‧ ADD REMINDER';
+  document.getElementById('note-content-input').value = '';
+  document.getElementById('todo-items-input').value = '飲一杯溫開水\n散步15分鐘\n量度血壓';
+  document.getElementById('media-image-input').value = '';
+  document.getElementById('media-url-input').value = '';
+  document.getElementById('media-linktitle-input').value = '';
+  document.getElementById('note-time-input').value = '';
+  document.getElementById('note-author-input').value = '';
+  
+  selectedNoteType = 'meds';
+  document.querySelectorAll('.type-option-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.type === 'meds');
+  });
+  updateModalFormFieldsVisibility();
+  updateModalLivePreview();
+  document.getElementById('note-modal').classList.add('active');
+  toggleSidebar(false);
+}
+
+function openEditNoteModal(id) {
+  const w = widgetsState.find(item => item.id === id);
+  if (!w) return;
+
+  document.getElementById('edit-target-id').value = w.id;
+  document.getElementById('modal-title-text').textContent = '編輯項目 ‧ EDIT CARD';
+  document.getElementById('note-content-input').value = w.content || '';
+  document.getElementById('note-time-input').value = w.time || '';
+  document.getElementById('note-author-input').value = w.author || '';
+
+  if (w.type === 'todo' && w.tasks) {
+    document.getElementById('todo-items-input').value = w.tasks.map(t => t.text).join('\n');
+  }
+  if (w.type === 'media') {
+    document.getElementById('media-image-input').value = w.imageUrl || '';
+    document.getElementById('media-url-input').value = w.linkUrl || '';
+    document.getElementById('media-linktitle-input').value = w.linkTitle || '';
+  }
+
+  selectedNoteType = w.type || 'meds';
+  document.querySelectorAll('.type-option-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.type === selectedNoteType);
+  });
+
+  updateModalFormFieldsVisibility();
+  updateModalLivePreview();
+  document.getElementById('note-modal').classList.add('active');
+}
+
+function closeNoteModal() {
+  document.getElementById('note-modal').classList.remove('active');
+}
+
+function selectTypeOption(btn, type) {
+  document.querySelectorAll('.type-option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedNoteType = type;
+  updateModalFormFieldsVisibility();
+  updateModalLivePreview();
+}
+
+function updateModalFormFieldsVisibility() {
+  const todoGroup = document.getElementById('group-todo-fields');
+  const mediaGroup = document.getElementById('group-media-fields');
+  if (todoGroup) todoGroup.style.display = (selectedNoteType === 'todo') ? 'flex' : 'none';
+  if (mediaGroup) mediaGroup.style.display = (selectedNoteType === 'media') ? 'flex' : 'none';
+}
+
+function updateModalLivePreview() {
+  const inputVal = document.getElementById('note-content-input').value;
+  const previewBox = document.getElementById('modal-live-preview');
+  if (!previewBox) return;
+
+  if (selectedNoteType === 'todo') {
+    const todoRaw = document.getElementById('todo-items-input');
+    const tasks = (todoRaw ? todoRaw.value : '').split('\n').filter(Boolean);
+    previewBox.innerHTML = `<b>【待辦清單預覽】</b><br>${escapeHTML(inputVal || '今日事項')}<br>` + tasks.map(t => `▫️ ${escapeHTML(t)}`).join('<br>');
+    previewBox.style.fontSize = '18px';
+  } else if (selectedNoteType === 'media') {
+    const urlVal = document.getElementById('media-url-input').value;
+    const titleVal = document.getElementById('media-linktitle-input').value;
+    previewBox.innerHTML = `<b>【網頁筆記預覽】</b><br>${escapeHTML(inputVal || '文章內容')}<br>` + (urlVal ? `<span style="color:var(--accent-purple);">🔗 ${escapeHTML(titleVal || urlVal)}</span>` : '');
+    previewBox.style.fontSize = '18px';
+  } else {
+    const rendered = formatContentWithDynamicFont(inputVal || '（請於上方輸入內容）', charsPerLine, 320);
+    previewBox.innerHTML = rendered.html;
+    previewBox.style.fontSize = rendered.fontSize;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const textarea = document.getElementById('note-content-input');
+  if (textarea) textarea.addEventListener('input', updateModalLivePreview);
+  const todoTextarea = document.getElementById('todo-items-input');
+  if (todoTextarea) todoTextarea.addEventListener('input', updateModalLivePreview);
+  const mediaUrlInput = document.getElementById('media-url-input');
+  if (mediaUrlInput) mediaUrlInput.addEventListener('input', updateModalLivePreview);
+  const mediaTitleInput = document.getElementById('media-linktitle-input');
+  if (mediaTitleInput) mediaTitleInput.addEventListener('input', updateModalLivePreview);
+});
+
+function saveNoteChanges() {
+  const editId = document.getElementById('edit-target-id').value;
+  const content = document.getElementById('note-content-input').value.trim();
+  const time = document.getElementById('note-time-input').value.trim() || '即時提醒';
+  const author = document.getElementById('note-author-input').value.trim() || '家人';
+
+  if (!content) {
+    showToast('請輸入內容');
+    return;
+  }
+
+  if (editId) {
+    const target = widgetsState.find(w => w.id === editId);
+    if (target) {
+      target.type = selectedNoteType;
+      target.content = content;
+      target.time = time;
+      target.author = author;
+      target.authorRole = author.charAt(0) || '家';
+
+      if (selectedNoteType === 'todo') {
+        const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
+        target.tasks = rawTasks.map((t, idx) => ({
+          id: 't-edit-' + idx,
+          text: t.trim(),
+          done: false
+        }));
+      } else if (selectedNoteType === 'media') {
+        target.imageUrl = document.getElementById('media-image-input').value.trim();
+        target.linkUrl = document.getElementById('media-url-input').value.trim();
+        target.linkTitle = document.getElementById('media-linktitle-input').value.trim();
+      }
+    }
+  } else {
+    const newIdx = widgetsState.length;
+    const maxCols = 3;
+    const col = newIdx % maxCols;
+    const row = Math.floor(newIdx / maxCols);
+
+    const newWidget = {
+      id: 'widget-custom-' + Date.now(),
+      type: selectedNoteType,
+      x: 40 + col * 370,
+      y: 80 + row * 380,
+      time: time,
+      content: content,
+      author: author,
+      authorRole: author.charAt(0) || '家',
+      acknowledged: false,
+      collapsed: false
+    };
+
+    if (selectedNoteType === 'todo') {
+      const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
+      newWidget.tasks = rawTasks.map((t, idx) => ({
+        id: 't-new-' + idx,
+        text: t.trim(),
+        done: false
+      }));
+    } else if (selectedNoteType === 'media') {
+      newWidget.imageUrl = document.getElementById('media-image-input').value.trim();
+      newWidget.linkUrl = document.getElementById('media-url-input').value.trim();
+      newWidget.linkTitle = document.getElementById('media-linktitle-input').value.trim();
+    }
+
+    widgetsState.push(newWidget);
+  }
+
+  saveWidgetsToStorage();
+  renderAllWidgets();
+  closeNoteModal();
+  showToast('卡片資料已儲存 ‧ SAVED');
+}
+
+function removeWidget(id) {
+  widgetsState = widgetsState.filter(w => w.id !== id);
+  saveWidgetsToStorage();
+  renderAllWidgets();
+  showToast('卡片已刪除 ‧ REMOVED');
+}
+
+function toggleAck(id) {
+  const target = widgetsState.find(w => w.id === id);
+  if (target) {
+    target.acknowledged = !target.acknowledged;
+    saveWidgetsToStorage();
+    renderAllWidgets();
+    showToast(target.acknowledged ? '已確認收到 ‧ ACKNOWLEDGED' : '已取消確認');
+  }
+}
+
+function spawnQuickSticker(type) {
+  const newIdx = widgetsState.length;
+  const maxCols = 3;
+  const col = newIdx % maxCols;
+  const row = Math.floor(newIdx / maxCols);
+
+  const presets = {
+    water: { type: 'note', content: '記得多飲溫水補充水分', time: '全日叮囑', author: '女', role: '敏' },
+    dinner: { type: 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30', author: '仔', role: '威' },
+    clothes: { type: 'note', content: '天冷出門記得穿外套', time: '早晚叮囑', author: '女', role: '敏' },
+    bp: { type: 'meds', content: '記得量血壓並記錄數據', time: '早晚一次', author: '家人叮囑', role: '醫' }
+  };
+
+  const item = presets[type] || presets.water;
+
+  const newWidget = {
+    id: 'widget-sticker-' + Date.now(),
+    type: item.type,
+    x: 40 + col * 370,
+    y: 80 + row * 380,
+    time: item.time,
+    content: item.content,
+    author: item.author,
+    authorRole: item.role,
+    acknowledged: false,
+    collapsed: false
+  };
+
+  widgetsState.push(newWidget);
+  saveWidgetsToStorage();
+  renderAllWidgets();
+  showToast('已新增快捷貼紙 ‧ ADDED');
+}
+
+let activeWidget = null;
+let startX = 0, startY = 0;
+let initialLeft = 0, initialTop = 0;
+
+function initDraggableWidget(widgetEl) {
+  widgetEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button, input, textarea, a, select')) return;
+
+    activeWidget = widgetEl;
+    bringToFront(activeWidget);
+    activeWidget.classList.add('dragging');
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const targetState = widgetsState.find(w => w.id === widgetEl.id);
+    if (targetState) {
+      initialLeft = targetState.x;
+      initialTop = targetState.y;
+    }
+
+    widgetEl.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  });
+
+  widgetEl.addEventListener('pointermove', (e) => {
+    if (!activeWidget || activeWidget !== widgetEl) return;
+
+    const dx = (e.clientX - startX) / canvasScale;
+    const dy = (e.clientY - startY) / canvasScale;
+
+    const newLeft = initialLeft + dx;
+    const newTop = initialTop + dy;
+
+    activeWidget.style.left = `${newLeft}px`;
+    activeWidget.style.top = `${newTop}px`;
+
+    const targetState = widgetsState.find(w => w.id === widgetEl.id);
+    if (targetState) {
+      targetState.x = newLeft;
+      targetState.y = newTop;
+    }
+  });
+
+  const endDrag = (e) => {
+    if (activeWidget === widgetEl) {
+      activeWidget.classList.remove('dragging');
+      activeWidget = null;
+      saveWidgetsToStorage();
+    }
+  };
+
+  widgetEl.addEventListener('pointerup', endDrag);
+  widgetEl.addEventListener('pointercancel', endDrag);
+}
+
+function initCanvasPanAndZoom() {
+  const canvas = document.getElementById('main-canvas');
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.canvas-widget, .canvas-top-bar, #sidebar-dock, .modal-backdrop')) return;
+    isPanningCanvas = true;
+    panStartX = e.clientX - panX;
+    panStartY = e.clientY - panY;
+    canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (!isPanningCanvas) return;
+    panX = e.clientX - panStartX;
+    panY = e.clientY - panStartY;
+    updateCanvasTransform();
+  });
+
+  const endPan = (e) => {
+    isPanningCanvas = false;
+  };
+  canvas.addEventListener('pointerup', endPan);
+  canvas.addEventListener('pointercancel', endPan);
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      initialPinchDistance = getTouchDistance(e.touches);
+      initialScaleOnPinch = canvasScale;
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && initialPinchDistance) {
+      const currentDistance = getTouchDistance(e.touches);
+      const scaleFactor = currentDistance / initialPinchDistance;
+      canvasScale = Math.min(2.5, Math.max(0.5, initialScaleOnPinch * scaleFactor));
+      updateCanvasTransform();
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+      initialPinchDistance = null;
+    }
+  });
+
+  canvas.addEventListener('wheel', (e) => {
+    if (e.target.closest('.canvas-widget, #sidebar-dock, .modal-backdrop')) return;
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+    canvasScale = Math.min(2.5, Math.max(0.5, canvasScale * zoomFactor));
+    updateCanvasTransform();
+  }, { passive: false });
+}
+
+function getTouchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function openMagnifierModal(id) {
+  const w = widgetsState.find(item => item.id === id);
+  if (!w) return;
+
+  activeMagnifiedCardId = id;
+  document.getElementById('mag-time-badge').textContent = `⏰ 時間: ${w.time || '即時'}`;
+  
+  const renderedMag = formatContentWithDynamicFont(w.content, charsPerLine, 450);
+  const magBox = document.getElementById('mag-content-box');
+  magBox.innerHTML = renderedMag.html;
+  magBox.style.fontSize = `calc(${renderedMag.fontSize} * 1.35)`;
+
+  document.getElementById('mag-author-badge').textContent = `✍️ 叮囑者: ${w.author || '家人'}`;
+
+  const ackBtn = document.getElementById('magnifier-modal').querySelector('#mag-ack-btn');
+  if (w.acknowledged) {
+    ackBtn.classList.add('acknowledged');
+    ackBtn.querySelector('span').textContent = '【 已確認收到 ‧ ACKNOWLEDGED 】';
+  } else {
+    ackBtn.classList.remove('acknowledged');
+    ackBtn.querySelector('span').textContent = '【 👍 我看到了 ‧ ACKNOWLEDGED 】';
+  }
+
+  document.getElementById('magnifier-modal').classList.add('active');
+}
+
+function closeMagnifierModal() {
+  document.getElementById('magnifier-modal').classList.remove('active');
+}
+
+function toggleAckFromMagnifier() {
+  if (activeMagnifiedCardId) {
+    toggleAck(activeMagnifiedCardId);
+    openMagnifierModal(activeMagnifiedCardId);
+  }
+}
+
+const WD = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const pad = n => String(n).padStart(2,'0');
+
+function updateClock() {
+  const now = new Date();
+  const hrs = now.getHours();
+  const mins = now.getMinutes();
+
+  const clockVal = document.getElementById('clock-time-val');
+  if (clockVal) clockVal.textContent = `${pad(hrs)}:${pad(mins)}`;
+
+  const dateVal = document.getElementById('clock-date-val');
+  if (dateVal) dateVal.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${WD[now.getDay()]}`;
+
+  updateSolarArcPosition(hrs, mins);
+}
+
+function updateSolarArcPosition(hrs, mins) {
+  const dayPath = document.getElementById('day-arc-path');
+  const nightPath = document.getElementById('night-arc-path');
+  const indicatorGlow = document.getElementById('solar-indicator-glow');
+  const indicatorCore = document.getElementById('solar-indicator-core');
+  const phaseBadge = document.getElementById('solar-phase-badge');
+
+  if (!dayPath || !nightPath || !indicatorGlow || !indicatorCore || !phaseBadge) return;
+
+  const currentMin = hrs * 60 + mins;
+  let pt = { x: 30, y: 85 };
+  let isDaytime = currentMin >= 360 && currentMin < 1080;
+
+  if (isDaytime) {
+    const dayRatio = (currentMin - 360) / 720;
+    const len = dayPath.getTotalLength();
+    pt = dayPath.getPointAtLength(dayRatio * len);
+
+    indicatorGlow.setAttribute('fill', '#FBBF24');
+    indicatorGlow.setAttribute('opacity', '0.45');
+    indicatorCore.setAttribute('fill', '#D97706');
+
+    if (hrs >= 6 && hrs < 9) {
+      phaseBadge.textContent = '🌅 清晨 (晨起食早餐) ‧ EARLY MORNING';
+    } else if (hrs >= 9 && hrs < 12) {
+      phaseBadge.textContent = '☀️ 上午 (日間活動) ‧ MORNING';
+    } else if (hrs >= 12 && hrs < 14) {
+      phaseBadge.textContent = '☀️ 正午 (午膳休息) ‧ NOON';
+    } else {
+      phaseBadge.textContent = '🌤️ 下午 (午後茶段) ‧ AFTERNOON';
+    }
+  } else {
+    let nightMin = currentMin >= 1080 ? currentMin - 1080 : currentMin + 360;
+    const nightRatio = nightMin / 720;
+    const len = nightPath.getTotalLength();
+    pt = nightPath.getPointAtLength(nightRatio * len);
+
+    indicatorGlow.setAttribute('fill', '#60A5FA');
+    indicatorGlow.setAttribute('opacity', '0.35');
+    indicatorCore.setAttribute('fill', '#1D4ED8');
+
+    if (hrs >= 18 && hrs < 21) {
+      phaseBadge.textContent = '🌇 黃昏 (晚飯時間) ‧ EVENING';
+    } else if (hrs >= 21 && hrs < 24) {
+      phaseBadge.textContent = '🌙 深夜 (準備入睡) ‧ BEDTIME';
+    } else {
+      phaseBadge.textContent = '🌙 凌晨 (靜夜休息) ‧ NIGHT';
+    }
+  }
+
+  indicatorGlow.setAttribute('cx', pt.x);
+  indicatorGlow.setAttribute('cy', pt.y);
+  indicatorCore.setAttribute('cx', pt.x);
+  indicatorCore.setAttribute('cy', pt.y);
+}
+
+setInterval(updateClock, 1000);
+
+function toggleSidebar(forceState) {
+  const dock = document.getElementById('sidebar-dock');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    const nextState = forceState !== undefined ? forceState : !dock.classList.contains('open');
+    dock.classList.toggle('open', nextState);
+    backdrop.classList.toggle('active', nextState);
+  } else {
+    const nextState = forceState !== undefined ? !forceState : !dock.classList.contains('collapsed');
+    dock.classList.toggle('collapsed', nextState);
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast-notification');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 2200);
+}
+
+document.getElementById('themeToggleBtn').addEventListener('click', () => {
+  document.body.classList.toggle('theme-night');
+  const isNight = document.body.classList.contains('theme-night');
+  document.getElementById('themeToggleText').textContent = isNight ? '暖光' : '護眼';
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadWidgetsFromStorage();
+  renderAllWidgets();
+  updateCanvasTransform();
+  updateClock();
+  initCanvasPanAndZoom();
+});
+</script>
+
+</body>
+</html>
