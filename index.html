@@ -14,7 +14,6 @@
 }
 
 :root {
-  /* Solar Atmospheric Tokens - High Contrast Cataract Friendly */
   --bg-surface: #FAF8F5;
   --bg-card: #FFFFFF;
   --text-main: #0F172A;
@@ -36,8 +35,6 @@
   
   --font-serif: 'Noto Serif TC', serif;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  /* Fluid Responsive Card Sizing Token */
   --widget-width: clamp(280px, 92vw, 360px);
   
   --safe-top: env(safe-area-inset-top, 0px);
@@ -82,15 +79,6 @@ html, body {
   vector-effect: non-scaling-stroke;
 }
 
-#ambient-edge-strobe {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  box-shadow: inset 0 0 0 0px transparent;
-  transition: box-shadow 0.4s ease;
-}
-
 #app-root {
   display: flex;
   width: 100vw;
@@ -104,7 +92,6 @@ html, body {
   padding-right: var(--safe-right);
 }
 
-/* Off-canvas Responsive Sidebar Drawer */
 #sidebar-dock {
   width: 290px;
   max-width: 85vw;
@@ -445,7 +432,6 @@ body.theme-night .canvas-top-bar {
   letter-spacing: 0.02em;
 }
 
-/* To-Do List Card Specific Styles */
 .todo-items-list {
   display: flex;
   flex-direction: column;
@@ -500,7 +486,6 @@ body.theme-night .canvas-top-bar {
   color: var(--text-muted);
 }
 
-/* Media Card Specific Styles */
 .media-thumbnail-container {
   width: 100%;
   height: 140px;
@@ -591,10 +576,17 @@ body.theme-night .canvas-top-bar {
   font-weight: 800;
 }
 
+.author-avatar-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .author-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  border: 2px solid var(--border-color);
   background: var(--border-color);
   color: #FFF;
   display: flex;
@@ -602,6 +594,14 @@ body.theme-night .canvas-top-bar {
   justify-content: center;
   font-size: 0.7rem;
   font-weight: 900;
+  overflow: hidden;
+  object-fit: cover;
+}
+
+.author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .clock-display-main {
@@ -757,6 +757,40 @@ body.theme-night .canvas-top-bar {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* Crop Tool Styles */
+.crop-tool-wrapper {
+  background: var(--bg-surface);
+  border: 2.5px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.crop-preview-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid var(--accent-gold);
+  overflow: hidden;
+  position: relative;
+  background: #000;
+  cursor: grab;
+  touch-action: none;
+}
+
+.crop-preview-container:active {
+  cursor: grabbing;
+}
+
+#crop-canvas-elem {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 </style>
 </head>
 <body>
@@ -782,30 +816,57 @@ body.theme-night .canvas-top-bar {
         <span>新增自訂叮囑 ‧ ADD</span>
       </button>
 
+      <div class="dock-section-title">成員檔案設定 ‧ PROFILES</div>
+      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <div class="form-group" style="gap:4px;">
+          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">給誰的筆記 (Notes For):</label>
+          <input type="text" class="form-input" id="profile-notes-for" value="家人" oninput="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"/>
+        </div>
+        <div class="form-group" style="gap:4px;">
+          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">誰寫的筆記 (Notes From):</label>
+          <input type="text" class="form-input" id="profile-notes-from" value="家人" oninput="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"/>
+        </div>
+      </div>
+
       <div class="dock-section-title">快捷貼紙 ‧ 1-TAP STICKERS</div>
       <div class="quick-stickers-grid">
         <button class="sticker-btn" onclick="spawnQuickSticker('water')">
           <svg class="svg-icon" style="color: var(--accent-blue);" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-          <span>記得飲水 💧</span>
+          <span>記得飲水</span>
         </button>
         <button class="sticker-btn" onclick="spawnQuickSticker('dinner')">
           <svg class="svg-icon" style="color: var(--accent-gold);" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
-          <span>返嚟食飯 🍚</span>
+          <span>返嚟食飯</span>
         </button>
         <button class="sticker-btn" onclick="spawnQuickSticker('clothes')">
           <svg class="svg-icon" style="color: var(--accent-red);" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
-          <span>天冷穿衣 🧥</span>
+          <span>天冷穿衣</span>
         </button>
         <button class="sticker-btn" onclick="spawnQuickSticker('bp')">
           <svg class="svg-icon" style="color: var(--accent-green);" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>量度血壓 🩺</span>
+          <span>量度血壓</span>
         </button>
+      </div>
+
+      <div class="dock-section-title">資料管理與存檔 ‧ SAVE / LOAD</div>
+      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">檔案儲存夾槽位 (Slot):</label>
+        <div style="display: flex; gap: 4px;">
+          <button class="type-option-btn selected" id="slot-btn-1" onclick="switchSaveSlot(1)" style="flex: 1; padding: 6px 2px;">槽位1</button>
+          <button class="type-option-btn" id="slot-btn-2" onclick="switchSaveSlot(2)" style="flex: 1; padding: 6px 2px;">槽位2</button>
+          <button class="type-option-btn" id="slot-btn-3" onclick="switchSaveSlot(3)" style="flex: 1; padding: 6px 2px;">槽位3</button>
+          <button class="type-option-btn" id="slot-btn-auto" onclick="switchSaveSlot('auto')" style="flex: 1; padding: 6px 2px; border-color: var(--accent-purple); color: var(--accent-purple);">自動槽</button>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 4px;">
+          <button class="widget-btn" style="flex: 1; background: var(--accent-green-bg); color: var(--accent-green); border-color: var(--accent-green); justify-content: center; padding: 8px;" onclick="triggerManualSave()">手動儲存</button>
+          <button class="widget-btn" style="flex: 1; background: var(--accent-blue-bg); color: var(--accent-blue); border-color: var(--accent-blue); justify-content: center; padding: 8px;" onclick="triggerManualLoad()">讀取槽位</button>
+        </div>
       </div>
 
       <div class="dock-section-title">排版整理 ‧ ORGANIZE</div>
       <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; background: var(--accent-gold-bg); border-color: var(--accent-gold); color: var(--accent-gold);" onclick="resetCardArrangement()">
         <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        <span>🔄 自動重設排列卡片 (RESET GRID)</span>
+        <span>自動重設排列卡片 (RESET GRID)</span>
       </button>
 
       <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; margin-top: 4px;" onclick="toggleCollapseAll()">
@@ -815,7 +876,7 @@ body.theme-night .canvas-top-bar {
 
       <div class="dock-section-title">每行字數 ‧ TEXT PER ROW</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數 (預設8個字自動放大):</label>
+        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數 (預設8個字):</label>
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <button class="widget-btn" onclick="changeCharsPerLine(-1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">-</button>
           <span id="chars-per-line-val" style="font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); min-width: 36px; text-align: center;">8</span>
@@ -835,7 +896,7 @@ body.theme-night .canvas-top-bar {
 
       <div class="instruction-guide-banner">
         <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span style="overflow: hidden; text-overflow: ellipsis;">💡 自由拖動畫布四周・支援待辦清單與網頁相片卡片</span>
+        <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・設定頁面支援大頭照圓形裁切與縮放</span>
       </div>
 
       <div id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none;" role="button">100%</div>
@@ -863,11 +924,45 @@ body.theme-night .canvas-top-bar {
       <div class="form-group">
         <label class="form-label">選擇分類 CATEGORY</label>
         <div class="form-type-selector" style="grid-template-columns: repeat(5, 1fr);">
-          <button type="button" class="type-option-btn selected" data-type="meds" onclick="selectTypeOption(this, 'meds')">💊 食藥</button>
-          <button type="button" class="type-option-btn" data-type="clinic" onclick="selectTypeOption(this, 'clinic')">🏥 覆診</button>
-          <button type="button" class="type-option-btn" data-type="note" onclick="selectTypeOption(this, 'note')">💌 家書</button>
-          <button type="button" class="type-option-btn" data-type="todo" onclick="selectTypeOption(this, 'todo')">📋 待辦</button>
-          <button type="button" class="type-option-btn" data-type="media" onclick="selectTypeOption(this, 'media')">🌐 網頁</button>
+          <button type="button" class="type-option-btn selected" data-type="meds" onclick="selectTypeOption(this, 'meds')">食藥</button>
+          <button type="button" class="type-option-btn" data-type="clinic" onclick="selectTypeOption(this, 'clinic')">覆診</button>
+          <button type="button" class="type-option-btn" data-type="note" onclick="selectTypeOption(this, 'note')">家書</button>
+          <button type="button" class="type-option-btn" data-type="todo" onclick="selectTypeOption(this, 'todo')">待辦</button>
+          <button type="button" class="type-option-btn" data-type="media" onclick="selectTypeOption(this, 'media')">網頁</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="form-group">
+          <label class="form-label">筆記給誰 (Notes For)</label>
+          <input type="text" class="form-input" id="note-for-input" placeholder="例如：家人"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">誰寫的筆記 (Notes From)</label>
+          <input type="text" class="form-input" id="note-author-input" placeholder="例如：家人"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
+        <div class="crop-tool-wrapper">
+          <div class="crop-preview-container" id="cropContainer">
+            <canvas id="crop-canvas-elem" width="120" height="120"></canvas>
+          </div>
+          <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
+            <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
+              <input type="range" id="cropScaleRange" min="0.5" max="3" step="0.05" value="1" style="width: 80px;" oninput="updateCropTransform()"/>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
+              <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
+            </div>
+            <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
         </div>
       </div>
 
@@ -876,13 +971,23 @@ body.theme-night .canvas-top-bar {
         <textarea class="form-textarea" id="note-content-input" placeholder="例如：記得食降血壓藥1丸與胃藥..."></textarea>
       </div>
 
-      <!-- Dynamic fields for Todo -->
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="form-label" style="margin-bottom:0;">個別卡片每行字數微調 (FONT SIZE)</label>
+          <span id="card-chars-val" style="font-weight:900; color:var(--accent-gold);">8</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="widget-btn" onclick="changeCardSpecificChars(-1)" style="padding: 4px 12px;">-</button>
+          <input type="range" id="card-chars-range" min="3" max="20" value="8" style="flex:1;" oninput="onCardCharsRangeInput(this.value)"/>
+          <button type="button" class="widget-btn" onclick="changeCardSpecificChars(1)" style="padding: 4px 12px;">+</button>
+        </div>
+      </div>
+
       <div class="form-group" id="group-todo-fields" style="display: none;">
         <label class="form-label">待辦事項清單 (每行一項)</label>
         <textarea class="form-textarea" id="todo-items-input" placeholder="飲一杯溫開水&#10;客廳散步15分鐘&#10;量度血壓"></textarea>
       </div>
 
-      <!-- Dynamic fields for Media & Link -->
       <div class="form-group" id="group-media-fields" style="display: none;">
         <label class="form-label">相片網址 IMAGE URL (選填)</label>
         <input type="text" class="form-input" id="media-image-input" placeholder="https://images.unsplash.com/..."/>
@@ -900,11 +1005,6 @@ body.theme-night .canvas-top-bar {
       <div class="form-group">
         <label class="form-label">提示時間 TIME / PHASE</label>
         <input type="text" class="form-input" id="note-time-input" placeholder="例如：09:00 AM / 今日事項"/>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">叮囑者姓名 AUTHOR NAME</label>
-        <input type="text" class="form-input" id="note-author-input" placeholder="例如：女兒 阿玲 / 兒子 阿明"/>
       </div>
 
       <button class="btn-primary-add" style="margin-top: 6px;" onclick="saveNoteChanges()">
@@ -926,7 +1026,7 @@ body.theme-night .canvas-top-bar {
       <div style="font-weight: 900; line-height: 1.25; color: #FBBF24; padding: 16px; background: #0F172A; border-radius: 12px; word-break: break-all; white-space: pre-wrap;" id="mag-content-box">---</div>
       <div style="font-size: 1rem; font-weight: 900; color: var(--text-muted);" id="mag-author-badge">---</div>
       <button class="ack-button" id="mag-ack-btn" style="height: 52px; font-size: 1.1rem;" onclick="toggleAckFromMagnifier()">
-        <span>【 👍 我看到了 ‧ ACKNOWLEDGED 】</span>
+        <span>【 我看到了 ‧ ACKNOWLEDGED 】</span>
       </button>
     </div>
   </div>
@@ -945,6 +1045,9 @@ let panStartY = 0;
 let initialPinchDistance = null;
 let initialScaleOnPinch = 1.0;
 
+let globalProfileNotesFor = '家人';
+let globalProfileNotesFrom = '家人';
+
 const DEFAULT_WIDGETS = [
   {
     id: 'widget-clock',
@@ -960,10 +1063,13 @@ const DEFAULT_WIDGETS = [
     y: 80,
     time: '09:00 AM (早餐後)',
     content: '食降血壓丸與胃藥',
-    author: '大女 阿玲',
-    authorRole: '玲',
+    author: '家人',
+    notesFor: '家人',
+    authorRole: '家',
+    avatarUrl: '',
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   },
   {
     id: 'widget-sample-todo',
@@ -972,15 +1078,18 @@ const DEFAULT_WIDGETS = [
     y: 80,
     time: '今日日常事項',
     content: '早晨健康打卡清單',
-    author: '大女 阿玲',
-    authorRole: '玲',
+    author: '家人',
+    notesFor: '家人',
+    authorRole: '家',
+    avatarUrl: '',
     tasks: [
       { id: 't1', text: '飲一杯溫開水', done: true },
       { id: 't2', text: '客廳散步 15 分鐘', done: false },
       { id: 't3', text: '量度血壓並記錄', done: false }
     ],
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   },
   {
     id: 'widget-sample-media',
@@ -989,13 +1098,16 @@ const DEFAULT_WIDGETS = [
     y: 80,
     time: '健康小百科',
     content: '降血壓飲食原則：每日鹽分攝取小於5克，多食新鮮蔬菜與高鉀水果。',
-    author: '細仔 阿明',
-    authorRole: '明',
+    author: '家人',
+    notesFor: '家人',
+    authorRole: '家',
+    avatarUrl: '',
     imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
     linkUrl: 'https://www.ha.org.hk',
     linkTitle: '醫院管理局健康資訊網',
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   },
   {
     id: 'widget-sample-2',
@@ -1004,10 +1116,13 @@ const DEFAULT_WIDGETS = [
     y: 460,
     time: '下午 02:30 (眼科)',
     content: '威爾斯醫院眼科覆診',
-    author: '細仔 阿明',
-    authorRole: '明',
+    author: '家人',
+    notesFor: '家人',
+    authorRole: '家',
+    avatarUrl: '',
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   },
   {
     id: 'widget-sample-3',
@@ -1016,10 +1131,13 @@ const DEFAULT_WIDGETS = [
     y: 460,
     time: '08:00 AM 叮囑',
     content: '水壺已裝滿溫開水',
-    author: '細仔 阿明',
-    authorRole: '明',
+    author: '家人',
+    notesFor: '家人',
+    authorRole: '家',
+    avatarUrl: '',
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   }
 ];
 
@@ -1029,14 +1147,45 @@ let activeMagnifiedCardId = null;
 let maxZIndex = 100;
 let isAllCollapsed = false;
 let charsPerLine = 8;
+let currentSaveSlot = '1';
+
+// Crop Tool Internal Variables
+let cropImageObj = null;
+let cropImgX = 0;
+let cropImgY = 0;
+let cropScale = 1;
+let cropRotate = 0;
+let isDraggingCrop = false;
+let dragCropStartX = 0;
+let dragCropStartY = 0;
+let currentEditingAvatarUrl = '';
 
 function loadWidgetsFromStorage() {
   try {
-    const saved = localStorage.getItem('care_canvas_widgets_v7');
+    const savedFor = localStorage.getItem('care_canvas_profile_for');
+    const savedFrom = localStorage.getItem('care_canvas_profile_from');
+    if (savedFor !== null) globalProfileNotesFor = savedFor;
+    if (savedFrom !== null) globalProfileNotesFrom = savedFrom;
+
+    const forInput = document.getElementById('profile-notes-for');
+    const fromInput = document.getElementById('profile-notes-from');
+    if (forInput) forInput.value = globalProfileNotesFor;
+    if (fromInput) fromInput.value = globalProfileNotesFrom;
+
+    const activeSlot = localStorage.getItem('care_canvas_active_slot') || '1';
+    currentSaveSlot = activeSlot;
+    updateSlotButtonsUI();
+
+    const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
     if (saved) {
       widgetsState = JSON.parse(saved);
     } else {
-      widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+      const legacy = localStorage.getItem('care_canvas_widgets_v7');
+      if (legacy) {
+        widgetsState = JSON.parse(legacy);
+      } else {
+        widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+      }
     }
   } catch(e) {
     widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
@@ -1053,6 +1202,63 @@ function loadWidgetsFromStorage() {
   updateCharsPerLineDisplay();
 }
 
+function saveGlobalProfiles() {
+  const forInput = document.getElementById('profile-notes-for');
+  const fromInput = document.getElementById('profile-notes-from');
+  if (forInput) globalProfileNotesFor = forInput.value.trim() || '家人';
+  if (fromInput) globalProfileNotesFrom = fromInput.value.trim() || '家人';
+  try {
+    localStorage.setItem('care_canvas_profile_for', globalProfileNotesFor);
+    localStorage.setItem('care_canvas_profile_from', globalProfileNotesFrom);
+  } catch(e) {}
+}
+
+function updateSlotButtonsUI() {
+  ['1', '2', '3', 'auto'].forEach(slot => {
+    const btn = document.getElementById(`slot-btn-${slot}`);
+    if (btn) {
+      if (String(slot) === String(currentSaveSlot)) {
+        btn.classList.add('selected');
+      } else {
+        btn.classList.remove('selected');
+      }
+    }
+  });
+}
+
+function switchSaveSlot(slot) {
+  currentSaveSlot = String(slot);
+  try {
+    localStorage.setItem('care_canvas_active_slot', currentSaveSlot);
+  } catch(e) {}
+  updateSlotButtonsUI();
+
+  try {
+    const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
+    if (saved) {
+      widgetsState = JSON.parse(saved);
+    } else {
+      widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+    }
+  } catch(e) {
+    widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
+  }
+
+  renderAllWidgets();
+  showToast(`已切換至 槽位 ${currentSaveSlot}`);
+}
+
+function triggerManualSave() {
+  saveWidgetsToStorage();
+  showToast(`資料已手動儲存至槽位 ${currentSaveSlot}`);
+}
+
+function triggerManualLoad() {
+  loadWidgetsFromStorage();
+  renderAllWidgets();
+  showToast(`已從槽位 ${currentSaveSlot} 讀取資料`);
+}
+
 function updateCharsPerLineDisplay() {
   const el = document.getElementById('chars-per-line-val');
   if (el) el.textContent = charsPerLine;
@@ -1066,7 +1272,7 @@ function changeCharsPerLine(delta) {
   updateCharsPerLineDisplay();
   renderAllWidgets();
   updateModalLivePreview();
-  showToast(`每行字數已設定為 ${charsPerLine} 字 (自動放大字型)`);
+  showToast(`全域預設每行字數已設為 ${charsPerLine} 字`);
 }
 
 function escapeHTML(str) {
@@ -1121,7 +1327,7 @@ function resetZoom() {
   panX = 40;
   panY = 70;
   updateCanvasTransform();
-  showToast('畫面縮放與中心已重置 ‧ ZOOM RESET');
+  showToast('畫面縮放與中心已重置');
 }
 
 function resetCardArrangement() {
@@ -1145,12 +1351,14 @@ function resetCardArrangement() {
   saveWidgetsToStorage();
   renderAllWidgets();
   updateCanvasTransform();
-  showToast('卡片已自動整齊排列 ‧ GRID RESET');
+  showToast('卡片已自動整齊排列');
 }
 
 function saveWidgetsToStorage() {
   try {
-    localStorage.setItem('care_canvas_widgets_v7', JSON.stringify(widgetsState));
+    const dataStr = JSON.stringify(widgetsState);
+    localStorage.setItem(`care_canvas_slot_${currentSaveSlot}`, dataStr);
+    localStorage.setItem('care_canvas_slot_auto', dataStr);
   } catch(e) {
     console.warn('LocalStorage save skipped', e);
   }
@@ -1184,7 +1392,7 @@ function createWidgetDOM(w) {
         <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
           <div style="display:flex; align-items:center; gap:6px;">
             <svg class="svg-icon" style="color:var(--accent-gold);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span class="collapsed-pill-title">🕒 智醒大時鐘</span>
+            <span class="collapsed-pill-title">智醒大時鐘</span>
           </div>
           <button class="widget-btn">展開</button>
         </div>
@@ -1199,7 +1407,7 @@ function createWidgetDOM(w) {
         </div>
         <div class="widget-body">
           <div class="clock-display-main" id="clock-time-val">00:00</div>
-          <div style="text-align:center; font-weight:900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月17日</div>
+          <div style="text-align:center; font-weight:900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月18日</div>
 
           <div style="margin-top: 10px; padding: 8px 6px; background: rgba(0,0,0,0.03); border: 2.5px solid var(--border-color); border-radius: 12px; text-align: center;">
             <div style="font-size: 0.76rem; font-family: var(--font-sans); font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
@@ -1225,7 +1433,7 @@ function createWidgetDOM(w) {
               <text x="270" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">18:00 昏</text>
             </svg>
             <div id="solar-phase-badge" style="font-size: 0.9rem; font-weight: 900; color: var(--accent-gold); margin-top: 2px;">
-              ☀️ 早上 ‧ Morning
+              早上 ‧ Morning
             </div>
           </div>
         </div>
@@ -1272,9 +1480,16 @@ function createWidgetDOM(w) {
   }
 
   const ackClass = w.acknowledged ? 'acknowledged' : '';
-  const ackText = w.acknowledged ? '【 已收到 ‧ ACKNOWLEDGED 】' : '【 👍 我看到了 ‧ ACKNOWLEDGED 】';
+  const ackText = w.acknowledged ? '【 已收到 ‧ ACKNOWLEDGED 】' : '【 我看到了 ‧ ACKNOWLEDGED 】';
+  const effectiveChars = w.charsPerLine || charsPerLine;
+  const authorName = w.author || '家人';
+  const notesForName = w.notesFor || '家人';
 
-  // Specific rendering for To-Do List Template
+  let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
+  if (w.avatarUrl && w.avatarUrl.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
+  }
+
   if (w.type === 'todo') {
     const tasks = w.tasks || [];
     const completedCount = tasks.filter(t => t.done).length;
@@ -1291,7 +1506,7 @@ function createWidgetDOM(w) {
 
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag">${tagTitle}</span>
+        <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯待辦">
             <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1319,25 +1534,24 @@ function createWidgetDOM(w) {
         </button>
       </div>
       <div class="widget-footer-stamp">
-        <span>家人待辦事項</span>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div class="author-avatar">${w.authorRole || '家'}</div>
-          <span>${w.author || '家人'}</span>
+        <span>給: ${escapeHTML(notesForName)}</span>
+        <div class="author-avatar-container">
+          ${avatarHTML}
+          <span>${escapeHTML(authorName)}</span>
         </div>
       </div>
     `;
     return card;
   }
 
-  // Specific rendering for Media & Web Bookmark Template
   if (w.type === 'media') {
     const hasImg = w.imageUrl && w.imageUrl.trim().length > 0;
     const hasLink = w.linkUrl && w.linkUrl.trim().length > 0;
-    const renderedContent = formatContentWithDynamicFont(w.content, charsPerLine, 320);
+    const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
 
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag">${tagTitle}</span>
+        <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯網頁筆記">
             <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1372,7 +1586,7 @@ function createWidgetDOM(w) {
               <svg class="svg-icon" style="color:var(--accent-purple);" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(w.linkTitle || w.linkUrl)}</span>
             </div>
-            <span style="font-size:0.75rem; white-space:nowrap;">開啟 🚀</span>
+            <span style="font-size:0.75rem; white-space:nowrap;">開啟</span>
           </a>
         ` : ''}
         <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
@@ -1381,22 +1595,21 @@ function createWidgetDOM(w) {
         </button>
       </div>
       <div class="widget-footer-stamp">
-        <span>網端精選內容</span>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <div class="author-avatar">${w.authorRole || '家'}</div>
-          <span>${w.author || '家人'}</span>
+        <span>給: ${escapeHTML(notesForName)}</span>
+        <div class="author-avatar-container">
+          ${avatarHTML}
+          <span>${escapeHTML(authorName)}</span>
         </div>
       </div>
     `;
     return card;
   }
 
-  // Standard Note, Meds, Clinic rendering
-  const renderedContent = formatContentWithDynamicFont(w.content, charsPerLine, 320);
+  const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
 
   card.innerHTML = `
     <div class="widget-header" style="cursor: inherit;">
-      <span class="widget-category-tag">${tagTitle}</span>
+      <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
       <div class="widget-controls">
         <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯內容">
           <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1426,10 +1639,10 @@ function createWidgetDOM(w) {
       </button>
     </div>
     <div class="widget-footer-stamp">
-      <span>家人關懷叮囑</span>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <div class="author-avatar">${w.authorRole || '家'}</div>
-        <span>${w.author || '家人'}</span>
+      <span>給: ${escapeHTML(notesForName)}</span>
+      <div class="author-avatar-container">
+        ${avatarHTML}
+        <span>${escapeHTML(authorName)}</span>
       </div>
     </div>
   `;
@@ -1480,11 +1693,23 @@ function openAddNoteModal() {
   document.getElementById('media-url-input').value = '';
   document.getElementById('media-linktitle-input').value = '';
   document.getElementById('note-time-input').value = '';
-  document.getElementById('note-author-input').value = '';
   
+  document.getElementById('note-for-input').value = globalProfileNotesFor;
+  document.getElementById('note-author-input').value = globalProfileNotesFrom;
+
+  currentEditingAvatarUrl = '';
+  resetCropDefaults();
+
+  const rangeInput = document.getElementById('card-chars-range');
+  if (rangeInput) rangeInput.value = charsPerLine;
+  const charsValEl = document.getElementById('card-chars-val');
+  if (charsValEl) charsValEl.textContent = charsPerLine;
+
   selectedNoteType = 'meds';
   document.querySelectorAll('.type-option-btn').forEach(btn => {
-    btn.classList.toggle('selected', btn.dataset.type === 'meds');
+    if (btn.dataset.type) {
+      btn.classList.toggle('selected', btn.dataset.type === 'meds');
+    }
   });
   updateModalFormFieldsVisibility();
   updateModalLivePreview();
@@ -1500,7 +1725,21 @@ function openEditNoteModal(id) {
   document.getElementById('modal-title-text').textContent = '編輯項目 ‧ EDIT CARD';
   document.getElementById('note-content-input').value = w.content || '';
   document.getElementById('note-time-input').value = w.time || '';
-  document.getElementById('note-author-input').value = w.author || '';
+  document.getElementById('note-for-input').value = w.notesFor || globalProfileNotesFor;
+  document.getElementById('note-author-input').value = w.author || globalProfileNotesFrom;
+
+  currentEditingAvatarUrl = w.avatarUrl || '';
+  if (currentEditingAvatarUrl) {
+    loadCropImageFromUrl(currentEditingAvatarUrl);
+  } else {
+    resetCropDefaults();
+  }
+
+  const cardChars = w.charsPerLine || charsPerLine;
+  const rangeInput = document.getElementById('card-chars-range');
+  if (rangeInput) rangeInput.value = cardChars;
+  const charsValEl = document.getElementById('card-chars-val');
+  if (charsValEl) charsValEl.textContent = cardChars;
 
   if (w.type === 'todo' && w.tasks) {
     document.getElementById('todo-items-input').value = w.tasks.map(t => t.text).join('\n');
@@ -1513,7 +1752,9 @@ function openEditNoteModal(id) {
 
   selectedNoteType = w.type || 'meds';
   document.querySelectorAll('.type-option-btn').forEach(btn => {
-    btn.classList.toggle('selected', btn.dataset.type === selectedNoteType);
+    if (btn.dataset.type) {
+      btn.classList.toggle('selected', btn.dataset.type === selectedNoteType);
+    }
   });
 
   updateModalFormFieldsVisibility();
@@ -1526,11 +1767,29 @@ function closeNoteModal() {
 }
 
 function selectTypeOption(btn, type) {
-  document.querySelectorAll('.type-option-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.type-option-btn').forEach(b => {
+    if (b.dataset.type) b.classList.remove('selected');
+  });
   btn.classList.add('selected');
   selectedNoteType = type;
   updateModalFormFieldsVisibility();
   updateModalLivePreview();
+}
+
+function onCardCharsRangeInput(val) {
+  const num = parseInt(val, 10) || 8;
+  const charsValEl = document.getElementById('card-chars-val');
+  if (charsValEl) charsValEl.textContent = num;
+  updateModalLivePreview();
+}
+
+function changeCardSpecificChars(delta) {
+  const rangeInput = document.getElementById('card-chars-range');
+  if (!rangeInput) return;
+  let current = parseInt(rangeInput.value, 10) || 8;
+  current = Math.max(3, Math.min(20, current + delta));
+  rangeInput.value = current;
+  onCardCharsRangeInput(current);
 }
 
 function updateModalFormFieldsVisibility() {
@@ -1545,6 +1804,9 @@ function updateModalLivePreview() {
   const previewBox = document.getElementById('modal-live-preview');
   if (!previewBox) return;
 
+  const rangeInput = document.getElementById('card-chars-range');
+  const currentChars = rangeInput ? parseInt(rangeInput.value, 10) || 8 : charsPerLine;
+
   if (selectedNoteType === 'todo') {
     const todoRaw = document.getElementById('todo-items-input');
     const tasks = (todoRaw ? todoRaw.value : '').split('\n').filter(Boolean);
@@ -1556,13 +1818,122 @@ function updateModalLivePreview() {
     previewBox.innerHTML = `<b>【網頁筆記預覽】</b><br>${escapeHTML(inputVal || '文章內容')}<br>` + (urlVal ? `<span style="color:var(--accent-purple);">🔗 ${escapeHTML(titleVal || urlVal)}</span>` : '');
     previewBox.style.fontSize = '18px';
   } else {
-    const rendered = formatContentWithDynamicFont(inputVal || '（請於上方輸入內容）', charsPerLine, 320);
+    const rendered = formatContentWithDynamicFont(inputVal || '（請於上方輸入內容）', currentChars, 320);
     previewBox.innerHTML = rendered.html;
     previewBox.style.fontSize = rendered.fontSize;
   }
 }
 
+// Crop & Image Handling
+function resetCropDefaults() {
+  cropImageObj = null;
+  cropImgX = 0;
+  cropImgY = 0;
+  cropScale = 1;
+  cropRotate = 0;
+  const scaleRange = document.getElementById('cropScaleRange');
+  const rotRange = document.getElementById('cropRotateRange');
+  if (scaleRange) scaleRange.value = 1;
+  if (rotRange) rotRange.value = 0;
+  drawCropCanvas();
+}
+
+function loadCropImageFromUrl(url) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    cropImageObj = img;
+    cropImgX = 0;
+    cropImgY = 0;
+    cropScale = 1;
+    cropRotate = 0;
+    drawCropCanvas();
+  };
+  img.src = url;
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    loadCropImageFromUrl(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateCropTransform() {
+  const scaleRange = document.getElementById('cropScaleRange');
+  const rotRange = document.getElementById('cropRotateRange');
+  if (scaleRange) cropScale = parseFloat(scaleRange.value) || 1;
+  if (rotRange) cropRotate = parseFloat(rotRange.value) || 0;
+  drawCropCanvas();
+}
+
+function drawCropCanvas() {
+  const canvas = document.getElementById('crop-canvas-elem');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (cropImageObj) {
+    ctx.save();
+    ctx.translate(canvas.width / 2 + cropImgX, canvas.height / 2 + cropImgY);
+    ctx.rotate((cropRotate * Math.PI) / 180);
+    ctx.scale(cropScale, cropScale);
+    ctx.drawImage(
+      cropImageObj,
+      -cropImageObj.width / 2,
+      -cropImageObj.height / 2
+    );
+    ctx.restore();
+  } else {
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('點擊上傳頭像', canvas.width / 2, canvas.height / 2);
+  }
+}
+
+function initCropInteraction() {
+  const container = document.getElementById('cropContainer');
+  if (!container) return;
+
+  container.addEventListener('pointerdown', (e) => {
+    if (!cropImageObj) return;
+    isDraggingCrop = true;
+    dragCropStartX = e.clientX - cropImgX;
+    dragCropStartY = e.clientY - cropImgY;
+    container.setPointerCapture(e.pointerId);
+  });
+
+  container.addEventListener('pointermove', (e) => {
+    if (!isDraggingCrop) return;
+    cropImgX = e.clientX - dragCropStartX;
+    cropImgY = e.clientY - dragCropStartY;
+    drawCropCanvas();
+  });
+
+  const endDragCrop = (e) => {
+    isDraggingCrop = false;
+  };
+  container.addEventListener('pointerup', endDragCrop);
+  container.addEventListener('pointercancel', endDragCrop);
+}
+
+function getCroppedAvatarDataURL() {
+  const canvas = document.getElementById('crop-canvas-elem');
+  if (!canvas || !cropImageObj) return '';
+  return canvas.toDataURL('image/png');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  initCropInteraction();
+  drawCropCanvas();
   const textarea = document.getElementById('note-content-input');
   if (textarea) textarea.addEventListener('input', updateModalLivePreview);
   const todoTextarea = document.getElementById('todo-items-input');
@@ -1577,12 +1948,17 @@ function saveNoteChanges() {
   const editId = document.getElementById('edit-target-id').value;
   const content = document.getElementById('note-content-input').value.trim();
   const time = document.getElementById('note-time-input').value.trim() || '即時提醒';
-  const author = document.getElementById('note-author-input').value.trim() || '家人';
+  const notesFor = document.getElementById('note-for-input').value.trim() || globalProfileNotesFor;
+  const author = document.getElementById('note-author-input').value.trim() || globalProfileNotesFrom;
+  const rangeInput = document.getElementById('card-chars-range');
+  const cardChars = rangeInput ? parseInt(rangeInput.value, 10) || 8 : charsPerLine;
 
   if (!content) {
     showToast('請輸入內容');
     return;
   }
+
+  const avatarDataUrl = getCroppedAvatarDataURL();
 
   if (editId) {
     const target = widgetsState.find(w => w.id === editId);
@@ -1590,8 +1966,11 @@ function saveNoteChanges() {
       target.type = selectedNoteType;
       target.content = content;
       target.time = time;
+      target.notesFor = notesFor;
       target.author = author;
       target.authorRole = author.charAt(0) || '家';
+      if (avatarDataUrl) target.avatarUrl = avatarDataUrl;
+      target.charsPerLine = cardChars;
 
       if (selectedNoteType === 'todo') {
         const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
@@ -1619,10 +1998,13 @@ function saveNoteChanges() {
       y: 80 + row * 380,
       time: time,
       content: content,
+      notesFor: notesFor,
       author: author,
       authorRole: author.charAt(0) || '家',
+      avatarUrl: avatarDataUrl,
       acknowledged: false,
-      collapsed: false
+      collapsed: false,
+      charsPerLine: cardChars
     };
 
     if (selectedNoteType === 'todo') {
@@ -1644,14 +2026,14 @@ function saveNoteChanges() {
   saveWidgetsToStorage();
   renderAllWidgets();
   closeNoteModal();
-  showToast('卡片資料已儲存 ‧ SAVED');
+  showToast('卡片資料已儲存');
 }
 
 function removeWidget(id) {
   widgetsState = widgetsState.filter(w => w.id !== id);
   saveWidgetsToStorage();
   renderAllWidgets();
-  showToast('卡片已刪除 ‧ REMOVED');
+  showToast('卡片已刪除');
 }
 
 function toggleAck(id) {
@@ -1660,7 +2042,7 @@ function toggleAck(id) {
     target.acknowledged = !target.acknowledged;
     saveWidgetsToStorage();
     renderAllWidgets();
-    showToast(target.acknowledged ? '已確認收到 ‧ ACKNOWLEDGED' : '已取消確認');
+    showToast(target.acknowledged ? '已確認收到' : '已取消確認');
   }
 }
 
@@ -1671,10 +2053,10 @@ function spawnQuickSticker(type) {
   const row = Math.floor(newIdx / maxCols);
 
   const presets = {
-    water: { type: 'note', content: '記得多飲溫水補充水分', time: '全日叮囑', author: '女', role: '敏' },
-    dinner: { type: 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30', author: '仔', role: '威' },
-    clothes: { type: 'note', content: '天冷出門記得穿外套', time: '早晚叮囑', author: '女', role: '敏' },
-    bp: { type: 'meds', content: '記得量血壓並記錄數據', time: '早晚一次', author: '家人叮囑', role: '醫' }
+    water: { type: 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
+    dinner: { type: 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30' },
+    clothes: { type: 'note', content: '天冷出門記得穿外套', time: '早晚叮囑' },
+    bp: { type: 'meds', content: '記得量血壓並記錄數據', time: '早晚一次' }
   };
 
   const item = presets[type] || presets.water;
@@ -1686,16 +2068,19 @@ function spawnQuickSticker(type) {
     y: 80 + row * 380,
     time: item.time,
     content: item.content,
-    author: item.author,
-    authorRole: item.role,
+    notesFor: globalProfileNotesFor,
+    author: globalProfileNotesFrom,
+    authorRole: globalProfileNotesFrom.charAt(0) || '家',
+    avatarUrl: '',
     acknowledged: false,
-    collapsed: false
+    collapsed: false,
+    charsPerLine: 8
   };
 
   widgetsState.push(newWidget);
   saveWidgetsToStorage();
   renderAllWidgets();
-  showToast('已新增快捷貼紙 ‧ ADDED');
+  showToast('已新增快捷貼紙');
 }
 
 let activeWidget = null;
@@ -1820,9 +2205,10 @@ function openMagnifierModal(id) {
   if (!w) return;
 
   activeMagnifiedCardId = id;
-  document.getElementById('mag-time-badge').textContent = `⏰ 時間: ${w.time || '即時'}`;
+  document.getElementById('mag-time-badge').textContent = `⏰ 時間: ${w.time || '即時'} | 給: ${w.notesFor || '家人'}`;
   
-  const renderedMag = formatContentWithDynamicFont(w.content, charsPerLine, 450);
+  const effectiveChars = w.charsPerLine || charsPerLine;
+  const renderedMag = formatContentWithDynamicFont(w.content, effectiveChars, 450);
   const magBox = document.getElementById('mag-content-box');
   magBox.innerHTML = renderedMag.html;
   magBox.style.fontSize = `calc(${renderedMag.fontSize} * 1.35)`;
@@ -1835,7 +2221,7 @@ function openMagnifierModal(id) {
     ackBtn.querySelector('span').textContent = '【 已確認收到 ‧ ACKNOWLEDGED 】';
   } else {
     ackBtn.classList.remove('acknowledged');
-    ackBtn.querySelector('span').textContent = '【 👍 我看到了 ‧ ACKNOWLEDGED 】';
+    ackBtn.querySelector('span').textContent = '【 我看到了 ‧ ACKNOWLEDGED 】';
   }
 
   document.getElementById('magnifier-modal').classList.add('active');
