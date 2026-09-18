@@ -61,8 +61,12 @@ html, body {
   background-color: var(--bg-surface);
   color: var(--text-main);
   font-family: var(--font-serif);
-  touch-action: none;
+  touch-action: pan-x pan-y;
   transition: background-color 0.8s ease;
+}
+
+button, [role="button"] {
+  cursor: pointer;
 }
 
 .svg-icon {
@@ -106,6 +110,7 @@ html, body {
   flex-shrink: 0;
   user-select: none;
   position: relative;
+  pointer-events: auto;
 }
 
 @media (max-width: 768px) {
@@ -251,6 +256,7 @@ html, body {
   width: 100%;
   height: 100%;
   cursor: grab;
+  touch-action: none;
 }
 
 #main-canvas:active {
@@ -280,6 +286,7 @@ body.theme-night #main-canvas {
   overflow-x: auto;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
 }
 
 body.theme-night .canvas-top-bar {
@@ -303,12 +310,13 @@ body.theme-night .canvas-top-bar {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 #widgets-container {
   position: absolute;
-  width: 5000px;
-  height: 5000px;
+  width: 0;
+  height: 0;
   top: 0;
   left: 0;
   transform-origin: 0 0;
@@ -639,6 +647,7 @@ body.theme-night .canvas-top-bar {
   box-shadow: var(--shadow-active);
   display: flex;
   flex-direction: column;
+  pointer-events: auto;
 }
 
 .modal-header {
@@ -752,7 +761,6 @@ body.theme-night .canvas-top-bar {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Crop Tool Styles (Moved to Profile Manager Modal) */
 .crop-tool-wrapper {
   background: var(--bg-surface);
   border: 2.5px solid var(--border-color);
@@ -765,8 +773,8 @@ body.theme-night .canvas-top-bar {
 }
 
 .crop-preview-container {
-  width: 100px;
-  height: 100px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   border: 3px solid var(--accent-gold);
   overflow: hidden;
@@ -782,8 +790,8 @@ body.theme-night .canvas-top-bar {
 
 #crop-canvas-elem {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 160px;
+  height: 160px;
 }
 </style>
 </head>
@@ -906,9 +914,9 @@ body.theme-night .canvas-top-bar {
         <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・成員大頭照請至管理檔案設定</span>
       </div>
 
-      <div id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none;" role="button">100%</div>
+      <button id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none; border: none;" role="button">100%</button>
 
-      <button class="btn-primary-add" id="themeToggleBtn" style="padding: 6px 10px; font-size: 0.82rem; background: var(--bg-card); color: var(--text-main); flex-shrink: 0;">
+      <button class="btn-primary-add" id="themeToggleBtn" onclick="toggleTheme()" style="padding: 6px 10px; font-size: 0.82rem; background: var(--bg-card); color: var(--text-main); flex-shrink: 0;">
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <span id="themeToggleText">護眼</span>
       </button>
@@ -1012,7 +1020,7 @@ body.theme-night .canvas-top-bar {
         <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
         <div class="crop-tool-wrapper">
           <div class="crop-preview-container" id="cropContainer">
-            <canvas id="crop-canvas-elem" width="120" height="120"></canvas>
+            <canvas id="crop-canvas-elem" width="160" height="160"></canvas>
           </div>
           <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
             <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
@@ -1064,11 +1072,7 @@ let canvasScale = 1.0;
 let panX = 100;
 let panY = 80;
 let isPanningCanvas = false;
-let panStartX = 0;
-let panStartY = 0;
-
-let initialPinchDistance = null;
-let initialScaleOnPinch = 1.0;
+let activePointers = new Map();
 
 let globalProfiles = [
   { name: '家人', avatarUrl: '' },
@@ -1187,15 +1191,16 @@ let isAllCollapsed = false;
 let charsPerLine = 8;
 let currentSaveSlot = '1';
 
-// Crop Tool Internal Variables (Used in Profile Manager)
+// Avatar Crop Variables
 let cropImageObj = null;
-let cropImgX = 0;
-let cropImgY = 0;
+let cropFocalX = 80;
+let cropFocalY = 80;
 let cropScale = 1;
 let cropRotate = 0;
 let isDraggingCrop = false;
 let dragCropStartX = 0;
 let dragCropStartY = 0;
+let cropPointers = new Map();
 let managerTempAvatarUrl = '';
 
 function loadWidgetsFromStorage() {
@@ -1706,7 +1711,6 @@ function createWidgetDOM(w) {
   const authorName = w.author || '家人';
   const notesForName = w.notesFor || '家人';
 
-  // Automatically pull the avatar from globalProfiles associated with the author name
   let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
   const authorProfile = globalProfiles.find(p => p.name === authorName);
   if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
@@ -1981,7 +1985,6 @@ function openEditNoteModal(id) {
 
 function closeNoteModal() {
   document.getElementById('note-modal').classList.remove('active');
-  // Ensure we keep the canvas visible correctly without top row obstruction
   window.scrollTo(0, 0);
 }
 
@@ -2043,13 +2046,14 @@ function updateModalLivePreview() {
   }
 }
 
-// Crop & Image Handling functions for Profile Manager
+// Crop & Image Handling functions with Relative Focal Point Mechanics
 function resetCropDefaults() {
   cropImageObj = null;
-  cropImgX = 0;
-  cropImgY = 0;
+  cropFocalX = 80;
+  cropFocalY = 80;
   cropScale = 1;
   cropRotate = 0;
+  cropPointers.clear();
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
   if (scaleRange) scaleRange.value = 0;
@@ -2066,8 +2070,8 @@ function loadCropImageFromUrl(url) {
   img.crossOrigin = 'anonymous';
   img.onload = () => {
     cropImageObj = img;
-    cropImgX = 0;
-    cropImgY = 0;
+    cropFocalX = 80;
+    cropFocalY = 80;
     cropScale = 1;
     cropRotate = 0;
     const scaleRange = document.getElementById('cropScaleRange');
@@ -2105,12 +2109,9 @@ function drawCropCanvas() {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   if (cropImageObj) {
     ctx.save();
-    ctx.translate(canvas.width / 2 + cropImgX, canvas.height / 2 + cropImgY);
+    ctx.translate(cropFocalX, cropFocalY);
     ctx.rotate((cropRotate * Math.PI) / 180);
     ctx.scale(cropScale, cropScale);
     ctx.drawImage(
@@ -2120,44 +2121,102 @@ function drawCropCanvas() {
     );
     ctx.restore();
   } else {
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#64748b';
     ctx.font = 'bold 12px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('點擊上傳頭像', canvas.width / 2, canvas.height / 2);
   }
+
+  // 50% Translucent Masking Overlay
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(80, 80, 80, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function initCropInteraction() {
   const container = document.getElementById('cropContainer');
   if (!container) return;
 
+  let initialPinchDist = 0;
+  let initialPinchScale = 1;
+
   container.addEventListener('pointerdown', (e) => {
     if (!cropImageObj) return;
-    isDraggingCrop = true;
-    dragCropStartX = e.clientX - cropImgX;
-    dragCropStartY = e.clientY - cropImgY;
     container.setPointerCapture(e.pointerId);
+    cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (cropPointers.size === 1) {
+      isDraggingCrop = true;
+      dragCropStartX = e.clientX;
+      dragCropStartY = e.clientY;
+    } else if (cropPointers.size === 2) {
+      isDraggingCrop = false;
+      const pts = Array.from(cropPointers.values());
+      initialPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      initialPinchScale = cropScale;
+    }
   });
 
   container.addEventListener('pointermove', (e) => {
-    if (!isDraggingCrop) return;
-    cropImgX = e.clientX - dragCropStartX;
-    cropImgY = e.clientY - dragCropStartY;
-    drawCropCanvas();
+    if (!cropPointers.has(e.pointerId)) return;
+    cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (cropPointers.size === 1 && isDraggingCrop) {
+      const dx = e.clientX - dragCropStartX;
+      const dy = e.clientY - dragCropStartY;
+      cropFocalX += dx;
+      cropFocalY += dy;
+      dragCropStartX = e.clientX;
+      dragCropStartY = e.clientY;
+      drawCropCanvas();
+    } else if (cropPointers.size === 2) {
+      const pts = Array.from(cropPointers.values());
+      const currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (initialPinchDist > 0) {
+        cropScale = Math.max(0.2, Math.min(3.5, initialPinchScale * (currentDist / initialPinchDist)));
+        const scaleRange = document.getElementById('cropScaleRange');
+        if (scaleRange) scaleRange.value = Math.round((cropScale - 1) * 40);
+        drawCropCanvas();
+      }
+    }
   });
 
-  const endDragCrop = (e) => {
-    isDraggingCrop = false;
+  const handlePointerEnd = (e) => {
+    cropPointers.delete(e.pointerId);
+    if (cropPointers.size < 2) initialPinchDist = 0;
+    if (cropPointers.size === 0) isDraggingCrop = false;
   };
-  container.addEventListener('pointerup', endDragCrop);
-  container.addEventListener('pointercancel', endDragCrop);
+
+  container.addEventListener('pointerup', handlePointerEnd);
+  container.addEventListener('pointercancel', handlePointerEnd);
 }
 
 function getCroppedAvatarDataURL() {
-  const canvas = document.getElementById('crop-canvas-elem');
-  if (!canvas || !cropImageObj) return '';
-  return canvas.toDataURL('image/png');
+  if (!cropImageObj) return '';
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = 160;
+  outCanvas.height = 160;
+  const ctx = outCanvas.getContext('2d');
+  
+  ctx.beginPath();
+  ctx.arc(80, 80, 80, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.translate(cropFocalX, cropFocalY);
+  ctx.rotate((cropRotate * Math.PI) / 180);
+  ctx.scale(cropScale, cropScale);
+  ctx.drawImage(cropImageObj, -cropImageObj.width / 2, -cropImageObj.height / 2);
+
+  return outCanvas.toDataURL('image/png');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2212,7 +2271,6 @@ function saveNoteChanges() {
       }
     }
   } else {
-    // Calculate new card position nicely inside the current visible canvas bounds/pan area
     const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
     const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
 
@@ -2312,7 +2370,7 @@ let initialLeft = 0, initialTop = 0;
 
 function initDraggableWidget(widgetEl) {
   widgetEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button, input, textarea, a, select')) return;
+    if (e.target.closest('button, input, textarea, a, select, [role="button"]')) return;
 
     activeWidget = widgetEl;
     bringToFront(activeWidget);
@@ -2364,49 +2422,55 @@ function initDraggableWidget(widgetEl) {
 
 function initCanvasPanAndZoom() {
   const canvas = document.getElementById('main-canvas');
+  let initialPinchDistance = null;
+  let initialScaleOnPinch = 1.0;
 
   canvas.addEventListener('pointerdown', (e) => {
     if (e.target.closest('.canvas-widget, .canvas-top-bar, #sidebar-dock, .modal-backdrop')) return;
-    isPanningCanvas = true;
-    panStartX = e.clientX - panX;
-    panStartY = e.clientY - panY;
     canvas.setPointerCapture(e.pointerId);
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.size === 1) {
+      isPanningCanvas = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    } else if (activePointers.size === 2) {
+      isPanningCanvas = false;
+      const pts = Array.from(activePointers.values());
+      initialPinchDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      initialScaleOnPinch = canvasScale;
+    }
   });
 
   canvas.addEventListener('pointermove', (e) => {
-    if (!isPanningCanvas) return;
-    panX = e.clientX - panStartX;
-    panY = e.clientY - panStartY;
-    updateCanvasTransform();
-  });
+    if (!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
-  const endPan = (e) => {
-    isPanningCanvas = false;
-  };
-  canvas.addEventListener('pointerup', endPan);
-  canvas.addEventListener('pointercancel', endPan);
-
-  canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      initialPinchDistance = getTouchDistance(e.touches);
-      initialScaleOnPinch = canvasScale;
-    }
-  }, { passive: true });
-
-  canvas.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && initialPinchDistance) {
-      const currentDistance = getTouchDistance(e.touches);
+    if (activePointers.size === 1 && isPanningCanvas) {
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateCanvasTransform();
+    } else if (activePointers.size === 2 && initialPinchDistance) {
+      const pts = Array.from(activePointers.values());
+      const currentDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
       const scaleFactor = currentDistance / initialPinchDistance;
       canvasScale = Math.min(2.5, Math.max(0.5, initialScaleOnPinch * scaleFactor));
       updateCanvasTransform();
     }
-  }, { passive: true });
+  });
 
-  canvas.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
+  const endPan = (e) => {
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) {
       initialPinchDistance = null;
     }
-  });
+    if (activePointers.size === 0) {
+      isPanningCanvas = false;
+    }
+  };
+
+  canvas.addEventListener('pointerup', endPan);
+  canvas.addEventListener('pointercancel', endPan);
 
   canvas.addEventListener('wheel', (e) => {
     if (e.target.closest('.canvas-widget, #sidebar-dock, .modal-backdrop')) return;
@@ -2415,12 +2479,6 @@ function initCanvasPanAndZoom() {
     canvasScale = Math.min(2.5, Math.max(0.5, canvasScale * zoomFactor));
     updateCanvasTransform();
   }, { passive: false });
-}
-
-function getTouchDistance(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
 }
 
 function openMagnifierModal(id) {
@@ -2543,35 +2601,50 @@ function toggleSidebar(forceState) {
 
   if (isMobile) {
     const nextState = forceState !== undefined ? forceState : !dock.classList.contains('open');
-    dock.classList.toggle('open', nextState);
-    backdrop.classList.toggle('active', nextState);
+    if (nextState) {
+      dock.classList.add('open');
+      backdrop.classList.add('active');
+    } else {
+      dock.classList.remove('open');
+      backdrop.classList.remove('active');
+    }
   } else {
     const nextState = forceState !== undefined ? !forceState : !dock.classList.contains('collapsed');
-    dock.classList.toggle('collapsed', nextState);
+    if (nextState) {
+      dock.classList.add('collapsed');
+    } else {
+      dock.classList.remove('collapsed');
+    }
+    backdrop.classList.remove('active');
   }
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast-notification');
-  toast.textContent = msg;
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 2200);
-}
-
-document.getElementById('themeToggleBtn').addEventListener('click', () => {
+function toggleTheme() {
   document.body.classList.toggle('theme-night');
   const isNight = document.body.classList.contains('theme-night');
-  document.getElementById('themeToggleText').textContent = isNight ? '暖光' : '護眼';
-});
+  const text = document.getElementById('themeToggleText');
+  if (text) text.textContent = isNight ? '日標' : '護眼';
+  showToast(isNight ? '已開啟護眼夜間模式' : '已開啟日間明亮模式');
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast-notification');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 2200);
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   loadWidgetsFromStorage();
   renderAllWidgets();
-  updateCanvasTransform();
-  updateClock();
   initCanvasPanAndZoom();
+  updateCanvasTransform();
 });
 </script>
-
 </body>
 </html>
