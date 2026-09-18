@@ -1019,8 +1019,8 @@ body.theme-night .canvas-top-bar {
             <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
             <div style="display: flex; align-items: center; gap: 4px;">
               <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
-              <input type="range" id="cropScaleRange" min="-80" max="80" step="1" value="0" style="width: 90px;" oninput="updateCropTransform()"/>
-            </div>
+              <input type="range" id="cropScaleRange" min="-500" max="100" step="1" value="-300" style="width: 90px;" oninput="updateCropTransform()"/>
+            </div> 
             <div style="display: flex; align-items: center; gap: 4px;">
               <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
               <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
@@ -1512,20 +1512,18 @@ function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
   const limit = maxChars || 8;
   const width = cardWidthPx || 320;
   
-  const availableWidth = width - 24;
-  let calculatedFontSizePx = Math.floor(availableWidth / (limit * 0.95));
-  calculatedFontSizePx = Math.max(22, Math.min(52, calculatedFontSizePx));
+  // Forces content text to fully span the row container width matching the character length setting per row
+  const availableWidth = width - 20;
+  let calculatedFontSizePx = Math.floor(availableWidth / limit * 1.15);
+  calculatedFontSizePx = Math.max(16, Math.min(64, calculatedFontSizePx));
 
   const lines = String(text).split('\n');
   const formatted = lines.map(line => {
     let result = '';
-    const cleanLine = line.replace(/\s+/g, '');
+    const cleanLine = line.trim();
     for (let i = 0; i < cleanLine.length; i += limit) {
       const chunk = cleanLine.slice(i, i + limit);
-      result += escapeHTML(chunk);
-      if (i + limit < cleanLine.length) {
-        result += '<br>';
-      }
+      result += `<span style="display:inline-block; width:100%; text-align:justify; letter-spacing:1px;">${escapeHTML(chunk)}</span>`;
     }
     return result;
   });
@@ -1707,12 +1705,28 @@ function createWidgetDOM(w) {
   const notesForName = w.notesFor || '家人';
 
   // Automatically pull the avatar from globalProfiles associated with the author name
-  let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
+  let authorAvatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
   const authorProfile = globalProfiles.find(p => p.name === authorName);
-  if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Avatar"/></div>`;
-  } else if (w.avatarUrl && w.avatarUrl.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
+  if (authorProfile && authorProfile.avatarUrl) {
+    authorAvatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Author"/></div>`;
+  }
+
+  let recipientAvatarHTML = '';
+  const recipientProfile = globalProfiles.find(p => p.name === notesForName);
+  if (recipientProfile && recipientProfile.avatarUrl) {
+    recipientAvatarHTML = `<div class="author-avatar" style="width:22px;height:22px;"><img src="${escapeHTML(recipientProfile.avatarUrl)}" alt="Recipient"/></div>`;
+  }
+
+  // If both sender and recipient are linked with avatars, show them in the card header/footer area
+  let linkedAvatarsHeaderTag = '';
+  if (authorProfile?.avatarUrl && recipientProfile?.avatarUrl) {
+    linkedAvatarsHeaderTag = `
+      <div style="display:flex; align-items:center; gap:4px; background:var(--bg-surface); padding:2px 6px; border-radius:6px; border:1.5px solid var(--border-color);">
+        ${authorAvatarHTML}
+        <span style="font-size:0.7rem; font-weight:900;">➔</span>
+        ${recipientAvatarHTML}
+      </div>
+    `;
   }
 
   if (w.type === 'todo') {
@@ -2048,11 +2062,11 @@ function resetCropDefaults() {
   cropImageObj = null;
   cropImgX = 0;
   cropImgY = 0;
-  cropScale = 1;
+  cropScale = 3.0;
   cropRotate = 0;
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) scaleRange.value = 0;
+  if (scaleRange) scaleRange.value = -300;
   if (rotRange) rotRange.value = 0;
   drawCropCanvas();
 }
@@ -2091,9 +2105,8 @@ function updateCropTransform() {
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
   if (scaleRange) {
-    const val = parseInt(scaleRange.value, 10) || 0;
-    cropScale = 1 + (val / 40);
-    cropScale = Math.max(0.2, Math.min(3.5, cropScale));
+    const val = parseInt(scaleRange.value, 10) || -300;
+    cropScale = Math.max(0.1, Math.min(5.0, Math.abs(val) / 100));
   }
   if (rotRange) cropRotate = parseFloat(rotRange.value) || 0;
   drawCropCanvas();
@@ -2157,7 +2170,7 @@ function initCropInteraction() {
 function getCroppedAvatarDataURL() {
   const canvas = document.getElementById('crop-canvas-elem');
   if (!canvas || !cropImageObj) return '';
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL('image/jpeg',0.75);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
