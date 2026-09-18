@@ -54,9 +54,9 @@ body.theme-night {
 
 html, body {
   width: 100%;
+  height: 100%;
   height: 100vh;
   height: 100dvh;
-  min-height: 100vh;
   overflow: hidden;
   background-color: var(--bg-surface);
   color: var(--text-main);
@@ -84,7 +84,8 @@ html, body {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   padding-top: var(--safe-top);
   padding-bottom: var(--safe-bottom);
@@ -751,7 +752,7 @@ body.theme-night .canvas-top-bar {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Crop Tool Styles */
+/* Crop Tool Styles (Moved to Profile Manager Modal) */
 .crop-tool-wrapper {
   background: var(--bg-surface);
   border: 2.5px solid var(--border-color);
@@ -902,7 +903,7 @@ body.theme-night .canvas-top-bar {
 
       <div class="instruction-guide-banner">
         <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・設定頁面支援大頭照圓形裁切與縮放</span>
+        <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・成員大頭照請至管理檔案設定</span>
       </div>
 
       <div id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none;" role="button">100%</div>
@@ -942,29 +943,6 @@ body.theme-night .canvas-top-bar {
           <label class="form-label">誰寫的筆記 (Notes From)</label>
           <select class="form-select" id="note-author-select" onchange="onProfileDropdownChange('from')"></select>
           <input type="text" class="form-input" id="note-author-input" placeholder="例如：家人" style="margin-top:4px;"/>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
-        <div class="crop-tool-wrapper">
-          <div class="crop-preview-container" id="cropContainer">
-            <canvas id="crop-canvas-elem" width="120" height="120"></canvas>
-          </div>
-          <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
-            <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
-              <input type="range" id="cropScaleRange" min="-80" max="80" step="1" value="0" style="width: 90px;" oninput="updateCropTransform()"/>
-            </div>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
-              <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
-            </div>
-            <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
-          </div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
         </div>
       </div>
 
@@ -1017,27 +995,46 @@ body.theme-night .canvas-top-bar {
   </div>
 </div>
 
-<!-- Profile Manager Modal -->
+<!-- Profile Manager Modal with Avatar Upload & Cropping Tool -->
 <div class="modal-backdrop" id="profile-manager-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <span class="modal-title">成員檔案管理 ‧ PROFILES MANAGER</span>
+      <span class="modal-title">成員檔案與頭像管理 ‧ PROFILES & AVATARS</span>
       <button class="modal-close-btn" onclick="closeProfileManagerModal()">關閉 X</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">新增/編輯成員檔案</label>
+        <label class="form-label">新增 / 編輯成員檔案名稱</label>
         <input type="text" class="form-input" id="manager-profile-name" placeholder="成員名稱 (例如: 爸爸, 媽媽, 兒子)"/>
-        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
-          <input type="file" id="managerProfileAvatarInput" accept="image/*" style="display:none;" onchange="handleManagerAvatarUpload(event)"/>
-          <button type="button" class="widget-btn" onclick="document.getElementById('managerProfileAvatarInput').click()">上傳大頭照</button>
-          <span id="manager-avatar-status" style="font-size:0.8rem; font-weight:900; color:var(--text-muted);">未選擇相片</span>
-        </div>
-        <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存成員檔案</button>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
+        <div class="crop-tool-wrapper">
+          <div class="crop-preview-container" id="cropContainer">
+            <canvas id="crop-canvas-elem" width="120" height="120"></canvas>
+          </div>
+          <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
+            <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
+              <input type="range" id="cropScaleRange" min="-80" max="80" step="1" value="0" style="width: 90px;" oninput="updateCropTransform()"/>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
+              <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
+            </div>
+            <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
+        </div>
+        <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存此成員檔案與頭像</button>
+      </div>
+
       <div class="form-group" style="margin-top:10px;">
         <label class="form-label">現有成員清單</label>
-        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;"></div>
+        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
       </div>
     </div>
   </div>
@@ -1190,7 +1187,7 @@ let isAllCollapsed = false;
 let charsPerLine = 8;
 let currentSaveSlot = '1';
 
-// Crop Tool Internal Variables
+// Crop Tool Internal Variables (Used in Profile Manager)
 let cropImageObj = null;
 let cropImgX = 0;
 let cropImgY = 0;
@@ -1199,7 +1196,6 @@ let cropRotate = 0;
 let isDraggingCrop = false;
 let dragCropStartX = 0;
 let dragCropStartY = 0;
-let currentEditingAvatarUrl = '';
 let managerTempAvatarUrl = '';
 
 function loadWidgetsFromStorage() {
@@ -1294,33 +1290,18 @@ function onProfileDropdownChange(type) {
     const input = document.getElementById('note-author-input');
     if (sel && input) {
       input.value = sel.value;
-      const found = globalProfiles.find(p => p.name === sel.value);
-      if (found && found.avatarUrl) {
-        currentEditingAvatarUrl = found.avatarUrl;
-        loadCropImageFromUrl(currentEditingAvatarUrl);
-      }
     }
   }
 }
 
 function openProfileManagerModal() {
   renderProfileListInManager();
+  resetCropDefaults();
   document.getElementById('profile-manager-modal').classList.add('active');
 }
 
 function closeProfileManagerModal() {
   document.getElementById('profile-manager-modal').classList.remove('active');
-}
-
-function handleManagerAvatarUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    managerTempAvatarUrl = evt.target.result;
-    document.getElementById('manager-avatar-status').textContent = '已選擇相片';
-  };
-  reader.readAsDataURL(file);
 }
 
 function saveProfileItem() {
@@ -1330,22 +1311,26 @@ function saveProfileItem() {
     showToast('請輸入成員名稱');
     return;
   }
+  const avatarData = getCroppedAvatarDataURL();
   const existing = globalProfiles.find(p => p.name === name);
+  
   if (existing) {
-    existing.avatarUrl = managerTempAvatarUrl || existing.avatarUrl;
+    if (avatarData) existing.avatarUrl = avatarData;
   } else {
-    globalProfiles.push({ name, avatarUrl: managerTempAvatarUrl || '' });
+    globalProfiles.push({ name, avatarUrl: avatarData || '' });
   }
+
   try {
     localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
   } catch(e) {}
 
   nameInput.value = '';
   managerTempAvatarUrl = '';
-  document.getElementById('manager-avatar-status').textContent = '未選擇相片';
+  resetCropDefaults();
   updateProfileDropdownsUI();
   renderProfileListInManager();
-  showToast('成員檔案已儲存');
+  renderAllWidgets();
+  showToast('成員檔案與頭像已儲存');
 }
 
 function renderProfileListInManager() {
@@ -1360,10 +1345,25 @@ function renderProfileListInManager() {
         <div class="author-avatar">${p.avatarUrl ? `<img src="${p.avatarUrl}"/>` : p.name.charAt(0)}</div>
         <span style="font-weight:900; font-size:0.9rem;">${escapeHTML(p.name)}</span>
       </div>
-      <button class="widget-btn" style="color:var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
+      <div style="display:flex; gap:4px;">
+        <button class="widget-btn" onclick="loadProfileIntoManagerForEdit('${escapeHTML(p.name)}')">編輯</button>
+        <button class="widget-btn" style="color:var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
+      </div>
     `;
     container.appendChild(row);
   });
+}
+
+function loadProfileIntoManagerForEdit(name) {
+  const found = globalProfiles.find(p => p.name === name);
+  if (!found) return;
+  document.getElementById('manager-profile-name').value = found.name;
+  if (found.avatarUrl) {
+    loadCropImageFromUrl(found.avatarUrl);
+  } else {
+    resetCropDefaults();
+  }
+  showToast(`已載入 ${name} 的資料供編輯頭像`);
 }
 
 function deleteProfileItem(name) {
@@ -1377,6 +1377,7 @@ function deleteProfileItem(name) {
   } catch(e) {}
   updateProfileDropdownsUI();
   renderProfileListInManager();
+  renderAllWidgets();
   showToast('成員檔案已刪除');
 }
 
@@ -1705,11 +1706,13 @@ function createWidgetDOM(w) {
   const authorName = w.author || '家人';
   const notesForName = w.notesFor || '家人';
 
+  // Automatically pull the avatar from globalProfiles associated with the author name
   let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
   const authorProfile = globalProfiles.find(p => p.name === authorName);
-  const activeAvatar = (authorProfile && authorProfile.avatarUrl) ? authorProfile.avatarUrl : w.avatarUrl;
-  if (activeAvatar && activeAvatar.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(activeAvatar)}" alt="Avatar"/></div>`;
+  if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Avatar"/></div>`;
+  } else if (w.avatarUrl && w.avatarUrl.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
   }
 
   if (w.type === 'todo') {
@@ -1922,14 +1925,6 @@ function openAddNoteModal() {
   document.getElementById('note-for-input').value = globalProfileNotesFor;
   document.getElementById('note-author-input').value = globalProfileNotesFrom;
 
-  const authorProf = globalProfiles.find(p => p.name === globalProfileNotesFrom);
-  currentEditingAvatarUrl = (authorProf && authorProf.avatarUrl) ? authorProf.avatarUrl : '';
-  if (currentEditingAvatarUrl) {
-    loadCropImageFromUrl(currentEditingAvatarUrl);
-  } else {
-    resetCropDefaults();
-  }
-
   const rangeInput = document.getElementById('card-chars-range');
   if (rangeInput) rangeInput.value = charsPerLine;
   const charsValEl = document.getElementById('card-chars-val');
@@ -1961,18 +1956,6 @@ function openEditNoteModal(id) {
   document.getElementById('note-for-input').value = w.notesFor || globalProfileNotesFor;
   document.getElementById('note-author-input').value = w.author || globalProfileNotesFrom;
 
-  currentEditingAvatarUrl = w.avatarUrl || '';
-  if (!currentEditingAvatarUrl && w.author) {
-    const foundP = globalProfiles.find(p => p.name === w.author);
-    if (foundP) currentEditingAvatarUrl = foundP.avatarUrl || '';
-  }
-
-  if (currentEditingAvatarUrl) {
-    loadCropImageFromUrl(currentEditingAvatarUrl);
-  } else {
-    resetCropDefaults();
-  }
-
   const cardChars = w.charsPerLine || charsPerLine;
   const rangeInput = document.getElementById('card-chars-range');
   if (rangeInput) rangeInput.value = cardChars;
@@ -1998,9 +1981,8 @@ function openEditNoteModal(id) {
 
 function closeNoteModal() {
   document.getElementById('note-modal').classList.remove('active');
-  // Ensure we return to canvas and check top row if needed
-  const canvas = document.getElementById('main-canvas');
-  if (canvas) canvas.scrollTop = 0;
+  // Ensure we keep the canvas visible correctly without top row obstruction
+  window.scrollTo(0, 0);
 }
 
 function selectTypeOption(btn, type) {
@@ -2061,7 +2043,7 @@ function updateModalLivePreview() {
   }
 }
 
-// Crop & Image Handling with zoom range -80 to +80
+// Crop & Image Handling functions for Profile Manager
 function resetCropDefaults() {
   cropImageObj = null;
   cropImgX = 0;
@@ -2073,6 +2055,10 @@ function resetCropDefaults() {
   if (scaleRange) scaleRange.value = 0;
   if (rotRange) rotRange.value = 0;
   drawCropCanvas();
+}
+
+function resetCropTransforms() {
+  resetCropDefaults();
 }
 
 function loadCropImageFromUrl(url) {
@@ -2106,7 +2092,6 @@ function updateCropTransform() {
   const rotRange = document.getElementById('cropRotateRange');
   if (scaleRange) {
     const val = parseInt(scaleRange.value, 10) || 0;
-    // Map -80 to +80 range to scale factor e.g., 0.2 to 3.0 (0 value = 1.0 scale)
     cropScale = 1 + (val / 40);
     cropScale = Math.max(0.2, Math.min(3.5, cropScale));
   }
@@ -2202,8 +2187,6 @@ function saveNoteChanges() {
     return;
   }
 
-  const avatarDataUrl = getCroppedAvatarDataURL();
-
   if (editId) {
     const target = widgetsState.find(w => w.id === editId);
     if (target) {
@@ -2213,7 +2196,6 @@ function saveNoteChanges() {
       target.notesFor = notesFor;
       target.author = author;
       target.authorRole = author.charAt(0) || '家';
-      if (avatarDataUrl) target.avatarUrl = avatarDataUrl;
       target.charsPerLine = cardChars;
 
       if (selectedNoteType === 'todo') {
@@ -2230,22 +2212,21 @@ function saveNoteChanges() {
       }
     }
   } else {
-    const newIdx = widgetsState.length;
-    const maxCols = 3;
-    const col = newIdx % maxCols;
-    const row = Math.floor(newIdx / maxCols);
+    // Calculate new card position nicely inside the current visible canvas bounds/pan area
+    const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
+    const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
 
     const newWidget = {
       id: 'widget-custom-' + Date.now(),
       type: selectedNoteType,
-      x: 40 + col * 370,
-      y: 80 + row * 380,
+      x: spawnX,
+      y: spawnY,
       time: time,
       content: content,
       notesFor: notesFor,
       author: author,
       authorRole: author.charAt(0) || '家',
-      avatarUrl: avatarDataUrl,
+      avatarUrl: '',
       acknowledged: false,
       collapsed: false,
       charsPerLine: cardChars
@@ -2291,10 +2272,8 @@ function toggleAck(id) {
 }
 
 function spawnQuickSticker(type) {
-  const newIdx = widgetsState.length;
-  const maxCols = 3;
-  const col = newIdx % maxCols;
-  const row = Math.floor(newIdx / maxCols);
+  const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
+  const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
 
   const presets = {
     water: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
@@ -2308,8 +2287,8 @@ function spawnQuickSticker(type) {
   const newWidget = {
     id: 'widget-sticker-' + Date.now(),
     type: item.type,
-    x: 40 + col * 370,
-    y: 80 + row * 380,
+    x: spawnX,
+    y: spawnY,
     time: item.time,
     content: item.content,
     notesFor: globalProfileNotesFor,
