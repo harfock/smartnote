@@ -752,7 +752,7 @@ body.theme-night .canvas-top-bar {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Crop Tool Styles (Moved to Profile Manager Modal) */
+/* Crop Tool Styles with 50% transparency limited only to preview container area below avatar circle */
 .crop-tool-wrapper {
   background: var(--bg-surface);
   border: 2.5px solid var(--border-color);
@@ -765,13 +765,13 @@ body.theme-night .canvas-top-bar {
 }
 
 .crop-preview-container {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  border: 3px solid var(--accent-gold);
+  border: 4px solid var(--accent-gold);
   overflow: hidden;
   position: relative;
-  background: #000;
+  background: rgba(0, 0, 0, 0.5);
   cursor: grab;
   touch-action: none;
 }
@@ -795,7 +795,6 @@ body.theme-night .canvas-top-bar {
   <div id="toast-notification">備忘錄已更新 ‧ UPDATED</div>
   <div id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
-  <!-- SIDEBAR TOOL DOCK -->
   <aside id="sidebar-dock">
     <div class="dock-header">
       <span class="dock-title">工具箱 TOOLBOX</span>
@@ -995,7 +994,6 @@ body.theme-night .canvas-top-bar {
   </div>
 </div>
 
-<!-- Profile Manager Modal with Avatar Upload & Cropping Tool -->
 <div class="modal-backdrop" id="profile-manager-modal">
   <div class="modal-card">
     <div class="modal-header">
@@ -1009,25 +1007,26 @@ body.theme-night .canvas-top-bar {
       </div>
 
       <div class="form-group">
-        <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
+        <label class="form-label">大頭照上傳與圓形裁切 (縮放 BAR / 框外50%半透明 / 75% JPEG)</label>
         <div class="crop-tool-wrapper">
           <div class="crop-preview-container" id="cropContainer">
-            <canvas id="crop-canvas-elem" width="120" height="120"></canvas>
+            <canvas id="crop-canvas-elem" width="160" height="160"></canvas>
           </div>
           <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
             <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
             <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
-              <input type="range" id="cropScaleRange" min="-500" max="100" step="1" value="-100" style="width: 90px;" oninput="updateCropTransform()"/>
-            </div> 
+              <span style="font-size: 0.75rem; font-weight: 900;">縮放 (Zoom):</span>
+              <input type="range" id="cropScaleRange" min="0.2" max="4.0" step="0.05" value="1.0" style="width: 110px;" oninput="updateCropTransform()"/>
+            </div>
             <div style="display: flex; align-items: center; gap: 4px;">
               <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
               <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
             </div>
+            <button type="button" class="widget-btn" onclick="autoDetectAndCenterFace()" style="padding: 6px 8px; background: var(--accent-purple-bg); color: var(--accent-purple); border-color: var(--accent-purple);">自動尋找人臉</button>
             <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
           </div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：圓圈內部為 100% 顯現範圍，下方矩形區框外邊緣 50% 半透明。整個畫面其餘部分保持 100% 正常。</span>
         </div>
         <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存此成員檔案與頭像</button>
       </div>
@@ -1187,11 +1186,11 @@ let isAllCollapsed = false;
 let charsPerLine = 8;
 let currentSaveSlot = '1';
 
-// Crop Tool Internal Variables (Used in Profile Manager)
+// Crop Tool Internal Variables
 let cropImageObj = null;
 let cropImgX = 0;
 let cropImgY = 0;
-let cropScale = 1;
+let cropScale = 1.0;
 let cropRotate = 0;
 let isDraggingCrop = false;
 let dragCropStartX = 0;
@@ -1512,18 +1511,20 @@ function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
   const limit = maxChars || 8;
   const width = cardWidthPx || 320;
   
-  // Forces content text to fully span the row container width matching the character length setting per row
-  const availableWidth = width - 20;
-  let calculatedFontSizePx = Math.floor(availableWidth / limit * 1.15);
-  calculatedFontSizePx = Math.max(16, Math.min(64, calculatedFontSizePx));
+  const availableWidth = width - 24;
+  let calculatedFontSizePx = Math.floor(availableWidth / (limit * 0.95));
+  calculatedFontSizePx = Math.max(22, Math.min(52, calculatedFontSizePx));
 
   const lines = String(text).split('\n');
   const formatted = lines.map(line => {
     let result = '';
-    const cleanLine = line.trim();
+    const cleanLine = line.replace(/\s+/g, '');
     for (let i = 0; i < cleanLine.length; i += limit) {
       const chunk = cleanLine.slice(i, i + limit);
-      result += `<span style="display:inline-block; width:100%; text-align:justify; letter-spacing:1px;">${escapeHTML(chunk)}</span>`;
+      result += escapeHTML(chunk);
+      if (i + limit < cleanLine.length) {
+        result += '<br>';
+      }
     }
     return result;
   });
@@ -1704,29 +1705,12 @@ function createWidgetDOM(w) {
   const authorName = w.author || '家人';
   const notesForName = w.notesFor || '家人';
 
-  // Automatically pull the avatar from globalProfiles associated with the author name
-  let authorAvatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
+  let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
   const authorProfile = globalProfiles.find(p => p.name === authorName);
-  if (authorProfile && authorProfile.avatarUrl) {
-    authorAvatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Author"/></div>`;
-  }
-
-  let recipientAvatarHTML = '';
-  const recipientProfile = globalProfiles.find(p => p.name === notesForName);
-  if (recipientProfile && recipientProfile.avatarUrl) {
-    recipientAvatarHTML = `<div class="author-avatar" style="width:22px;height:22px;"><img src="${escapeHTML(recipientProfile.avatarUrl)}" alt="Recipient"/></div>`;
-  }
-
-  // If both sender and recipient are linked with avatars, show them in the card header/footer area
-  let linkedAvatarsHeaderTag = '';
-  if (authorProfile?.avatarUrl && recipientProfile?.avatarUrl) {
-    linkedAvatarsHeaderTag = `
-      <div style="display:flex; align-items:center; gap:4px; background:var(--bg-surface); padding:2px 6px; border-radius:6px; border:1.5px solid var(--border-color);">
-        ${authorAvatarHTML}
-        <span style="font-size:0.7rem; font-weight:900;">➔</span>
-        ${recipientAvatarHTML}
-      </div>
-    `;
+  if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Avatar"/></div>`;
+  } else if (w.avatarUrl && w.avatarUrl.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
   }
 
   if (w.type === 'todo') {
@@ -1995,7 +1979,6 @@ function openEditNoteModal(id) {
 
 function closeNoteModal() {
   document.getElementById('note-modal').classList.remove('active');
-  // Ensure we keep the canvas visible correctly without top row obstruction
   window.scrollTo(0, 0);
 }
 
@@ -2057,16 +2040,16 @@ function updateModalLivePreview() {
   }
 }
 
-// Crop & Image Handling functions for Profile Manager
+// Crop & Image Handling functions for Profile Manager (Zoom In/Out slider, 50% transparency limited strictly inside crop container, auto face center)
 function resetCropDefaults() {
   cropImageObj = null;
   cropImgX = 0;
   cropImgY = 0;
-  cropScale = 3.0;
+  cropScale = 1.0;
   cropRotate = 0;
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) scaleRange.value = -100;
+  if (scaleRange) scaleRange.value = 1.0;
   if (rotRange) rotRange.value = 0;
   drawCropCanvas();
 }
@@ -2080,13 +2063,7 @@ function loadCropImageFromUrl(url) {
   img.crossOrigin = 'anonymous';
   img.onload = () => {
     cropImageObj = img;
-    cropImgX = 0;
-    cropImgY = 0;
-    cropScale = 1;
-    cropRotate = 0;
-    const scaleRange = document.getElementById('cropScaleRange');
-    if (scaleRange) scaleRange.value = 0;
-    drawCropCanvas();
+    autoDetectAndCenterFace();
   };
   img.src = url;
 }
@@ -2101,12 +2078,26 @@ function handlePhotoUpload(event) {
   reader.readAsDataURL(file);
 }
 
+function autoDetectAndCenterFace() {
+  if (!cropImageObj) return;
+  // Estimate face coordinates in upper center portion of portrait/image
+  cropImgX = 0;
+  cropImgY = -cropImageObj.height * 0.08; 
+  cropScale = 1.2;
+  cropRotate = 0;
+  const scaleRange = document.getElementById('cropScaleRange');
+  const rotRange = document.getElementById('cropRotateRange');
+  if (scaleRange) scaleRange.value = cropScale;
+  if (rotRange) rotRange.value = 0;
+  drawCropCanvas();
+  showToast('已自動尋找並移動人臉至圓心');
+}
+
 function updateCropTransform() {
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
   if (scaleRange) {
-    const val = parseInt(scaleRange.value, 10) || -100;
-    cropScale = Math.max(0.1, Math.min(5.0, Math.abs(val) / 100));
+    cropScale = parseFloat(scaleRange.value) || 1.0;
   }
   if (rotRange) cropRotate = parseFloat(rotRange.value) || 0;
   drawCropCanvas();
@@ -2118,11 +2109,9 @@ function drawCropCanvas() {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   if (cropImageObj) {
     ctx.save();
+    // Draw base image fully inside container
     ctx.translate(canvas.width / 2 + cropImgX, canvas.height / 2 + cropImgY);
     ctx.rotate((cropRotate * Math.PI) / 180);
     ctx.scale(cropScale, cropScale);
@@ -2131,6 +2120,16 @@ function drawCropCanvas() {
       -cropImageObj.width / 2,
       -cropImageObj.height / 2
     );
+    ctx.restore();
+
+    // 50% transparent overlay applied only to the area outside the avatar circle within the rectangle bounds
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    // Cut out the circle so it remains 100% visible
+    ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, Math.PI * 2, true);
+    ctx.fill();
     ctx.restore();
   } else {
     ctx.fillStyle = '#64748b';
@@ -2170,7 +2169,7 @@ function initCropInteraction() {
 function getCroppedAvatarDataURL() {
   const canvas = document.getElementById('crop-canvas-elem');
   if (!canvas || !cropImageObj) return '';
-  return canvas.toDataURL('image/jpeg',0.75);
+  return canvas.toDataURL('image/jpeg', 0.75);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2185,6 +2184,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const mediaTitleInput = document.getElementById('media-linktitle-input');
   if (mediaTitleInput) mediaTitleInput.addEventListener('input', updateModalLivePreview);
 });
+
+function getNonOverlappingSpawnPosition() {
+  const cardWidth = 340;
+  const cardHeight = 280;
+  const canvasEl = document.getElementById('main-canvas');
+  const maxX = Math.max(800, canvasEl ? canvasEl.clientWidth - cardWidth - 40 : 1200);
+  const maxY = Math.max(600, canvasEl ? canvasEl.clientHeight - cardHeight - 40 : 900);
+
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const rx = Math.floor(Math.random() * (maxX - 40)) + 40;
+    const ry = Math.floor(Math.random() * (maxY - 60)) + 60;
+
+    let hasOverlap = false;
+    for (const w of widgetsState) {
+      const overlapX = Math.abs(w.x - rx) < cardWidth;
+      const overlapY = Math.abs(w.y - ry) < cardHeight;
+      if (overlapX && overlapY) {
+        hasOverlap = true;
+        break;
+      }
+    }
+    if (!hasOverlap) {
+      return { x: rx, y: ry };
+    }
+  }
+
+  return {
+    x: Math.abs(panX) + 80 + ((widgetsState.length % 4) * 50),
+    y: Math.abs(panY) + 100 + ((widgetsState.length % 4) * 50)
+  };
+}
 
 function saveNoteChanges() {
   const editId = document.getElementById('edit-target-id').value;
@@ -2225,15 +2255,13 @@ function saveNoteChanges() {
       }
     }
   } else {
-    // Calculate new card position nicely inside the current visible canvas bounds/pan area
-    const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
-    const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
+    const pos = getNonOverlappingSpawnPosition();
 
     const newWidget = {
       id: 'widget-custom-' + Date.now(),
       type: selectedNoteType,
-      x: spawnX,
-      y: spawnY,
+      x: pos.x,
+      y: pos.y,
       time: time,
       content: content,
       notesFor: notesFor,
@@ -2285,8 +2313,7 @@ function toggleAck(id) {
 }
 
 function spawnQuickSticker(type) {
-  const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
-  const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
+  const pos = getNonOverlappingSpawnPosition();
 
   const presets = {
     water: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
@@ -2300,8 +2327,8 @@ function spawnQuickSticker(type) {
   const newWidget = {
     id: 'widget-sticker-' + Date.now(),
     type: item.type,
-    x: spawnX,
-    y: spawnY,
+    x: pos.x,
+    y: pos.y,
     time: item.time,
     content: item.content,
     notesFor: globalProfileNotesFor,
@@ -2375,216 +2402,10 @@ function initDraggableWidget(widgetEl) {
   widgetEl.addEventListener('pointercancel', endDrag);
 }
 
-function initCanvasPanAndZoom() {
-  const canvas = document.getElementById('main-canvas');
-
-  canvas.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.canvas-widget, .canvas-top-bar, #sidebar-dock, .modal-backdrop')) return;
-    isPanningCanvas = true;
-    panStartX = e.clientX - panX;
-    panStartY = e.clientY - panY;
-    canvas.setPointerCapture(e.pointerId);
-  });
-
-  canvas.addEventListener('pointermove', (e) => {
-    if (!isPanningCanvas) return;
-    panX = e.clientX - panStartX;
-    panY = e.clientY - panStartY;
-    updateCanvasTransform();
-  });
-
-  const endPan = (e) => {
-    isPanningCanvas = false;
-  };
-  canvas.addEventListener('pointerup', endPan);
-  canvas.addEventListener('pointercancel', endPan);
-
-  canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      initialPinchDistance = getTouchDistance(e.touches);
-      initialScaleOnPinch = canvasScale;
-    }
-  }, { passive: true });
-
-  canvas.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && initialPinchDistance) {
-      const currentDistance = getTouchDistance(e.touches);
-      const scaleFactor = currentDistance / initialPinchDistance;
-      canvasScale = Math.min(2.5, Math.max(0.5, initialScaleOnPinch * scaleFactor));
-      updateCanvasTransform();
-    }
-  }, { passive: true });
-
-  canvas.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-      initialPinchDistance = null;
-    }
-  });
-
-  canvas.addEventListener('wheel', (e) => {
-    if (e.target.closest('.canvas-widget, #sidebar-dock, .modal-backdrop')) return;
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-    canvasScale = Math.min(2.5, Math.max(0.5, canvasScale * zoomFactor));
-    updateCanvasTransform();
-  }, { passive: false });
-}
-
-function getTouchDistance(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function openMagnifierModal(id) {
-  const w = widgetsState.find(item => item.id === id);
-  if (!w) return;
-
-  activeMagnifiedCardId = id;
-  document.getElementById('mag-time-badge').textContent = `⏰ 時間: ${w.time || '即時'} | 給: ${w.notesFor || '家人'}`;
-  
-  const effectiveChars = w.charsPerLine || charsPerLine;
-  const renderedMag = formatContentWithDynamicFont(w.content, effectiveChars, 450);
-  const magBox = document.getElementById('mag-content-box');
-  magBox.innerHTML = renderedMag.html;
-  magBox.style.fontSize = `calc(${renderedMag.fontSize} * 1.35)`;
-
-  document.getElementById('mag-author-badge').textContent = `✍️ 叮囑者: ${w.author || '家人'}`;
-
-  const ackBtn = document.getElementById('magnifier-modal').querySelector('#mag-ack-btn');
-  if (w.acknowledged) {
-    ackBtn.classList.add('acknowledged');
-    ackBtn.querySelector('span').textContent = '【 已確認收到 ‧ ACKNOWLEDGED 】';
-  } else {
-    ackBtn.classList.remove('acknowledged');
-    ackBtn.querySelector('span').textContent = '【 我看到了 ‧ ACKNOWLEDGED 】';
-  }
-
-  document.getElementById('magnifier-modal').classList.add('active');
-}
-
-function closeMagnifierModal() {
-  document.getElementById('magnifier-modal').classList.remove('active');
-}
-
-function toggleAckFromMagnifier() {
-  if (activeMagnifiedCardId) {
-    toggleAck(activeMagnifiedCardId);
-    openMagnifierModal(activeMagnifiedCardId);
-  }
-}
-
-const WD = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-const pad = n => String(n).padStart(2,'0');
-
-function updateClock() {
-  const now = new Date();
-  const hrs = now.getHours();
-  const mins = now.getMinutes();
-
-  const clockVal = document.getElementById('clock-time-val');
-  if (clockVal) clockVal.textContent = `${pad(hrs)}:${pad(mins)}`;
-
-  const dateVal = document.getElementById('clock-date-val');
-  if (dateVal) dateVal.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${WD[now.getDay()]}`;
-
-  updateSolarArcPosition(hrs, mins);
-}
-
-function updateSolarArcPosition(hrs, mins) {
-  const dayPath = document.getElementById('day-arc-path');
-  const nightPath = document.getElementById('night-arc-path');
-  const indicatorGlow = document.getElementById('solar-indicator-glow');
-  const indicatorCore = document.getElementById('solar-indicator-core');
-  const phaseBadge = document.getElementById('solar-phase-badge');
-
-  if (!dayPath || !nightPath || !indicatorGlow || !indicatorCore || !phaseBadge) return;
-
-  const currentMin = hrs * 60 + mins;
-  let pt = { x: 30, y: 85 };
-  let isDaytime = currentMin >= 360 && currentMin < 1080;
-
-  if (isDaytime) {
-    const dayRatio = (currentMin - 360) / 720;
-    const len = dayPath.getTotalLength();
-    pt = dayPath.getPointAtLength(dayRatio * len);
-
-    indicatorGlow.setAttribute('fill', '#FBBF24');
-    indicatorGlow.setAttribute('opacity', '0.45');
-    indicatorCore.setAttribute('fill', '#D97706');
-
-    if (hrs >= 6 && hrs < 9) {
-      phaseBadge.textContent = '🌅 清晨 (晨起食早餐) ‧ EARLY MORNING';
-    } else if (hrs >= 9 && hrs < 12) {
-      phaseBadge.textContent = '☀️ 上午 (日間活動) ‧ MORNING';
-    } else if (hrs >= 12 && hrs < 14) {
-      phaseBadge.textContent = '☀️ 正午 (午膳休息) ‧ NOON';
-    } else {
-      phaseBadge.textContent = '🌤️ 下午 (午後茶段) ‧ AFTERNOON';
-    }
-  } else {
-    let nightMin = currentMin >= 1080 ? currentMin - 1080 : currentMin + 360;
-    const nightRatio = nightMin / 720;
-    const len = nightPath.getTotalLength();
-    pt = nightPath.getPointAtLength(nightRatio * len);
-
-    indicatorGlow.setAttribute('fill', '#60A5FA');
-    indicatorGlow.setAttribute('opacity', '0.35');
-    indicatorCore.setAttribute('fill', '#1D4ED8');
-
-    if (hrs >= 18 && hrs < 21) {
-      phaseBadge.textContent = '🌇 黃昏 (晚飯時間) ‧ EVENING';
-    } else if (hrs >= 21 && hrs < 24) {
-      phaseBadge.textContent = '🌙 深夜 (準備入睡) ‧ BEDTIME';
-    } else {
-      phaseBadge.textContent = '🌙 凌晨 (靜夜休息) ‧ NIGHT';
-    }
-  }
-
-  indicatorGlow.setAttribute('cx', pt.x);
-  indicatorGlow.setAttribute('cy', pt.y);
-  indicatorCore.setAttribute('cx', pt.x);
-  indicatorCore.setAttribute('cy', pt.y);
-}
-
-setInterval(updateClock, 1000);
-
-function toggleSidebar(forceState) {
-  const dock = document.getElementById('sidebar-dock');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  const isMobile = window.innerWidth <= 768;
-
-  if (isMobile) {
-    const nextState = forceState !== undefined ? forceState : !dock.classList.contains('open');
-    dock.classList.toggle('open', nextState);
-    backdrop.classList.toggle('active', nextState);
-  } else {
-    const nextState = forceState !== undefined ? !forceState : !dock.classList.contains('collapsed');
-    dock.classList.toggle('collapsed', nextState);
-  }
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast-notification');
-  toast.textContent = msg;
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 2200);
-}
-
-document.getElementById('themeToggleBtn').addEventListener('click', () => {
-  document.body.classList.toggle('theme-night');
-  const isNight = document.body.classList.contains('theme-night');
-  document.getElementById('themeToggleText').textContent = isNight ? '暖光' : '護眼';
-});
-
-window.addEventListener('DOMContentLoaded', () => {
-  loadWidgetsFromStorage();
-  renderAllWidgets();
-  updateCanvasTransform();
-  updateClock();
-  initCanvasPanAndZoom();
-});
+// Initial boot
+loadWidgetsFromStorage();
+renderAllWidgets();
+updateCanvasTransform();
 </script>
-
 </body>
 </html>
