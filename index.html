@@ -12,7 +12,6 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
-
 :root {
   --bg-surface: #FAF8F5;
   --bg-card: #FFFFFF;
@@ -29,29 +28,24 @@
   --accent-red-bg: #FEE2E2;
   --accent-purple: #7C3AED;
   --accent-purple-bg: #F3E8FF;
-  
-  --shadow-elevation: 0 8px 24px -4px rgba(0, 0, 0, 0.16), 0 4px 6px -2px rgba(0, 0, 0, 0.08);
-  --shadow-active: 0 18px 36px -6px rgba(0, 0, 0, 0.3);
-  
+  --shadow-elevation: 0 8px 24px 4px rgba(0,0,0,0.16), 0 4px 6px -2px rgba(0,0,0,0.08);
+  --shadow-active: 0 18px 36px 6px rgba(0, 0, 0, 0.3);
   --font-serif: 'Noto Serif TC', serif;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --widget-width: clamp(280px, 92vw, 360px);
-  
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 }
-
 body.theme-night {
   --bg-surface: #0B0F17;
   --bg-card: #151D2A;
   --text-main: #F8FAFC;
   --text-muted: #CBD5E1;
   --border-color: #475569;
-  --shadow-elevation: 0 8px 24px -4px rgba(0, 0, 0, 0.7);
+  --shadow-elevation: 0 8px 24px 4px rgba(0, 0, 0, 0.7);
 }
-
 html, body {
   width: 100%;
   height: 100%;
@@ -64,11 +58,9 @@ html, body {
   touch-action: pan-x pan-y;
   transition: background-color 0.8s ease;
 }
-
 button, [role="button"] {
   cursor: pointer;
 }
-
 .svg-icon {
   display: inline-block;
   width: 20px;
@@ -82,7 +74,6 @@ button, [role="button"] {
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
-
 #app-root {
   display: flex;
   width: 100vw;
@@ -96,7 +87,6 @@ button, [role="button"] {
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
 }
-
 #sidebar-dock {
   width: 290px;
   max-width: 85vw;
@@ -112,7 +102,6 @@ button, [role="button"] {
   position: relative;
   pointer-events: auto;
 }
-
 @media (max-width: 768px) {
   #sidebar-dock {
     position: fixed;
@@ -126,14 +115,12 @@ button, [role="button"] {
     transform: translateX(0);
   }
 }
-
 @media (min-width: 769px) {
   #sidebar-dock.collapsed {
     transform: translateX(-290px);
     margin-right: -290px;
   }
 }
-
 #sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -144,12 +131,10 @@ button, [role="button"] {
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
-
 #sidebar-backdrop.active {
   opacity: 1;
   pointer-events: auto;
 }
-
 .dock-header {
   padding: 14px 16px;
   background: #0F172A;
@@ -159,13 +144,11 @@ button, [role="button"] {
   justify-content: space-between;
   border-bottom: 3px solid var(--border-color);
 }
-
 .dock-title {
   font-size: 1.05rem;
   font-weight: 900;
   color: #FBBF24;
 }
-
 .dock-toggle-btn {
   background: #334155;
   color: #FFF;
@@ -175,7 +158,6 @@ button, [role="button"] {
   cursor: pointer;
   font-weight: 900;
 }
-
 .dock-body {
   padding: 14px;
   display: flex;
@@ -185,7 +167,6 @@ button, [role="button"] {
   flex: 1;
   -webkit-overflow-scrolling: touch;
 }
-
 .btn-primary-add {
   background: var(--accent-gold);
   color: #FFFFFF;
@@ -202,12 +183,10 @@ button, [role="button"] {
   box-shadow: 0 4px 10px rgba(0,0,0,0.12);
   white-space: nowrap;
 }
-
 .btn-primary-add:active {
   transform: scale(0.97);
   background: #B45309;
 }
-
 .dock-section-title {
   font-size: 0.82rem;
   font-family: var(--font-sans);
@@ -218,13 +197,11 @@ button, [role="button"] {
   border-bottom: 2px solid rgba(0,0,0,0.12);
   padding-bottom: 4px;
 }
-
 .quick-stickers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
-
 .sticker-btn {
   background: var(--bg-surface);
   border: 2.5px solid var(--border-color);
@@ -240,34 +217,27 @@ button, [role="button"] {
   gap: 6px;
   text-align: center;
 }
-
 .sticker-btn:active {
   background: var(--accent-gold-bg);
   border-color: var(--accent-gold);
 }
-
 #main-canvas {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background-image: 
-    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.12) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.12) 1px, transparent 0);
   background-size: 28px 28px;
   width: 100%;
   height: 100%;
   cursor: grab;
   touch-action: none;
 }
-
 #main-canvas:active {
   cursor: grabbing;
 }
-
 body.theme-night #main-canvas {
-  background-image: 
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0);
 }
-
 .canvas-top-bar {
   position: absolute;
   top: 0;
@@ -288,11 +258,9 @@ body.theme-night #main-canvas {
   -webkit-overflow-scrolling: touch;
   pointer-events: auto;
 }
-
 body.theme-night .canvas-top-bar {
   background: rgba(11, 15, 23, 0.88);
 }
-
 .instruction-guide-banner {
   background: #0F172A;
   color: #FBBF24;
@@ -312,7 +280,6 @@ body.theme-night .canvas-top-bar {
   white-space: nowrap;
   pointer-events: none;
 }
-
 #widgets-container {
   position: absolute;
   width: 0;
@@ -323,11 +290,9 @@ body.theme-night .canvas-top-bar {
   transition: transform 0.05s ease-out;
   pointer-events: none;
 }
-
 #widgets-container .canvas-widget {
   pointer-events: auto;
 }
-
 .canvas-widget {
   position: absolute;
   width: var(--widget-width);
@@ -345,17 +310,14 @@ body.theme-night .canvas-top-bar {
   will-change: transform, left, top;
   cursor: grab;
 }
-
 .canvas-widget:active {
   cursor: grabbing;
 }
-
 .canvas-widget.dragging {
   box-shadow: var(--shadow-active);
   border-color: var(--accent-gold);
   z-index: 3000 !important;
 }
-
 .canvas-widget.type-meds { border-left: 10px solid var(--accent-red); }
 .canvas-widget.type-clinic { border-left: 10px solid var(--accent-blue); }
 .canvas-widget.type-note { border-left: 10px solid var(--accent-green); }
@@ -372,7 +334,6 @@ body.theme-night .canvas-top-bar {
   justify-content: space-between;
   cursor: move;
 }
-
 .widget-category-tag {
   font-family: var(--font-sans);
   font-weight: 900;
@@ -382,13 +343,11 @@ body.theme-night .canvas-top-bar {
   color: #FFF;
   white-space: nowrap;
 }
-
 .widget-controls {
   display: flex;
   align-items: center;
   gap: 4px;
 }
-
 .widget-btn {
   background: rgba(0,0,0,0.06);
   border: 1.5px solid var(--border-color);
@@ -402,19 +361,16 @@ body.theme-night .canvas-top-bar {
   align-items: center;
   gap: 3px;
 }
-
 .widget-btn:active {
   background: var(--accent-gold-bg);
   border-color: var(--accent-gold);
 }
-
 .widget-body {
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .widget-time-badge {
   display: inline-flex;
   align-items: center;
@@ -424,7 +380,6 @@ body.theme-night .canvas-top-bar {
   font-size: 0.95rem;
   color: var(--accent-gold);
 }
-
 .widget-content-text {
   font-weight: 900;
   line-height: 1.25;
@@ -433,14 +388,12 @@ body.theme-night .canvas-top-bar {
   white-space: pre-wrap;
   letter-spacing: 0.02em;
 }
-
 .todo-items-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 4px;
 }
-
 .todo-item-row {
   display: flex;
   align-items: center;
@@ -451,12 +404,10 @@ body.theme-night .canvas-top-bar {
   border-radius: 10px;
   cursor: pointer;
 }
-
 .todo-item-row.completed {
   opacity: 0.65;
   background: rgba(0,0,0,0.02);
 }
-
 .todo-checkbox {
   width: 24px;
   height: 24px;
@@ -468,13 +419,11 @@ body.theme-night .canvas-top-bar {
   justify-content: center;
   flex-shrink: 0;
 }
-
 .todo-item-row.completed .todo-checkbox {
   background: var(--accent-green);
   border-color: var(--accent-green);
   color: #FFF;
 }
-
 .todo-item-text {
   font-size: 1rem;
   font-weight: 900;
@@ -482,12 +431,10 @@ body.theme-night .canvas-top-bar {
   word-break: break-all;
   flex: 1;
 }
-
 .todo-item-row.completed .todo-item-text {
   text-decoration: line-through;
   color: var(--text-muted);
 }
-
 .media-thumbnail-container {
   width: 100%;
   height: 140px;
@@ -497,13 +444,11 @@ body.theme-night .canvas-top-bar {
   background: #000;
   position: relative;
 }
-
 .media-thumbnail-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .media-link-badge {
   display: flex;
   align-items: center;
@@ -519,7 +464,6 @@ body.theme-night .canvas-top-bar {
   text-decoration: none;
   cursor: pointer;
 }
-
 .ack-button {
   width: 100%;
   height: 48px;
@@ -536,17 +480,14 @@ body.theme-night .canvas-top-bar {
   gap: 6px;
   transition: all 0.2s ease;
 }
-
 .ack-button.acknowledged {
   background: var(--accent-green);
   border-color: var(--accent-green);
   color: #FFFFFF;
 }
-
 .canvas-widget.collapsed-mode {
   padding: 2px;
 }
-
 .collapsed-pill-box {
   padding: 8px 10px;
   display: flex;
@@ -555,7 +496,6 @@ body.theme-night .canvas-top-bar {
   gap: 8px;
   cursor: pointer;
 }
-
 .collapsed-pill-title {
   font-weight: 900;
   font-size: 1.05rem;
@@ -565,7 +505,6 @@ body.theme-night .canvas-top-bar {
   text-overflow: ellipsis;
   max-width: 180px;
 }
-
 .widget-footer-stamp {
   padding: 8px 12px;
   border-top: 2px dashed rgba(0,0,0,0.12);
@@ -577,13 +516,11 @@ body.theme-night .canvas-top-bar {
   color: var(--text-muted);
   font-weight: 800;
 }
-
 .author-avatar-container {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-
 .author-avatar {
   width: 28px;
   height: 28px;
@@ -599,13 +536,11 @@ body.theme-night .canvas-top-bar {
   overflow: hidden;
   object-fit: cover;
 }
-
 .author-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .clock-display-main {
   font-family: var(--font-sans);
   font-weight: 900;
@@ -616,7 +551,6 @@ body.theme-night .canvas-top-bar {
   margin: 4px 0;
   font-variant-numeric: tabular-nums;
 }
-
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -631,12 +565,10 @@ body.theme-night .canvas-top-bar {
   pointer-events: none;
   transition: opacity 0.25s ease;
 }
-
 .modal-backdrop.active {
   opacity: 1;
   pointer-events: auto;
 }
-
 .modal-card {
   background: var(--bg-card);
   border: 4px solid var(--border-color);
@@ -649,7 +581,6 @@ body.theme-night .canvas-top-bar {
   flex-direction: column;
   pointer-events: auto;
 }
-
 .modal-header {
   padding: 14px;
   background: #0F172A;
@@ -659,13 +590,11 @@ body.theme-night .canvas-top-bar {
   justify-content: space-between;
   border-bottom: 3.5px solid var(--border-color);
 }
-
 .modal-title {
   font-size: 1.05rem;
   font-weight: 900;
   color: #FBBF24;
 }
-
 .modal-close-btn {
   background: #334155;
   color: #FFF;
@@ -675,26 +604,22 @@ body.theme-night .canvas-top-bar {
   cursor: pointer;
   font-weight: 900;
 }
-
 .modal-body {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-
 .form-label {
   font-weight: 900;
   font-size: 0.9rem;
   color: var(--text-main);
 }
-
 .form-input, .form-textarea, .form-select {
   width: 100%;
   padding: 10px 12px;
@@ -707,18 +632,15 @@ body.theme-night .canvas-top-bar {
   font-weight: 800;
   outline: none;
 }
-
 .form-textarea {
   resize: vertical;
   min-height: 80px;
 }
-
 .form-type-selector {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
-
 .type-option-btn {
   border: 2.5px solid var(--border-color);
   border-radius: 8px;
@@ -730,12 +652,10 @@ body.theme-night .canvas-top-bar {
   cursor: pointer;
   text-align: center;
 }
-
 .type-option-btn.selected {
   background: var(--border-color);
   color: #FFF;
 }
-
 #toast-notification {
   position: fixed;
   top: clamp(60px, 10vh, 80px);
@@ -755,12 +675,10 @@ body.theme-night .canvas-top-bar {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
-
 #toast-notification.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 .crop-tool-wrapper {
   background: var(--bg-surface);
   border: 2.5px solid var(--border-color);
@@ -771,7 +689,6 @@ body.theme-night .canvas-top-bar {
   gap: 10px;
   align-items: center;
 }
-
 .crop-preview-container {
   width: 160px;
   height: 160px;
@@ -783,11 +700,9 @@ body.theme-night .canvas-top-bar {
   cursor: grab;
   touch-action: none;
 }
-
 .crop-preview-container:active {
   cursor: grabbing;
 }
-
 #crop-canvas-elem {
   display: block;
   width: 160px;
@@ -796,13 +711,11 @@ body.theme-night .canvas-top-bar {
 </style>
 </head>
 <body>
-
 <div id="app-root">
-
   <div id="ambient-edge-strobe"></div>
-  <div id="toast-notification">備忘錄已更新 ‧ UPDATED</div>
+  <div id="toast-notification">備忘錄已更新 UPDATED</div>
   <div id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
-
+  
   <!-- SIDEBAR TOOL DOCK -->
   <aside id="sidebar-dock">
     <div class="dock-header">
@@ -811,18 +724,17 @@ body.theme-night .canvas-top-bar {
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-
     <div class="dock-body">
       <button class="btn-primary-add" onclick="openAddNoteModal()">
         <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>新增自訂叮囑 ‧ ADD</span>
+        <span>新增自訂叮囑 ADD</span>
       </button>
-
-      <div class="dock-section-title">成員檔案與預設 ‧ PROFILES</div>
+      
+      <div class="dock-section-title">成員檔案與預設 PROFILES</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:0.85rem; font-weight:900;">多重檔案清單</span>
-          <button class="widget-btn" onclick="openProfileManagerModal()" style="background:var(--accent-gold-bg); color:var(--accent-gold); border-color:var(--accent-gold);">管理檔案</button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size:0.85rem; font-weight: 900;">多重檔案清單</span>
+          <button class="widget-btn" onclick="openProfileManagerModal()" style="background: var(--accent-gold-bg); color:var(--accent-gold); border-color: var(--accent-gold);">管理檔案</button>
         </div>
         <div class="form-group" style="gap:4px;">
           <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">預設對象 (Default To):</label>
@@ -834,16 +746,16 @@ body.theme-night .canvas-top-bar {
         </div>
       </div>
 
-      <div class="dock-section-title">分類管理 ‧ CATEGORIES</div>
+      <div class="dock-section-title">分類管理 CATEGORIES</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
         <div style="display: flex; gap: 4px;">
           <input type="text" class="form-input" id="new-category-input" placeholder="新分類名稱" style="padding:6px; font-size:0.85rem;"/>
-          <button class="widget-btn" onclick="addNewCategory()" style="background:var(--accent-green-bg); color:var(--accent-green); border-color:var(--accent-green); white-space:nowrap;">新增</button>
+          <button class="widget-btn" onclick="addNewCategory()" style="background: var(--accent-green-bg); color: var(--accent-green); border-color: var(--accent-green); white-space:nowrap;">新增</button>
         </div>
         <div id="categories-row-container" style="display: flex; flex-wrap: wrap; gap: 4px;"></div>
       </div>
 
-      <div class="dock-section-title">快捷貼紙 ‧ 1-TAP STICKERS</div>
+      <div class="dock-section-title">快捷貼紙 1-TAP STICKERS</div>
       <div class="quick-stickers-grid">
         <button class="sticker-btn" onclick="spawnQuickSticker('water')">
           <svg class="svg-icon" style="color: var(--accent-blue);" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
@@ -854,7 +766,7 @@ body.theme-night .canvas-top-bar {
           <span>返嚟食飯</span>
         </button>
         <button class="sticker-btn" onclick="spawnQuickSticker('clothes')">
-          <svg class="svg-icon" style="color: var(--accent-red);" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+          <svg class="svg-icon" style="color: var(--accent-red);" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
           <span>天冷穿衣</span>
         </button>
         <button class="sticker-btn" onclick="spawnQuickSticker('bp')">
@@ -863,13 +775,13 @@ body.theme-night .canvas-top-bar {
         </button>
       </div>
 
-      <div class="dock-section-title">資料管理與存檔 ‧ SAVE / LOAD</div>
+      <div class="dock-section-title">資料管理與存檔 SAVE / LOAD</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">檔案儲存夾槽位 (Slot):</label>
         <div style="display: flex; gap: 4px;">
-          <button class="type-option-btn selected" id="slot-btn-1" onclick="switchSaveSlot(1)" style="flex: 1; padding: 6px 2px;">槽位1</button>
-          <button class="type-option-btn" id="slot-btn-2" onclick="switchSaveSlot(2)" style="flex: 1; padding: 6px 2px;">槽位2</button>
-          <button class="type-option-btn" id="slot-btn-3" onclick="switchSaveSlot(3)" style="flex: 1; padding: 6px 2px;">槽位3</button>
+          <button class="type-option-btn selected" id="slot-btn-1" onclick="switchSaveSlot(1)" style="flex: 1; padding: 6px 2px;">槽位 1</button>
+          <button class="type-option-btn" id="slot-btn-2" onclick="switchSaveSlot(2)" style="flex: 1; padding: 6px 2px;">槽位 2</button>
+          <button class="type-option-btn" id="slot-btn-3" onclick="switchSaveSlot(3)" style="flex: 1; padding: 6px 2px;">槽位 3</button>
           <button class="type-option-btn" id="slot-btn-auto" onclick="switchSaveSlot('auto')" style="flex: 1; padding: 6px 2px; border-color: var(--accent-purple); color: var(--accent-purple);">自動槽</button>
         </div>
         <div style="display: flex; gap: 6px; margin-top: 4px;">
@@ -878,20 +790,19 @@ body.theme-night .canvas-top-bar {
         </div>
       </div>
 
-      <div class="dock-section-title">排版整理 ‧ ORGANIZE</div>
+      <div class="dock-section-title">排版整理 ORGANIZE</div>
       <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; background: var(--accent-gold-bg); border-color: var(--accent-gold); color: var(--accent-gold);" onclick="resetCardArrangement()">
         <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         <span>自動重設排列卡片 (RESET GRID)</span>
       </button>
-
       <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; margin-top: 4px;" onclick="toggleCollapseAll()">
         <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
-        <span id="collapseAllBtnText">全部折疊 / 展開 (省空間)</span>
+        <span id="collapseAllBtnText">全部折疊/展開(省空間)</span>
       </button>
 
-      <div class="dock-section-title">每行字數 ‧ TEXT PER ROW</div>
+      <div class="dock-section-title">每行字數 TEXT PER ROW</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數 (預設8個字):</label>
+        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數(預設8個字):</label>
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
           <button class="widget-btn" onclick="changeCharsPerLine(-1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">-</button>
           <span id="chars-per-line-val" style="font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); min-width: 36px; text-align: center;">8</span>
@@ -902,63 +813,53 @@ body.theme-night .canvas-top-bar {
   </aside>
 
   <main id="main-canvas">
-
     <div class="canvas-top-bar">
       <button class="btn-primary-add" onclick="toggleSidebar(true)" style="padding: 6px 10px; font-size: 0.82rem; flex-shrink: 0;">
         <svg class="svg-icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         <span>工具箱</span>
       </button>
-
       <div class="instruction-guide-banner">
         <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・成員大頭照請至管理檔案設定</span>
       </div>
-
-      <button id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 ‧ Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); border-radius: 6px; flex-shrink: 0; cursor: pointer; user-select: none; border: none;" role="button">100%</button>
-
+      <button id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); cursor: pointer; user-select: none; border: none; border-radius: 6px; flex-shrink: 0;" role="button">100%</button>
       <button class="btn-primary-add" id="themeToggleBtn" onclick="toggleTheme()" style="padding: 6px 10px; font-size: 0.82rem; background: var(--bg-card); color: var(--text-main); flex-shrink: 0;">
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <span id="themeToggleText">護眼</span>
       </button>
     </div>
-
     <div id="widgets-container"></div>
-
   </main>
 </div>
 
 <div class="modal-backdrop" id="note-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <span class="modal-title" id="modal-title-text">編輯叮囑 ‧ EDIT REMINDER</span>
+      <span class="modal-title" id="modal-title-text">編輯叮囑 EDIT REMINDER</span>
       <button class="modal-close-btn" onclick="closeNoteModal()">關閉 X</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-target-id" value=""/>
-
       <div class="form-group">
         <label class="form-label">選擇分類 CATEGORY</label>
         <div class="form-type-selector" id="modal-type-selector-container"></div>
       </div>
-
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div class="form-group">
           <label class="form-label">筆記給誰 (Notes For)</label>
           <select class="form-select" id="note-for-select" onchange="onProfileDropdownChange('for')"></select>
-          <input type="text" class="form-input" id="note-for-input" placeholder="例如：家人" style="margin-top:4px;"/>
+          <input type="text" class="form-input" id="note-for-input" placeholder="例如:家人" style="margin-top:4px;"/>
         </div>
         <div class="form-group">
           <label class="form-label">誰寫的筆記 (Notes From)</label>
           <select class="form-select" id="note-author-select" onchange="onProfileDropdownChange('from')"></select>
-          <input type="text" class="form-input" id="note-author-input" placeholder="例如：家人" style="margin-top:4px;"/>
+          <input type="text" class="form-input" id="note-author-input" placeholder="例如:家人" style="margin-top:4px;"/>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">主要標題 / 內容 TITLE / CONTENT</label>
-        <textarea class="form-textarea" id="note-content-input" placeholder="例如：記得食降血壓藥1丸與胃藥..."></textarea>
+        <textarea class="form-textarea" id="note-content-input" placeholder="例如:記得食降血壓藥1丸與胃藥..."></textarea>
       </div>
-
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <label class="form-label" style="margin-bottom:0;">個別卡片每行字數微調 (FONT SIZE)</label>
@@ -970,12 +871,10 @@ body.theme-night .canvas-top-bar {
           <button type="button" class="widget-btn" onclick="changeCardSpecificChars(1)" style="padding: 4px 12px;">+</button>
         </div>
       </div>
-
       <div class="form-group" id="group-todo-fields" style="display: none;">
-        <label class="form-label">待辦事項清單 (每行一項)</label>
-        <textarea class="form-textarea" id="todo-items-input" placeholder="飲一杯溫開水&#10;客廳散步15分鐘&#10;量度血壓"></textarea>
+        <label class="form-label">待辦事項清單(每行一項)</label>
+        <textarea class="form-textarea" id="todo-items-input" placeholder="飲一杯溫開水 客廳散步15分鐘 量度血壓"></textarea>
       </div>
-
       <div class="form-group" id="group-media-fields" style="display: none;">
         <label class="form-label">相片網址 IMAGE URL (選填)</label>
         <input type="text" class="form-input" id="media-image-input" placeholder="https://images.unsplash.com/..."/>
@@ -984,20 +883,17 @@ body.theme-night .canvas-top-bar {
         <label class="form-label" style="margin-top: 4px;">網頁標題 LINK TITLE (選填)</label>
         <input type="text" class="form-input" id="media-linktitle-input" placeholder="醫院管理局健康資訊"/>
       </div>
-
       <div class="form-group">
-        <label class="form-label">即時預覽 ‧ LIVE PREVIEW</label>
+        <label class="form-label">即時預覽 LIVE PREVIEW</label>
         <div id="modal-live-preview" style="background: var(--bg-surface); border: 3px solid var(--border-color); border-radius: 10px; padding: 12px; font-weight: 900; line-height: 1.25; word-break: break-all; white-space: pre-wrap; color: var(--text-main);">...</div>
       </div>
-
       <div class="form-group">
         <label class="form-label">提示時間 TIME / PHASE</label>
-        <input type="text" class="form-input" id="note-time-input" placeholder="例如：09:00 AM / 今日事項"/>
+        <input type="text" class="form-input" id="note-time-input" placeholder="例如:09:00 AM / 今日事項"/>
       </div>
-
       <button class="btn-primary-add" style="margin-top: 6px;" onclick="saveNoteChanges()">
         <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>儲存叮囑 ‧ SAVE REMINDER</span>
+        <span>儲存叮囑 SAVE REMINDER</span>
       </button>
     </div>
   </div>
@@ -1007,17 +903,16 @@ body.theme-night .canvas-top-bar {
 <div class="modal-backdrop" id="profile-manager-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <span class="modal-title">成員檔案與頭像管理 ‧ PROFILES & AVATARS</span>
+      <span class="modal-title">成員檔案與頭像管理 PROFILES & AVATARS</span>
       <button class="modal-close-btn" onclick="closeProfileManagerModal()">關閉 X</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">新增 / 編輯成員檔案名稱</label>
-        <input type="text" class="form-input" id="manager-profile-name" placeholder="成員名稱 (例如: 爸爸, 媽媽, 兒子)"/>
+        <label class="form-label">新增/編輯成員檔案名稱</label>
+        <input type="text" class="form-input" id="manager-profile-name" placeholder="成員名稱(例如:爸爸,媽媽,兒子)"/>
       </div>
-
       <div class="form-group">
-        <label class="form-label">大頭照上傳與圓形裁切 (頭像相片)</label>
+        <label class="form-label">大頭照上傳與圓形裁切(頭像相片)</label>
         <div class="crop-tool-wrapper">
           <div class="crop-preview-container" id="cropContainer">
             <canvas id="crop-canvas-elem" width="160" height="160"></canvas>
@@ -1035,14 +930,13 @@ body.theme-night .canvas-top-bar {
             </div>
             <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
           </div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示：可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示:可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
         </div>
         <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存此成員檔案與頭像</button>
       </div>
-
       <div class="form-group" style="margin-top:10px;">
         <label class="form-label">現有成員清單</label>
-        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
+        <div id="profile-list-container" style="display: flex; flex-direction: column; gap:6px; max-height: 220px; overflow-y:auto;"></div>
       </div>
     </div>
   </div>
@@ -1051,7 +945,7 @@ body.theme-night .canvas-top-bar {
 <div class="modal-backdrop" id="magnifier-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <span class="modal-title">超大字閱讀 ‧ MAGNIFIED VIEW</span>
+      <span class="modal-title">超大字閱讀 MAGNIFIED VIEW</span>
       <button class="modal-close-btn" onclick="closeMagnifierModal()">關閉 X</button>
     </div>
     <div class="modal-body" style="gap: 14px;">
@@ -1059,7 +953,7 @@ body.theme-night .canvas-top-bar {
       <div style="font-weight: 900; line-height: 1.25; color: #FBBF24; padding: 16px; background: #0F172A; border-radius: 12px; word-break: break-all; white-space: pre-wrap;" id="mag-content-box">---</div>
       <div style="font-size: 1rem; font-weight: 900; color: var(--text-muted);" id="mag-author-badge">---</div>
       <button class="ack-button" id="mag-ack-btn" style="height: 52px; font-size: 1.1rem;" onclick="toggleAckFromMagnifier()">
-        <span>【 我看到了 ‧ ACKNOWLEDGED 】</span>
+        <span>【 我看到了 ACKNOWLEDGED 】</span>
       </button>
     </div>
   </div>
@@ -1067,9 +961,8 @@ body.theme-night .canvas-top-bar {
 
 <script>
 'use strict';
-
 let canvasScale = 1.0;
-let panX = 100;
+let panX = 10.0;
 let panY = 80;
 let isPanningCanvas = false;
 let activePointers = new Map();
@@ -1126,7 +1019,7 @@ const DEFAULT_WIDGETS = [
     avatarUrl: '',
     tasks: [
       { id: 't1', text: '飲一杯溫開水', done: true },
-      { id: 't2', text: '客廳散步 15 分鐘', done: false },
+      { id: 't2', text: '客廳散步 15分鐘', done: false },
       { id: 't3', text: '量度血壓並記錄', done: false }
     ],
     acknowledged: false,
@@ -1139,7 +1032,7 @@ const DEFAULT_WIDGETS = [
     x: 1150,
     y: 80,
     time: '健康小百科',
-    content: '降血壓飲食原則：每日鹽分攝取小於5克，多食新鮮蔬菜與高鉀水果。',
+    content: '降血壓飲食原則:每日鹽分攝取小於5克,多食新鮮蔬菜與高鉀水果。',
     author: '家人',
     notesFor: '家人',
     authorRole: '家',
@@ -1156,7 +1049,7 @@ const DEFAULT_WIDGETS = [
     type: 'clinic',
     x: 40,
     y: 460,
-    time: '下午 02:30 (眼科)',
+    time: '下午02:30 (眼科)',
     content: '威爾斯醫院眼科覆診',
     author: '家人',
     notesFor: '家人',
@@ -1203,28 +1096,32 @@ let dragCropStartY = 0;
 let cropPointers = new Map();
 let managerTempAvatarUrl = '';
 
+function showToast(msg) {
+  const toast = document.getElementById('toast-notification');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 2200);
+}
+
 function loadWidgetsFromStorage() {
   try {
     const savedProfiles = localStorage.getItem('care_canvas_profiles_list');
-    if (savedProfiles) {
-      globalProfiles = JSON.parse(savedProfiles);
-    }
+    if (savedProfiles) globalProfiles = JSON.parse(savedProfiles);
     const savedCats = localStorage.getItem('care_canvas_categories_list');
-    if (savedCats) {
-      categoriesState = JSON.parse(savedCats);
-    }
-
+    if (savedCats) categoriesState = JSON.parse(savedCats);
     const savedFor = localStorage.getItem('care_canvas_profile_for');
     const savedFrom = localStorage.getItem('care_canvas_profile_from');
     if (savedFor !== null) globalProfileNotesFor = savedFor;
     if (savedFrom !== null) globalProfileNotesFrom = savedFrom;
-
+    
     updateProfileDropdownsUI();
-
     const activeSlot = localStorage.getItem('care_canvas_active_slot') || '1';
     currentSaveSlot = activeSlot;
     updateSlotButtonsUI();
-
+    
     const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
     if (saved) {
       widgetsState = JSON.parse(saved);
@@ -1239,7 +1136,7 @@ function loadWidgetsFromStorage() {
   } catch(e) {
     widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
   }
-
+  
   try {
     const savedChars = localStorage.getItem('care_canvas_chars_per_line');
     if (savedChars) {
@@ -1293,9 +1190,7 @@ function onProfileDropdownChange(type) {
   } else if (type === 'from') {
     const sel = document.getElementById('note-author-select');
     const input = document.getElementById('note-author-input');
-    if (sel && input) {
-      input.value = sel.value;
-    }
+    if (sel && input) input.value = sel.value;
   }
 }
 
@@ -1318,17 +1213,14 @@ function saveProfileItem() {
   }
   const avatarData = getCroppedAvatarDataURL();
   const existing = globalProfiles.find(p => p.name === name);
-  
   if (existing) {
     if (avatarData) existing.avatarUrl = avatarData;
   } else {
     globalProfiles.push({ name, avatarUrl: avatarData || '' });
   }
-
   try {
     localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
   } catch(e) {}
-
   nameInput.value = '';
   managerTempAvatarUrl = '';
   resetCropDefaults();
@@ -1344,15 +1236,15 @@ function renderProfileListInManager() {
   container.innerHTML = '';
   globalProfiles.forEach(p => {
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:var(--bg-surface); border:2px solid var(--border-color); border-radius:8px;';
+    row.style.cssText = 'display: flex; align-items:center; justify-content: space-between; padding: 6px 10px; background: var(--bg-surface); border:2px solid var(--border-color); border-radius: 8px;';
     row.innerHTML = `
-      <div style="display:flex; align-items:center; gap:8px;">
+      <div style="display: flex; align-items:center; gap:8px;">
         <div class="author-avatar">${p.avatarUrl ? `<img src="${p.avatarUrl}"/>` : p.name.charAt(0)}</div>
         <span style="font-weight:900; font-size:0.9rem;">${escapeHTML(p.name)}</span>
       </div>
-      <div style="display:flex; gap:4px;">
+      <div style="display: flex; gap:4px;">
         <button class="widget-btn" onclick="loadProfileIntoManagerForEdit('${escapeHTML(p.name)}')">編輯</button>
-        <button class="widget-btn" style="color:var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
+        <button class="widget-btn" style="color: var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
       </div>
     `;
     container.appendChild(row);
@@ -1408,7 +1300,7 @@ function addNewCategory() {
 function renameCategory(id) {
   const cat = categoriesState.find(c => c.id === id);
   if (!cat) return;
-  const newName = prompt('請輸入新的分類名稱：', cat.name);
+  const newName = prompt('請輸入新的分類名稱:', cat.name);
   if (newName && newName.trim()) {
     cat.name = newName.trim();
     try {
@@ -1424,13 +1316,12 @@ function renderCategoriesRow() {
   const container = document.getElementById('categories-row-container');
   if (container) {
     container.innerHTML = categoriesState.map(c => `
-      <div style="display:flex; align-items:center; gap:4px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:6px; padding:4px 8px;">
+      <div style="display: flex; align-items:center; gap:4px; background: var(--bg-card); border:2px solid var(--border-color); border-radius: 6px; padding: 4px 8px;">
         <span style="font-weight:900; font-size:0.8rem; color:${c.color};">${escapeHTML(c.name)}</span>
-        <button class="widget-btn" style="padding:1px 4px; font-size:0.7rem;" onclick="renameCategory('${c.id}')">改</button>
+        <button class="widget-btn" style="padding: 1px 4px; font-size:0.7rem;" onclick="renameCategory('${c.id}')">改</button>
       </div>
     `).join('');
   }
-
   const modalTypeContainer = document.getElementById('modal-type-selector-container');
   if (modalTypeContainer) {
     const colCount = Math.min(categoriesState.length, 5);
@@ -1460,7 +1351,6 @@ function switchSaveSlot(slot) {
     localStorage.setItem('care_canvas_active_slot', currentSaveSlot);
   } catch(e) {}
   updateSlotButtonsUI();
-
   try {
     const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
     if (saved) {
@@ -1471,9 +1361,8 @@ function switchSaveSlot(slot) {
   } catch(e) {
     widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
   }
-
   renderAllWidgets();
-  showToast(`已切換至 槽位 ${currentSaveSlot}`);
+  showToast(`已切換至槽位 ${currentSaveSlot}`);
 }
 
 function triggerManualSave() {
@@ -1505,26 +1394,25 @@ function changeCharsPerLine(delta) {
 
 function escapeHTML(str) {
   return String(str || '')
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """)
+    .replace(/'/g, "'");
 }
 
 function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
   if (!text) return { html: '', fontSize: '32px' };
   const limit = maxChars || 8;
   const width = cardWidthPx || 320;
-  
   const availableWidth = width - 24;
   let calculatedFontSizePx = Math.floor(availableWidth / (limit * 0.95));
   calculatedFontSizePx = Math.max(22, Math.min(52, calculatedFontSizePx));
-
+  
   const lines = String(text).split('\n');
   const formatted = lines.map(line => {
     let result = '';
-    const cleanLine = line.replace(/\s+/g, '');
+    const cleanLine = line.replace(/\s+/g,'');
     for (let i = 0; i < cleanLine.length; i += limit) {
       const chunk = cleanLine.slice(i, i + limit);
       result += escapeHTML(chunk);
@@ -1534,7 +1422,6 @@ function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
     }
     return result;
   });
-
   return {
     html: formatted.join('<br>'),
     fontSize: `${calculatedFontSizePx}px`
@@ -1564,7 +1451,6 @@ function resetCardArrangement() {
   const colWidth = 370;
   const rowHeight = 380;
   const maxCols = 3;
-
   widgetsState.forEach((w, index) => {
     const col = index % maxCols;
     const row = Math.floor(index / maxCols);
@@ -1572,7 +1458,6 @@ function resetCardArrangement() {
     w.y = startY + row * rowHeight;
     w.collapsed = false;
   });
-
   panX = 20;
   panY = 70;
   canvasScale = 1.0;
@@ -1595,13 +1480,11 @@ function saveWidgetsToStorage() {
 function renderAllWidgets() {
   const container = document.getElementById('widgets-container');
   container.innerHTML = '';
-
   widgetsState.forEach(w => {
     const el = createWidgetDOM(w);
     container.appendChild(el);
     initDraggableWidget(el);
   });
-
   updateClock();
 }
 
@@ -1610,15 +1493,14 @@ function createWidgetDOM(w) {
   card.id = w.id;
   card.style.left = `${w.x}px`;
   card.style.top = `${w.y}px`;
-
-  card.addEventListener('pointerdown', (e) => bringToFront(card));
+  card.addEventListener('pointerdown', () => bringToFront(card));
 
   if (w.type === 'clock') {
     card.className = `canvas-widget type-clock ${w.collapsed ? 'collapsed-mode' : ''}`;
     if (w.collapsed) {
       card.innerHTML = `
         <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
-          <div style="display:flex; align-items:center; gap:6px;">
+          <div style="display: flex; align-items:center; gap:6px;">
             <svg class="svg-icon" style="color:var(--accent-gold);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span class="collapsed-pill-title">智醒大時鐘</span>
           </div>
@@ -1628,40 +1510,35 @@ function createWidgetDOM(w) {
     } else {
       card.innerHTML = `
         <div class="widget-header">
-          <span class="widget-category-tag">CLOCK ‧ 時鐘</span>
+          <span class="widget-category-tag">CLOCK 時鐘</span>
           <div class="widget-controls">
             <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
           </div>
         </div>
         <div class="widget-body">
           <div class="clock-display-main" id="clock-time-val">00:00</div>
-          <div style="text-align:center; font-weight:900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月18日</div>
-
+          <div style="text-align:center; font-weight: 900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月18日</div>
           <div style="margin-top: 10px; padding: 8px 6px; background: rgba(0,0,0,0.03); border: 2.5px solid var(--border-color); border-radius: 12px; text-align: center;">
             <div style="font-size: 0.76rem; font-family: var(--font-sans); font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
-              晝夜太陽軌跡 ‧ SOLAR ARC OF THE DAY
+              晝夜太陽軌跡 SOLAR ARC OF THE DAY
             </div>
             <svg id="solar-arc-svg" viewBox="0 0 300 115" style="width: 100%; max-width: 280px; height: auto; overflow: visible; display: block; margin: 0 auto;">
-              <line x1="15" y1="85" x2="285" y2="85" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"/>
+              <line x1="15" y1="85" x2="285" y2="85" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="4" opacity="0.5"/>
               <path id="day-arc-path" d="M 30 85 A 120 70 0 0 1 270 85" fill="none" stroke="var(--accent-gold)" stroke-width="3.5" stroke-linecap="round"/>
               <path id="night-arc-path" d="M 270 85 A 120 25 0 0 1 30 85" fill="none" stroke="#64748B" stroke-width="2" stroke-dasharray="3 3" opacity="0.6"/>
-              
               <g id="solar-indicator-group">
                 <circle id="solar-indicator-glow" cx="30" cy="85" r="13" fill="#FBBF24" opacity="0.45"/>
                 <circle id="solar-indicator-core" cx="30" cy="85" r="7.5" fill="#D97706" stroke="#FFFFFF" stroke-width="2"/>
               </g>
-
               <circle cx="30" cy="85" r="3.5" fill="var(--text-main)"/>
               <text x="30" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">06:00 晨</text>
-
               <circle cx="150" cy="15" r="3.5" fill="var(--accent-gold)"/>
               <text x="150" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--accent-gold)">12:00 午</text>
-
               <circle cx="270" cy="85" r="3.5" fill="var(--text-main)"/>
               <text x="270" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">18:00 昏</text>
             </svg>
             <div id="solar-phase-badge" style="font-size: 0.9rem; font-weight: 900; color: var(--accent-gold); margin-top: 2px;">
-              早上 ‧ Morning
+              早上 Morning
             </div>
           </div>
         </div>
@@ -1670,34 +1547,33 @@ function createWidgetDOM(w) {
     return card;
   }
 
-  let tagTitle = 'MESSAGE ‧ 叮囑';
+  let tagTitle = 'MESSAGE · 叮囑';
   let categoryColor = 'var(--accent-green)';
   const foundCat = categoriesState.find(c => c.id === w.type);
   if (foundCat) {
-    tagTitle = `${foundCat.name.toUpperCase()} ‧ 分類`;
+    tagTitle = `${foundCat.name.toUpperCase()} 分類`;
     categoryColor = foundCat.color;
   } else if (w.type === 'meds') {
-    tagTitle = 'MEDS ‧ 食藥';
+    tagTitle = 'MEDS · 食藥';
     categoryColor = 'var(--accent-red)';
   } else if (w.type === 'clinic') {
-    tagTitle = 'CLINIC ‧ 覆診';
+    tagTitle = 'CLINIC · 覆診';
     categoryColor = 'var(--accent-blue)';
   } else if (w.type === 'todo') {
-    tagTitle = 'TODO ‧ 待辦';
+    tagTitle = 'TODO · 待辦';
     categoryColor = 'var(--accent-green)';
   } else if (w.type === 'media') {
-    tagTitle = 'MEDIA ‧ 網頁筆記';
+    tagTitle = 'MEDIA · 網頁筆記';
     categoryColor = 'var(--accent-purple)';
   }
 
   card.className = `canvas-widget ${w.collapsed ? 'collapsed-mode' : ''}`;
   card.style.borderLeft = `10px solid ${categoryColor}`;
-
   if (w.collapsed) {
     card.innerHTML = `
       <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span class="collapsed-pill-title">${w.content}</span>
+        <div style="display: flex; align-items:center; gap: 6px;">
+          <span class="collapsed-pill-title">${escapeHTML(w.content)}</span>
         </div>
         <button class="widget-btn">展開</button>
       </div>
@@ -1706,12 +1582,12 @@ function createWidgetDOM(w) {
   }
 
   const ackClass = w.acknowledged ? 'acknowledged' : '';
-  const ackText = w.acknowledged ? '【 已收到 ‧ ACKNOWLEDGED 】' : '【 我看到了 ‧ ACKNOWLEDGED 】';
+  const ackText = w.acknowledged ? '【已收到 ACKNOWLEDGED】' : '【我看到了 ACKNOWLEDGED】';
   const effectiveChars = w.charsPerLine || charsPerLine;
   const authorName = w.author || '家人';
   const notesForName = w.notesFor || '家人';
 
-  let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
+  let avatarHTML = `<div class="author-avatar">${escapeHTML(authorName.charAt(0) || '家')}</div>`;
   const authorProfile = globalProfiles.find(p => p.name === authorName);
   if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
     avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Avatar"/></div>`;
@@ -1723,11 +1599,10 @@ function createWidgetDOM(w) {
     const tasks = w.tasks || [];
     const completedCount = tasks.filter(t => t.done).length;
     const totalCount = tasks.length;
-
     let tasksHTML = tasks.map(t => `
       <div class="todo-item-row ${t.done ? 'completed' : ''}" onclick="toggleTaskDone('${w.id}', '${t.id}')">
         <div class="todo-checkbox">
-          ${t.done ? '<svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+          ${t.done ? '<svg class="svg-icon" style="width: 14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
         </div>
         <span class="todo-item-text">${escapeHTML(t.text)}</span>
       </div>
@@ -1735,22 +1610,22 @@ function createWidgetDOM(w) {
 
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
+        <span class="widget-category-tag" style="background: ${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯待辦">
-            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             <span>編輯</span>
           </button>
           <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
           <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
-            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
       <div class="widget-body">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div class="widget-time-badge">
-            <span>${w.time || '待辦事項'}</span>
+            <span>${escapeHTML(w.time || '待辦事項')}</span>
           </div>
           <span style="font-size: 0.85rem; font-weight: 900; color: var(--accent-green); background: var(--accent-green-bg); padding: 3px 8px; border-radius: 6px;">已完成 ${completedCount}/${totalCount}</span>
         </div>
@@ -1776,46 +1651,43 @@ function createWidgetDOM(w) {
     const hasImg = w.imageUrl && w.imageUrl.trim().length > 0;
     const hasLink = w.linkUrl && w.linkUrl.trim().length > 0;
     const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
-
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
+        <span class="widget-category-tag" style="background: ${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯網頁筆記">
-            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             <span>編輯</span>
           </button>
           <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
-            <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color: var(--accent-red);">
+            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
       <div class="widget-body">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div class="widget-time-badge">
-            <span>${w.time || '網頁筆記'}</span>
+            <span>${escapeHTML(w.time || '網頁筆記')}</span>
           </div>
           <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
-            <svg class="svg-icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <svg class="svg-icon" style="width: 13px; height: 13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
             <span>放大</span>
           </button>
         </div>
         ${hasImg ? `
-          <div class="media-thumbnail-container">
-            <img src="${escapeHTML(w.imageUrl)}" alt="Media photo" onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80'"/>
-          </div>
-        ` : ''}
+        <div class="media-thumbnail-container">
+          <img src="${escapeHTML(w.imageUrl)}" alt="Media photo" onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80'"/>
+        </div>` : ''}
         <div class="widget-content-text" style="font-size: ${renderedContent.fontSize};">${renderedContent.html}</div>
         ${hasLink ? `
-          <a href="${escapeHTML(w.linkUrl)}" target="_blank" rel="noopener noreferrer" class="media-link-badge">
-            <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
-              <svg class="svg-icon" style="color:var(--accent-purple);" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHTML(w.linkTitle || w.linkUrl)}</span>
-            </div>
-            <span style="font-size:0.75rem; white-space:nowrap;">開啟</span>
-          </a>
-        ` : ''}
+        <a href="${escapeHTML(w.linkUrl)}" target="_blank" rel="noopener noreferrer" class="media-link-badge">
+          <div style="display: flex; align-items:center; gap: 6px; overflow:hidden;">
+            <svg class="svg-icon" style="color:var(--accent-purple);" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space: nowrap;">${escapeHTML(w.linkTitle || w.linkUrl)}</span>
+          </div>
+          <span style="font-size:0.75rem; white-space: nowrap;">開啟</span>
+        </a>` : ''}
         <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
           <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
           <span>${ackText}</span>
@@ -1833,28 +1705,27 @@ function createWidgetDOM(w) {
   }
 
   const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
-
   card.innerHTML = `
     <div class="widget-header" style="cursor: inherit;">
       <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
       <div class="widget-controls">
         <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯內容">
-          <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           <span>編輯</span>
         </button>
         <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-        <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
-          <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color: var(--accent-red);">
+          <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
     <div class="widget-body">
       <div style="display: flex; align-items: center; justify-content: space-between;">
         <div class="widget-time-badge">
-          <span>${w.time || '即時提醒'}</span>
+          <span>${escapeHTML(w.time || '即時提醒')}</span>
         </div>
         <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
-          <svg class="svg-icon" style="width:13px; height:13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          <svg class="svg-icon" style="width: 13px; height: 13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
           <span>放大</span>
         </button>
       </div>
@@ -1872,7 +1743,6 @@ function createWidgetDOM(w) {
       </div>
     </div>
   `;
-
   return card;
 }
 
@@ -1912,7 +1782,7 @@ function toggleCollapseAll() {
 
 function openAddNoteModal() {
   document.getElementById('edit-target-id').value = '';
-  document.getElementById('modal-title-text').textContent = '新增叮囑 ‧ ADD REMINDER';
+  document.getElementById('modal-title-text').textContent = '新增叮囑 ADD REMINDER';
   document.getElementById('note-content-input').value = '';
   document.getElementById('todo-items-input').value = '飲一杯溫開水\n散步15分鐘\n量度血壓';
   document.getElementById('media-image-input').value = '';
@@ -1925,15 +1795,14 @@ function openAddNoteModal() {
   const selFrom = document.getElementById('note-author-select');
   if (selTo) selTo.value = globalProfileNotesFor;
   if (selFrom) selFrom.value = globalProfileNotesFrom;
-
   document.getElementById('note-for-input').value = globalProfileNotesFor;
   document.getElementById('note-author-input').value = globalProfileNotesFrom;
-
+  
   const rangeInput = document.getElementById('card-chars-range');
   if (rangeInput) rangeInput.value = charsPerLine;
   const charsValEl = document.getElementById('card-chars-val');
   if (charsValEl) charsValEl.textContent = charsPerLine;
-
+  
   selectedNoteType = categoriesState.length > 0 ? categoriesState[0].id : 'meds';
   renderCategoriesRow();
   updateModalFormFieldsVisibility();
@@ -1945,9 +1814,8 @@ function openAddNoteModal() {
 function openEditNoteModal(id) {
   const w = widgetsState.find(item => item.id === id);
   if (!w) return;
-
   document.getElementById('edit-target-id').value = w.id;
-  document.getElementById('modal-title-text').textContent = '編輯項目 ‧ EDIT CARD';
+  document.getElementById('modal-title-text').textContent = '編輯項目・EDIT CARD';
   document.getElementById('note-content-input').value = w.content || '';
   document.getElementById('note-time-input').value = w.time || '';
   
@@ -1956,16 +1824,15 @@ function openEditNoteModal(id) {
   const selFrom = document.getElementById('note-author-select');
   if (selTo && w.notesFor) selTo.value = w.notesFor;
   if (selFrom && w.author) selFrom.value = w.author;
-
   document.getElementById('note-for-input').value = w.notesFor || globalProfileNotesFor;
   document.getElementById('note-author-input').value = w.author || globalProfileNotesFrom;
-
+  
   const cardChars = w.charsPerLine || charsPerLine;
   const rangeInput = document.getElementById('card-chars-range');
   if (rangeInput) rangeInput.value = cardChars;
   const charsValEl = document.getElementById('card-chars-val');
   if (charsValEl) charsValEl.textContent = cardChars;
-
+  
   if (w.type === 'todo' && w.tasks) {
     document.getElementById('todo-items-input').value = w.tasks.map(t => t.text).join('\n');
   }
@@ -1974,10 +1841,9 @@ function openEditNoteModal(id) {
     document.getElementById('media-url-input').value = w.linkUrl || '';
     document.getElementById('media-linktitle-input').value = w.linkTitle || '';
   }
-
+  
   selectedNoteType = w.type || (categoriesState.length > 0 ? categoriesState[0].id : 'meds');
   renderCategoriesRow();
-
   updateModalFormFieldsVisibility();
   updateModalLivePreview();
   document.getElementById('note-modal').classList.add('active');
@@ -2025,28 +1891,27 @@ function updateModalLivePreview() {
   const inputVal = document.getElementById('note-content-input').value;
   const previewBox = document.getElementById('modal-live-preview');
   if (!previewBox) return;
-
   const rangeInput = document.getElementById('card-chars-range');
   const currentChars = rangeInput ? parseInt(rangeInput.value, 10) || 8 : charsPerLine;
-
+  
   if (selectedNoteType === 'todo') {
     const todoRaw = document.getElementById('todo-items-input');
     const tasks = (todoRaw ? todoRaw.value : '').split('\n').filter(Boolean);
-    previewBox.innerHTML = `<b>【待辦清單預覽】</b><br>${escapeHTML(inputVal || '今日事項')}<br>` + tasks.map(t => `▫️ ${escapeHTML(t)}`).join('<br>');
+    previewBox.innerHTML = `<b>【待辦清單預覽】</b><br>${escapeHTML(inputVal || '今日事項')}<br>` + tasks.map(t => escapeHTML(t)).join('<br>');
     previewBox.style.fontSize = '18px';
   } else if (selectedNoteType === 'media') {
     const urlVal = document.getElementById('media-url-input').value;
     const titleVal = document.getElementById('media-linktitle-input').value;
-    previewBox.innerHTML = `<b>【網頁筆記預覽】</b><br>${escapeHTML(inputVal || '文章內容')}<br>` + (urlVal ? `<span style="color:var(--accent-purple);">🔗 ${escapeHTML(titleVal || urlVal)}</span>` : '');
+    previewBox.innerHTML = `<b>【網頁筆記預覽】</b><br>${escapeHTML(inputVal || '文章內容')}<br>` + (urlVal ? `<span style="color: var(--accent-purple);">${escapeHTML(titleVal || urlVal)}</span>` : '');
     previewBox.style.fontSize = '18px';
   } else {
-    const rendered = formatContentWithDynamicFont(inputVal || '（請於上方輸入內容）', currentChars, 320);
+    const rendered = formatContentWithDynamicFont(inputVal || '(請於上方輸入內容)', currentChars, 320);
     previewBox.innerHTML = rendered.html;
     previewBox.style.fontSize = rendered.fontSize;
   }
 }
 
-// Crop & Image Handling functions with Relative Focal Point Mechanics
+// Circle-Centered Avatar Crop & Image Handling functions
 function resetCropDefaults() {
   cropImageObj = null;
   cropFocalX = 80;
@@ -2108,7 +1973,7 @@ function drawCropCanvas() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  
   if (cropImageObj) {
     ctx.save();
     ctx.translate(cropFocalX, cropFocalY);
@@ -2129,12 +1994,11 @@ function drawCropCanvas() {
     ctx.textBaseline = 'middle';
     ctx.fillText('點擊上傳頭像', canvas.width / 2, canvas.height / 2);
   }
-
+  
   // 50% Translucent Masking Overlay
   ctx.save();
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   ctx.globalCompositeOperation = 'destination-out';
   ctx.beginPath();
   ctx.arc(80, 80, 80, 0, Math.PI * 2);
@@ -2145,15 +2009,13 @@ function drawCropCanvas() {
 function initCropInteraction() {
   const container = document.getElementById('cropContainer');
   if (!container) return;
-
   let initialPinchDist = 0;
   let initialPinchScale = 1;
-
+  
   container.addEventListener('pointerdown', (e) => {
     if (!cropImageObj) return;
     container.setPointerCapture(e.pointerId);
     cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (cropPointers.size === 1) {
       isDraggingCrop = true;
       dragCropStartX = e.clientX;
@@ -2169,7 +2031,6 @@ function initCropInteraction() {
   container.addEventListener('pointermove', (e) => {
     if (!cropPointers.has(e.pointerId)) return;
     cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (cropPointers.size === 1 && isDraggingCrop) {
       const dx = e.clientX - dragCropStartX;
       const dy = e.clientY - dragCropStartY;
@@ -2195,7 +2056,6 @@ function initCropInteraction() {
     if (cropPointers.size < 2) initialPinchDist = 0;
     if (cropPointers.size === 0) isDraggingCrop = false;
   };
-
   container.addEventListener('pointerup', handlePointerEnd);
   container.addEventListener('pointercancel', handlePointerEnd);
 }
@@ -2206,31 +2066,15 @@ function getCroppedAvatarDataURL() {
   outCanvas.width = 160;
   outCanvas.height = 160;
   const ctx = outCanvas.getContext('2d');
-  
   ctx.beginPath();
   ctx.arc(80, 80, 80, 0, Math.PI * 2);
   ctx.clip();
-
   ctx.translate(cropFocalX, cropFocalY);
   ctx.rotate((cropRotate * Math.PI) / 180);
   ctx.scale(cropScale, cropScale);
   ctx.drawImage(cropImageObj, -cropImageObj.width / 2, -cropImageObj.height / 2);
-
   return outCanvas.toDataURL('image/png');
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  initCropInteraction();
-  drawCropCanvas();
-  const textarea = document.getElementById('note-content-input');
-  if (textarea) textarea.addEventListener('input', updateModalLivePreview);
-  const todoTextarea = document.getElementById('todo-items-input');
-  if (todoTextarea) todoTextarea.addEventListener('input', updateModalLivePreview);
-  const mediaUrlInput = document.getElementById('media-url-input');
-  if (mediaUrlInput) mediaUrlInput.addEventListener('input', updateModalLivePreview);
-  const mediaTitleInput = document.getElementById('media-linktitle-input');
-  if (mediaTitleInput) mediaTitleInput.addEventListener('input', updateModalLivePreview);
-});
 
 function saveNoteChanges() {
   const editId = document.getElementById('edit-target-id').value;
@@ -2256,14 +2100,9 @@ function saveNoteChanges() {
       target.author = author;
       target.authorRole = author.charAt(0) || '家';
       target.charsPerLine = cardChars;
-
       if (selectedNoteType === 'todo') {
         const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
-        target.tasks = rawTasks.map((t, idx) => ({
-          id: 't-edit-' + idx,
-          text: t.trim(),
-          done: false
-        }));
+        target.tasks = rawTasks.map((t, idx) => ({ id: 't-edit-' + idx, text: t.trim(), done: false }));
       } else if (selectedNoteType === 'media') {
         target.imageUrl = document.getElementById('media-image-input').value.trim();
         target.linkUrl = document.getElementById('media-url-input').value.trim();
@@ -2273,7 +2112,6 @@ function saveNoteChanges() {
   } else {
     const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
     const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
-
     const newWidget = {
       id: 'widget-custom-' + Date.now(),
       type: selectedNoteType,
@@ -2289,23 +2127,16 @@ function saveNoteChanges() {
       collapsed: false,
       charsPerLine: cardChars
     };
-
     if (selectedNoteType === 'todo') {
       const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
-      newWidget.tasks = rawTasks.map((t, idx) => ({
-        id: 't-new-' + idx,
-        text: t.trim(),
-        done: false
-      }));
+      newWidget.tasks = rawTasks.map((t, idx) => ({ id: 't-new-' + idx, text: t.trim(), done: false }));
     } else if (selectedNoteType === 'media') {
       newWidget.imageUrl = document.getElementById('media-image-input').value.trim();
       newWidget.linkUrl = document.getElementById('media-url-input').value.trim();
       newWidget.linkTitle = document.getElementById('media-linktitle-input').value.trim();
     }
-
     widgetsState.push(newWidget);
   }
-
   saveWidgetsToStorage();
   renderAllWidgets();
   closeNoteModal();
@@ -2332,16 +2163,13 @@ function toggleAck(id) {
 function spawnQuickSticker(type) {
   const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
   const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
-
   const presets = {
     water: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
-    dinner: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30' },
+    dinner: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '今晚返嚟一齊食晚飯', time: '下午06:30' },
     clothes: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '天冷出門記得穿外套', time: '早晚叮囑' },
     bp: { type: categoriesState[0] ? categoriesState[0].id : 'meds', content: '記得量血壓並記錄數據', time: '早晚一次' }
   };
-
   const item = presets[type] || presets.water;
-
   const newWidget = {
     id: 'widget-sticker-' + Date.now(),
     type: item.type,
@@ -2357,7 +2185,6 @@ function spawnQuickSticker(type) {
     collapsed: false,
     charsPerLine: 8
   };
-
   widgetsState.push(newWidget);
   saveWidgetsToStorage();
   renderAllWidgets();
@@ -2371,36 +2198,28 @@ let initialLeft = 0, initialTop = 0;
 function initDraggableWidget(widgetEl) {
   widgetEl.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button, input, textarea, a, select, [role="button"]')) return;
-
     activeWidget = widgetEl;
     bringToFront(activeWidget);
     activeWidget.classList.add('dragging');
-
     startX = e.clientX;
     startY = e.clientY;
-
     const targetState = widgetsState.find(w => w.id === widgetEl.id);
     if (targetState) {
       initialLeft = targetState.x;
       initialTop = targetState.y;
     }
-
     widgetEl.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
 
   widgetEl.addEventListener('pointermove', (e) => {
     if (!activeWidget || activeWidget !== widgetEl) return;
-
     const dx = (e.clientX - startX) / canvasScale;
     const dy = (e.clientY - startY) / canvasScale;
-
     const newLeft = initialLeft + dx;
     const newTop = initialTop + dy;
-
     activeWidget.style.left = `${newLeft}px`;
     activeWidget.style.top = `${newTop}px`;
-
     const targetState = widgetsState.find(w => w.id === widgetEl.id);
     if (targetState) {
       targetState.x = newLeft;
@@ -2415,7 +2234,6 @@ function initDraggableWidget(widgetEl) {
       saveWidgetsToStorage();
     }
   };
-
   widgetEl.addEventListener('pointerup', endDrag);
   widgetEl.addEventListener('pointercancel', endDrag);
 }
@@ -2426,10 +2244,9 @@ function initCanvasPanAndZoom() {
   let initialScaleOnPinch = 1.0;
 
   canvas.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.canvas-widget, .canvas-top-bar, #sidebar-dock, .modal-backdrop')) return;
+    if (e.target.closest('.canvas-widget, #sidebar-dock, .canvas-top-bar, .modal-backdrop')) return;
     canvas.setPointerCapture(e.pointerId);
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (activePointers.size === 1) {
       isPanningCanvas = true;
       startX = e.clientX - panX;
@@ -2445,7 +2262,6 @@ function initCanvasPanAndZoom() {
   canvas.addEventListener('pointermove', (e) => {
     if (!activePointers.has(e.pointerId)) return;
     activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
     if (activePointers.size === 1 && isPanningCanvas) {
       panX = e.clientX - startX;
       panY = e.clientY - startY;
@@ -2468,7 +2284,6 @@ function initCanvasPanAndZoom() {
       isPanningCanvas = false;
     }
   };
-
   canvas.addEventListener('pointerup', endPan);
   canvas.addEventListener('pointercancel', endPan);
 
@@ -2484,27 +2299,23 @@ function initCanvasPanAndZoom() {
 function openMagnifierModal(id) {
   const w = widgetsState.find(item => item.id === id);
   if (!w) return;
-
   activeMagnifiedCardId = id;
-  document.getElementById('mag-time-badge').textContent = `⏰ 時間: ${w.time || '即時'} | 給: ${w.notesFor || '家人'}`;
-  
+  document.getElementById('mag-time-badge').textContent = `時間: ${w.time || '即時'} | 給: ${w.notesFor || '家人'}`;
   const effectiveChars = w.charsPerLine || charsPerLine;
   const renderedMag = formatContentWithDynamicFont(w.content, effectiveChars, 450);
   const magBox = document.getElementById('mag-content-box');
   magBox.innerHTML = renderedMag.html;
   magBox.style.fontSize = `calc(${renderedMag.fontSize} * 1.35)`;
-
-  document.getElementById('mag-author-badge').textContent = `✍️ 叮囑者: ${w.author || '家人'}`;
-
+  document.getElementById('mag-author-badge').textContent = `叮囑者: ${w.author || '家人'}`;
+  
   const ackBtn = document.getElementById('magnifier-modal').querySelector('#mag-ack-btn');
   if (w.acknowledged) {
     ackBtn.classList.add('acknowledged');
-    ackBtn.querySelector('span').textContent = '【 已確認收到 ‧ ACKNOWLEDGED 】';
+    ackBtn.querySelector('span').textContent = '【已確認收到 ACKNOWLEDGED】';
   } else {
     ackBtn.classList.remove('acknowledged');
-    ackBtn.querySelector('span').textContent = '【 我看到了 ‧ ACKNOWLEDGED 】';
+    ackBtn.querySelector('span').textContent = '【我看到了 ACKNOWLEDGED】';
   }
-
   document.getElementById('magnifier-modal').classList.add('active');
 }
 
@@ -2520,19 +2331,16 @@ function toggleAckFromMagnifier() {
 }
 
 const WD = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-const pad = n => String(n).padStart(2,'0');
+const pad = n => String(n).padStart(2, '0');
 
 function updateClock() {
   const now = new Date();
   const hrs = now.getHours();
   const mins = now.getMinutes();
-
   const clockVal = document.getElementById('clock-time-val');
   if (clockVal) clockVal.textContent = `${pad(hrs)}:${pad(mins)}`;
-
   const dateVal = document.getElementById('clock-date-val');
   if (dateVal) dateVal.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${WD[now.getDay()]}`;
-
   updateSolarArcPosition(hrs, mins);
 }
 
@@ -2542,50 +2350,44 @@ function updateSolarArcPosition(hrs, mins) {
   const indicatorGlow = document.getElementById('solar-indicator-glow');
   const indicatorCore = document.getElementById('solar-indicator-core');
   const phaseBadge = document.getElementById('solar-phase-badge');
-
   if (!dayPath || !nightPath || !indicatorGlow || !indicatorCore || !phaseBadge) return;
-
+  
   const currentMin = hrs * 60 + mins;
   let pt = { x: 30, y: 85 };
   let isDaytime = currentMin >= 360 && currentMin < 1080;
-
+  
   if (isDaytime) {
     const dayRatio = (currentMin - 360) / 720;
     const len = dayPath.getTotalLength();
     pt = dayPath.getPointAtLength(dayRatio * len);
-
     indicatorGlow.setAttribute('fill', '#FBBF24');
     indicatorGlow.setAttribute('opacity', '0.45');
     indicatorCore.setAttribute('fill', '#D97706');
-
     if (hrs >= 6 && hrs < 9) {
-      phaseBadge.textContent = '🌅 清晨 (晨起食早餐) ‧ EARLY MORNING';
+      phaseBadge.textContent = '清晨(晨起食早餐) EARLY MORNING';
     } else if (hrs >= 9 && hrs < 12) {
-      phaseBadge.textContent = '☀️ 上午 (日間活動) ‧ MORNING';
+      phaseBadge.textContent = '上午(日間活動) MORNING';
     } else if (hrs >= 12 && hrs < 14) {
-      phaseBadge.textContent = '☀️ 正午 (午膳休息) ‧ NOON';
+      phaseBadge.textContent = '正午(午膳休息) NOON';
     } else {
-      phaseBadge.textContent = '🌤️ 下午 (午後茶段) ‧ AFTERNOON';
+      phaseBadge.textContent = '下午(午後茶段) AFTERNOON';
     }
   } else {
     let nightMin = currentMin >= 1080 ? currentMin - 1080 : currentMin + 360;
     const nightRatio = nightMin / 720;
     const len = nightPath.getTotalLength();
     pt = nightPath.getPointAtLength(nightRatio * len);
-
     indicatorGlow.setAttribute('fill', '#60A5FA');
     indicatorGlow.setAttribute('opacity', '0.35');
     indicatorCore.setAttribute('fill', '#1D4ED8');
-
     if (hrs >= 18 && hrs < 21) {
-      phaseBadge.textContent = '🌇 黃昏 (晚飯時間) ‧ EVENING';
+      phaseBadge.textContent = '黃昏(晚飯時間) EVENING';
     } else if (hrs >= 21 && hrs < 24) {
-      phaseBadge.textContent = '🌙 深夜 (準備入睡) ‧ BEDTIME';
+      phaseBadge.textContent = '深夜(準備入睡) BEDTIME';
     } else {
-      phaseBadge.textContent = '🌙 凌晨 (靜夜休息) ‧ NIGHT';
+      phaseBadge.textContent = '凌晨(靜夜休息) NIGHT';
     }
   }
-
   indicatorGlow.setAttribute('cx', pt.x);
   indicatorGlow.setAttribute('cy', pt.y);
   indicatorCore.setAttribute('cx', pt.x);
@@ -2598,7 +2400,6 @@ function toggleSidebar(forceState) {
   const dock = document.getElementById('sidebar-dock');
   const backdrop = document.getElementById('sidebar-backdrop');
   const isMobile = window.innerWidth <= 768;
-
   if (isMobile) {
     const nextState = forceState !== undefined ? forceState : !dock.classList.contains('open');
     if (nextState) {
@@ -2611,11 +2412,10 @@ function toggleSidebar(forceState) {
   } else {
     const nextState = forceState !== undefined ? !forceState : !dock.classList.contains('collapsed');
     if (nextState) {
-      dock.classList.add('collapsed');
-    } else {
       dock.classList.remove('collapsed');
+    } else {
+      dock.classList.add('collapsed');
     }
-    backdrop.classList.remove('active');
   }
 }
 
@@ -2624,27 +2424,25 @@ function toggleTheme() {
   const isNight = document.body.classList.contains('theme-night');
   const text = document.getElementById('themeToggleText');
   if (text) text.textContent = isNight ? '日標' : '護眼';
-  showToast(isNight ? '已開啟護眼夜間模式' : '已開啟日間明亮模式');
 }
 
-let toastTimer = null;
-function showToast(msg) {
-  const toast = document.getElementById('toast-notification');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add('visible');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.remove('visible');
-  }, 2200);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   loadWidgetsFromStorage();
-  renderAllWidgets();
   initCanvasPanAndZoom();
-  updateCanvasTransform();
+  initCropInteraction();
+  drawCropCanvas();
+  
+  const textarea = document.getElementById('note-content-input');
+  if (textarea) textarea.addEventListener('input', updateModalLivePreview);
+  const todoTextarea = document.getElementById('todo-items-input');
+  if (todoTextarea) todoTextarea.addEventListener('input', updateModalLivePreview);
+  const mediaUrlInput = document.getElementById('media-url-input');
+  if (mediaUrlInput) mediaUrlInput.addEventListener('input', updateModalLivePreview);
+  const mediaTitleInput = document.getElementById('media-linktitle-input');
+  if (mediaTitleInput) mediaTitleInput.addEventListener('input', updateModalLivePreview);
 });
 </script>
 </body>
 </html>
+
+
