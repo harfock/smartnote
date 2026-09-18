@@ -374,13 +374,6 @@ body.theme-night .canvas-top-bar {
   white-space: nowrap;
 }
 
-.type-meds .widget-category-tag { background: var(--accent-red); }
-.type-clinic .widget-category-tag { background: var(--accent-blue); }
-.type-note .widget-category-tag { background: var(--accent-green); }
-.type-clock .widget-category-tag { background: var(--accent-gold); }
-.type-todo .widget-category-tag { background: var(--accent-green); }
-.type-media .widget-category-tag { background: var(--accent-purple); }
-
 .widget-controls {
   display: flex;
   align-items: center;
@@ -692,7 +685,7 @@ body.theme-night .canvas-top-bar {
   color: var(--text-main);
 }
 
-.form-input, .form-textarea {
+.form-input, .form-textarea, .form-select {
   width: 100%;
   padding: 10px 12px;
   border: 3px solid var(--border-color);
@@ -816,16 +809,29 @@ body.theme-night .canvas-top-bar {
         <span>新增自訂叮囑 ‧ ADD</span>
       </button>
 
-      <div class="dock-section-title">成員檔案設定 ‧ PROFILES</div>
+      <div class="dock-section-title">成員檔案與預設 ‧ PROFILES</div>
       <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <div class="form-group" style="gap:4px;">
-          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">給誰的筆記 (Notes For):</label>
-          <input type="text" class="form-input" id="profile-notes-for" value="家人" oninput="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"/>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.85rem; font-weight:900;">多重檔案清單</span>
+          <button class="widget-btn" onclick="openProfileManagerModal()" style="background:var(--accent-gold-bg); color:var(--accent-gold); border-color:var(--accent-gold);">管理檔案</button>
         </div>
         <div class="form-group" style="gap:4px;">
-          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">誰寫的筆記 (Notes From):</label>
-          <input type="text" class="form-input" id="profile-notes-from" value="家人" oninput="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"/>
+          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">預設對象 (Default To):</label>
+          <select class="form-select" id="default-profile-to" onchange="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"></select>
         </div>
+        <div class="form-group" style="gap:4px;">
+          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">預設發起人 (Default From):</label>
+          <select class="form-select" id="default-profile-from" onchange="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"></select>
+        </div>
+      </div>
+
+      <div class="dock-section-title">分類管理 ‧ CATEGORIES</div>
+      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; gap: 4px;">
+          <input type="text" class="form-input" id="new-category-input" placeholder="新分類名稱" style="padding:6px; font-size:0.85rem;"/>
+          <button class="widget-btn" onclick="addNewCategory()" style="background:var(--accent-green-bg); color:var(--accent-green); border-color:var(--accent-green); white-space:nowrap;">新增</button>
+        </div>
+        <div id="categories-row-container" style="display: flex; flex-wrap: wrap; gap: 4px;"></div>
       </div>
 
       <div class="dock-section-title">快捷貼紙 ‧ 1-TAP STICKERS</div>
@@ -923,23 +929,19 @@ body.theme-night .canvas-top-bar {
 
       <div class="form-group">
         <label class="form-label">選擇分類 CATEGORY</label>
-        <div class="form-type-selector" style="grid-template-columns: repeat(5, 1fr);">
-          <button type="button" class="type-option-btn selected" data-type="meds" onclick="selectTypeOption(this, 'meds')">食藥</button>
-          <button type="button" class="type-option-btn" data-type="clinic" onclick="selectTypeOption(this, 'clinic')">覆診</button>
-          <button type="button" class="type-option-btn" data-type="note" onclick="selectTypeOption(this, 'note')">家書</button>
-          <button type="button" class="type-option-btn" data-type="todo" onclick="selectTypeOption(this, 'todo')">待辦</button>
-          <button type="button" class="type-option-btn" data-type="media" onclick="selectTypeOption(this, 'media')">網頁</button>
-        </div>
+        <div class="form-type-selector" id="modal-type-selector-container"></div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
         <div class="form-group">
           <label class="form-label">筆記給誰 (Notes For)</label>
-          <input type="text" class="form-input" id="note-for-input" placeholder="例如：家人"/>
+          <select class="form-select" id="note-for-select" onchange="onProfileDropdownChange('for')"></select>
+          <input type="text" class="form-input" id="note-for-input" placeholder="例如：家人" style="margin-top:4px;"/>
         </div>
         <div class="form-group">
           <label class="form-label">誰寫的筆記 (Notes From)</label>
-          <input type="text" class="form-input" id="note-author-input" placeholder="例如：家人"/>
+          <select class="form-select" id="note-author-select" onchange="onProfileDropdownChange('from')"></select>
+          <input type="text" class="form-input" id="note-author-input" placeholder="例如：家人" style="margin-top:4px;"/>
         </div>
       </div>
 
@@ -954,7 +956,7 @@ body.theme-night .canvas-top-bar {
             <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
             <div style="display: flex; align-items: center; gap: 4px;">
               <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
-              <input type="range" id="cropScaleRange" min="0.5" max="3" step="0.05" value="1" style="width: 80px;" oninput="updateCropTransform()"/>
+              <input type="range" id="cropScaleRange" min="-80" max="80" step="1" value="0" style="width: 90px;" oninput="updateCropTransform()"/>
             </div>
             <div style="display: flex; align-items: center; gap: 4px;">
               <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
@@ -1015,6 +1017,32 @@ body.theme-night .canvas-top-bar {
   </div>
 </div>
 
+<!-- Profile Manager Modal -->
+<div class="modal-backdrop" id="profile-manager-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-title">成員檔案管理 ‧ PROFILES MANAGER</span>
+      <button class="modal-close-btn" onclick="closeProfileManagerModal()">關閉 X</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">新增/編輯成員檔案</label>
+        <input type="text" class="form-input" id="manager-profile-name" placeholder="成員名稱 (例如: 爸爸, 媽媽, 兒子)"/>
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+          <input type="file" id="managerProfileAvatarInput" accept="image/*" style="display:none;" onchange="handleManagerAvatarUpload(event)"/>
+          <button type="button" class="widget-btn" onclick="document.getElementById('managerProfileAvatarInput').click()">上傳大頭照</button>
+          <span id="manager-avatar-status" style="font-size:0.8rem; font-weight:900; color:var(--text-muted);">未選擇相片</span>
+        </div>
+        <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存成員檔案</button>
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label class="form-label">現有成員清單</label>
+        <div id="profile-list-container" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="magnifier-modal">
   <div class="modal-card">
     <div class="modal-header">
@@ -1045,8 +1073,21 @@ let panStartY = 0;
 let initialPinchDistance = null;
 let initialScaleOnPinch = 1.0;
 
+let globalProfiles = [
+  { name: '家人', avatarUrl: '' },
+  { name: '爸爸', avatarUrl: '' },
+  { name: '媽媽', avatarUrl: '' }
+];
 let globalProfileNotesFor = '家人';
 let globalProfileNotesFrom = '家人';
+
+let categoriesState = [
+  { id: 'meds', name: '食藥', color: 'var(--accent-red)' },
+  { id: 'clinic', name: '覆診', color: 'var(--accent-blue)' },
+  { id: 'note', name: '家書', color: 'var(--accent-green)' },
+  { id: 'todo', name: '待辦', color: 'var(--accent-green)' },
+  { id: 'media', name: '網頁', color: 'var(--accent-purple)' }
+];
 
 const DEFAULT_WIDGETS = [
   {
@@ -1159,18 +1200,25 @@ let isDraggingCrop = false;
 let dragCropStartX = 0;
 let dragCropStartY = 0;
 let currentEditingAvatarUrl = '';
+let managerTempAvatarUrl = '';
 
 function loadWidgetsFromStorage() {
   try {
+    const savedProfiles = localStorage.getItem('care_canvas_profiles_list');
+    if (savedProfiles) {
+      globalProfiles = JSON.parse(savedProfiles);
+    }
+    const savedCats = localStorage.getItem('care_canvas_categories_list');
+    if (savedCats) {
+      categoriesState = JSON.parse(savedCats);
+    }
+
     const savedFor = localStorage.getItem('care_canvas_profile_for');
     const savedFrom = localStorage.getItem('care_canvas_profile_from');
     if (savedFor !== null) globalProfileNotesFor = savedFor;
     if (savedFrom !== null) globalProfileNotesFrom = savedFrom;
 
-    const forInput = document.getElementById('profile-notes-for');
-    const fromInput = document.getElementById('profile-notes-from');
-    if (forInput) forInput.value = globalProfileNotesFor;
-    if (fromInput) fromInput.value = globalProfileNotesFrom;
+    updateProfileDropdownsUI();
 
     const activeSlot = localStorage.getItem('care_canvas_active_slot') || '1';
     currentSaveSlot = activeSlot;
@@ -1200,17 +1248,191 @@ function loadWidgetsFromStorage() {
     charsPerLine = 8;
   }
   updateCharsPerLineDisplay();
+  renderCategoriesRow();
 }
 
 function saveGlobalProfiles() {
-  const forInput = document.getElementById('profile-notes-for');
-  const fromInput = document.getElementById('profile-notes-from');
-  if (forInput) globalProfileNotesFor = forInput.value.trim() || '家人';
-  if (fromInput) globalProfileNotesFrom = fromInput.value.trim() || '家人';
+  const selTo = document.getElementById('default-profile-to');
+  const selFrom = document.getElementById('default-profile-from');
+  if (selTo) globalProfileNotesFor = selTo.value;
+  if (selFrom) globalProfileNotesFrom = selFrom.value;
   try {
     localStorage.setItem('care_canvas_profile_for', globalProfileNotesFor);
     localStorage.setItem('care_canvas_profile_from', globalProfileNotesFrom);
   } catch(e) {}
+}
+
+function updateProfileDropdownsUI() {
+  ['default-profile-to', 'default-profile-from', 'note-for-select', 'note-author-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const currentVal = el.value;
+    el.innerHTML = '';
+    globalProfiles.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      el.appendChild(opt);
+    });
+    if (id === 'default-profile-to' && globalProfiles.some(p => p.name === globalProfileNotesFor)) {
+      el.value = globalProfileNotesFor;
+    } else if (id === 'default-profile-from' && globalProfiles.some(p => p.name === globalProfileNotesFrom)) {
+      el.value = globalProfileNotesFrom;
+    } else if (currentVal && globalProfiles.some(p => p.name === currentVal)) {
+      el.value = currentVal;
+    }
+  });
+}
+
+function onProfileDropdownChange(type) {
+  if (type === 'for') {
+    const sel = document.getElementById('note-for-select');
+    const input = document.getElementById('note-for-input');
+    if (sel && input) input.value = sel.value;
+  } else if (type === 'from') {
+    const sel = document.getElementById('note-author-select');
+    const input = document.getElementById('note-author-input');
+    if (sel && input) {
+      input.value = sel.value;
+      const found = globalProfiles.find(p => p.name === sel.value);
+      if (found && found.avatarUrl) {
+        currentEditingAvatarUrl = found.avatarUrl;
+        loadCropImageFromUrl(currentEditingAvatarUrl);
+      }
+    }
+  }
+}
+
+function openProfileManagerModal() {
+  renderProfileListInManager();
+  document.getElementById('profile-manager-modal').classList.add('active');
+}
+
+function closeProfileManagerModal() {
+  document.getElementById('profile-manager-modal').classList.remove('active');
+}
+
+function handleManagerAvatarUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    managerTempAvatarUrl = evt.target.result;
+    document.getElementById('manager-avatar-status').textContent = '已選擇相片';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveProfileItem() {
+  const nameInput = document.getElementById('manager-profile-name');
+  const name = nameInput.value.trim();
+  if (!name) {
+    showToast('請輸入成員名稱');
+    return;
+  }
+  const existing = globalProfiles.find(p => p.name === name);
+  if (existing) {
+    existing.avatarUrl = managerTempAvatarUrl || existing.avatarUrl;
+  } else {
+    globalProfiles.push({ name, avatarUrl: managerTempAvatarUrl || '' });
+  }
+  try {
+    localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
+  } catch(e) {}
+
+  nameInput.value = '';
+  managerTempAvatarUrl = '';
+  document.getElementById('manager-avatar-status').textContent = '未選擇相片';
+  updateProfileDropdownsUI();
+  renderProfileListInManager();
+  showToast('成員檔案已儲存');
+}
+
+function renderProfileListInManager() {
+  const container = document.getElementById('profile-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+  globalProfiles.forEach(p => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:var(--bg-surface); border:2px solid var(--border-color); border-radius:8px;';
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="author-avatar">${p.avatarUrl ? `<img src="${p.avatarUrl}"/>` : p.name.charAt(0)}</div>
+        <span style="font-weight:900; font-size:0.9rem;">${escapeHTML(p.name)}</span>
+      </div>
+      <button class="widget-btn" style="color:var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function deleteProfileItem(name) {
+  if (globalProfiles.length <= 1) {
+    showToast('至少需保留一個成員檔案');
+    return;
+  }
+  globalProfiles = globalProfiles.filter(p => p.name !== name);
+  try {
+    localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
+  } catch(e) {}
+  updateProfileDropdownsUI();
+  renderProfileListInManager();
+  showToast('成員檔案已刪除');
+}
+
+function addNewCategory() {
+  const input = document.getElementById('new-category-input');
+  const name = input.value.trim();
+  if (!name) {
+    showToast('請輸入分類名稱');
+    return;
+  }
+  const id = 'cat_' + Date.now();
+  const colors = ['var(--accent-red)', 'var(--accent-blue)', 'var(--accent-green)', 'var(--accent-gold)', 'var(--accent-purple)'];
+  const color = colors[categoriesState.length % colors.length];
+  categoriesState.push({ id, name, color });
+  try {
+    localStorage.setItem('care_canvas_categories_list', JSON.stringify(categoriesState));
+  } catch(e) {}
+  input.value = '';
+  renderCategoriesRow();
+  showToast('已新增分類');
+}
+
+function renameCategory(id) {
+  const cat = categoriesState.find(c => c.id === id);
+  if (!cat) return;
+  const newName = prompt('請輸入新的分類名稱：', cat.name);
+  if (newName && newName.trim()) {
+    cat.name = newName.trim();
+    try {
+      localStorage.setItem('care_canvas_categories_list', JSON.stringify(categoriesState));
+    } catch(e) {}
+    renderCategoriesRow();
+    renderAllWidgets();
+    showToast('分類已重新命名');
+  }
+}
+
+function renderCategoriesRow() {
+  const container = document.getElementById('categories-row-container');
+  if (container) {
+    container.innerHTML = categoriesState.map(c => `
+      <div style="display:flex; align-items:center; gap:4px; background:var(--bg-card); border:2px solid var(--border-color); border-radius:6px; padding:4px 8px;">
+        <span style="font-weight:900; font-size:0.8rem; color:${c.color};">${escapeHTML(c.name)}</span>
+        <button class="widget-btn" style="padding:1px 4px; font-size:0.7rem;" onclick="renameCategory('${c.id}')">改</button>
+      </div>
+    `).join('');
+  }
+
+  const modalTypeContainer = document.getElementById('modal-type-selector-container');
+  if (modalTypeContainer) {
+    const colCount = Math.min(categoriesState.length, 5);
+    modalTypeContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+    modalTypeContainer.innerHTML = categoriesState.map(c => `
+      <button type="button" class="type-option-btn ${selectedNoteType === c.id ? 'selected' : ''}" data-type="${c.id}" onclick="selectTypeOption(this, '${c.id}')">${escapeHTML(c.name)}</button>
+    `).join('');
+  }
 }
 
 function updateSlotButtonsUI() {
@@ -1443,34 +1665,32 @@ function createWidgetDOM(w) {
   }
 
   let tagTitle = 'MESSAGE ‧ 叮囑';
-  let categoryClass = 'type-note';
-  let badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
-
-  if (w.type === 'meds') {
-    categoryClass = 'type-meds';
+  let categoryColor = 'var(--accent-green)';
+  const foundCat = categoriesState.find(c => c.id === w.type);
+  if (foundCat) {
+    tagTitle = `${foundCat.name.toUpperCase()} ‧ 分類`;
+    categoryColor = foundCat.color;
+  } else if (w.type === 'meds') {
     tagTitle = 'MEDS ‧ 食藥';
-    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    categoryColor = 'var(--accent-red)';
   } else if (w.type === 'clinic') {
-    categoryClass = 'type-clinic';
     tagTitle = 'CLINIC ‧ 覆診';
-    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+    categoryColor = 'var(--accent-blue)';
   } else if (w.type === 'todo') {
-    categoryClass = 'type-todo';
     tagTitle = 'TODO ‧ 待辦';
-    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
+    categoryColor = 'var(--accent-green)';
   } else if (w.type === 'media') {
-    categoryClass = 'type-media';
     tagTitle = 'MEDIA ‧ 網頁筆記';
-    badgeIcon = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+    categoryColor = 'var(--accent-purple)';
   }
 
-  card.className = `canvas-widget ${categoryClass} ${w.collapsed ? 'collapsed-mode' : ''}`;
+  card.className = `canvas-widget ${w.collapsed ? 'collapsed-mode' : ''}`;
+  card.style.borderLeft = `10px solid ${categoryColor}`;
 
   if (w.collapsed) {
     card.innerHTML = `
       <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
         <div style="display:flex; align-items:center; gap:6px;">
-          ${badgeIcon}
           <span class="collapsed-pill-title">${w.content}</span>
         </div>
         <button class="widget-btn">展開</button>
@@ -1486,8 +1706,10 @@ function createWidgetDOM(w) {
   const notesForName = w.notesFor || '家人';
 
   let avatarHTML = `<div class="author-avatar">${authorName.charAt(0) || '家'}</div>`;
-  if (w.avatarUrl && w.avatarUrl.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
+  const authorProfile = globalProfiles.find(p => p.name === authorName);
+  const activeAvatar = (authorProfile && authorProfile.avatarUrl) ? authorProfile.avatarUrl : w.avatarUrl;
+  if (activeAvatar && activeAvatar.trim() !== '') {
+    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(activeAvatar)}" alt="Avatar"/></div>`;
   }
 
   if (w.type === 'todo') {
@@ -1506,7 +1728,7 @@ function createWidgetDOM(w) {
 
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
+        <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯待辦">
             <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1521,7 +1743,6 @@ function createWidgetDOM(w) {
       <div class="widget-body">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div class="widget-time-badge">
-            ${badgeIcon}
             <span>${w.time || '待辦事項'}</span>
           </div>
           <span style="font-size: 0.85rem; font-weight: 900; color: var(--accent-green); background: var(--accent-green-bg); padding: 3px 8px; border-radius: 6px;">已完成 ${completedCount}/${totalCount}</span>
@@ -1551,7 +1772,7 @@ function createWidgetDOM(w) {
 
     card.innerHTML = `
       <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
+        <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
         <div class="widget-controls">
           <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯網頁筆記">
             <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1566,7 +1787,6 @@ function createWidgetDOM(w) {
       <div class="widget-body">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div class="widget-time-badge">
-            ${badgeIcon}
             <span>${w.time || '網頁筆記'}</span>
           </div>
           <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
@@ -1609,7 +1829,7 @@ function createWidgetDOM(w) {
 
   card.innerHTML = `
     <div class="widget-header" style="cursor: inherit;">
-      <span class="widget-category-tag">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
+      <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
       <div class="widget-controls">
         <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯內容">
           <svg class="svg-icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -1624,7 +1844,6 @@ function createWidgetDOM(w) {
     <div class="widget-body">
       <div style="display: flex; align-items: center; justify-content: space-between;">
         <div class="widget-time-badge">
-          ${badgeIcon}
           <span>${w.time || '即時提醒'}</span>
         </div>
         <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
@@ -1694,23 +1913,30 @@ function openAddNoteModal() {
   document.getElementById('media-linktitle-input').value = '';
   document.getElementById('note-time-input').value = '';
   
+  updateProfileDropdownsUI();
+  const selTo = document.getElementById('note-for-select');
+  const selFrom = document.getElementById('note-author-select');
+  if (selTo) selTo.value = globalProfileNotesFor;
+  if (selFrom) selFrom.value = globalProfileNotesFrom;
+
   document.getElementById('note-for-input').value = globalProfileNotesFor;
   document.getElementById('note-author-input').value = globalProfileNotesFrom;
 
-  currentEditingAvatarUrl = '';
-  resetCropDefaults();
+  const authorProf = globalProfiles.find(p => p.name === globalProfileNotesFrom);
+  currentEditingAvatarUrl = (authorProf && authorProf.avatarUrl) ? authorProf.avatarUrl : '';
+  if (currentEditingAvatarUrl) {
+    loadCropImageFromUrl(currentEditingAvatarUrl);
+  } else {
+    resetCropDefaults();
+  }
 
   const rangeInput = document.getElementById('card-chars-range');
   if (rangeInput) rangeInput.value = charsPerLine;
   const charsValEl = document.getElementById('card-chars-val');
   if (charsValEl) charsValEl.textContent = charsPerLine;
 
-  selectedNoteType = 'meds';
-  document.querySelectorAll('.type-option-btn').forEach(btn => {
-    if (btn.dataset.type) {
-      btn.classList.toggle('selected', btn.dataset.type === 'meds');
-    }
-  });
+  selectedNoteType = categoriesState.length > 0 ? categoriesState[0].id : 'meds';
+  renderCategoriesRow();
   updateModalFormFieldsVisibility();
   updateModalLivePreview();
   document.getElementById('note-modal').classList.add('active');
@@ -1725,10 +1951,22 @@ function openEditNoteModal(id) {
   document.getElementById('modal-title-text').textContent = '編輯項目 ‧ EDIT CARD';
   document.getElementById('note-content-input').value = w.content || '';
   document.getElementById('note-time-input').value = w.time || '';
+  
+  updateProfileDropdownsUI();
+  const selTo = document.getElementById('note-for-select');
+  const selFrom = document.getElementById('note-author-select');
+  if (selTo && w.notesFor) selTo.value = w.notesFor;
+  if (selFrom && w.author) selFrom.value = w.author;
+
   document.getElementById('note-for-input').value = w.notesFor || globalProfileNotesFor;
   document.getElementById('note-author-input').value = w.author || globalProfileNotesFrom;
 
   currentEditingAvatarUrl = w.avatarUrl || '';
+  if (!currentEditingAvatarUrl && w.author) {
+    const foundP = globalProfiles.find(p => p.name === w.author);
+    if (foundP) currentEditingAvatarUrl = foundP.avatarUrl || '';
+  }
+
   if (currentEditingAvatarUrl) {
     loadCropImageFromUrl(currentEditingAvatarUrl);
   } else {
@@ -1750,12 +1988,8 @@ function openEditNoteModal(id) {
     document.getElementById('media-linktitle-input').value = w.linkTitle || '';
   }
 
-  selectedNoteType = w.type || 'meds';
-  document.querySelectorAll('.type-option-btn').forEach(btn => {
-    if (btn.dataset.type) {
-      btn.classList.toggle('selected', btn.dataset.type === selectedNoteType);
-    }
-  });
+  selectedNoteType = w.type || (categoriesState.length > 0 ? categoriesState[0].id : 'meds');
+  renderCategoriesRow();
 
   updateModalFormFieldsVisibility();
   updateModalLivePreview();
@@ -1764,6 +1998,9 @@ function openEditNoteModal(id) {
 
 function closeNoteModal() {
   document.getElementById('note-modal').classList.remove('active');
+  // Ensure we return to canvas and check top row if needed
+  const canvas = document.getElementById('main-canvas');
+  if (canvas) canvas.scrollTop = 0;
 }
 
 function selectTypeOption(btn, type) {
@@ -1824,7 +2061,7 @@ function updateModalLivePreview() {
   }
 }
 
-// Crop & Image Handling
+// Crop & Image Handling with zoom range -80 to +80
 function resetCropDefaults() {
   cropImageObj = null;
   cropImgX = 0;
@@ -1833,7 +2070,7 @@ function resetCropDefaults() {
   cropRotate = 0;
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) scaleRange.value = 1;
+  if (scaleRange) scaleRange.value = 0;
   if (rotRange) rotRange.value = 0;
   drawCropCanvas();
 }
@@ -1847,6 +2084,8 @@ function loadCropImageFromUrl(url) {
     cropImgY = 0;
     cropScale = 1;
     cropRotate = 0;
+    const scaleRange = document.getElementById('cropScaleRange');
+    if (scaleRange) scaleRange.value = 0;
     drawCropCanvas();
   };
   img.src = url;
@@ -1865,7 +2104,12 @@ function handlePhotoUpload(event) {
 function updateCropTransform() {
   const scaleRange = document.getElementById('cropScaleRange');
   const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) cropScale = parseFloat(scaleRange.value) || 1;
+  if (scaleRange) {
+    const val = parseInt(scaleRange.value, 10) || 0;
+    // Map -80 to +80 range to scale factor e.g., 0.2 to 3.0 (0 value = 1.0 scale)
+    cropScale = 1 + (val / 40);
+    cropScale = Math.max(0.2, Math.min(3.5, cropScale));
+  }
   if (rotRange) cropRotate = parseFloat(rotRange.value) || 0;
   drawCropCanvas();
 }
@@ -2053,10 +2297,10 @@ function spawnQuickSticker(type) {
   const row = Math.floor(newIdx / maxCols);
 
   const presets = {
-    water: { type: 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
-    dinner: { type: 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30' },
-    clothes: { type: 'note', content: '天冷出門記得穿外套', time: '早晚叮囑' },
-    bp: { type: 'meds', content: '記得量血壓並記錄數據', time: '早晚一次' }
+    water: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
+    dinner: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '今晚返嚟一齊食晚飯', time: '下午 06:30' },
+    clothes: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '天冷出門記得穿外套', time: '早晚叮囑' },
+    bp: { type: categoriesState[0] ? categoriesState[0].id : 'meds', content: '記得量血壓並記錄數據', time: '早晚一次' }
   };
 
   const item = presets[type] || presets.water;
