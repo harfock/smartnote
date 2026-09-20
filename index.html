@@ -1,2448 +1,1512 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>智醒長者・自由空間數位照護日誌</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Inter:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
+:root{
+  --navy:#16324f;
+  --navy-d:#0e2238;
+  --orange:#f28c1b;
+  --orange-d:#d97a06;
+  --gold:#f4b942;
+  --cream:#f6f1e7;
+  --cream-2:#fdf8ee;
+  --line:#d8d2c4;
+  --red:#d64545;
+  --green:#3a7d44;
+  --green-bg:#e8f5e9;
+  --purple:#7b5cd6;
+  --card:#fff;
+  --shadow:0 4px 14px rgba(22,50,79,.18);
+  --radius:14px;
 }
-:root {
-  --bg-surface: #FAF8F5;
-  --bg-card: #FFFFFF;
-  --text-main: #0F172A;
-  --text-muted: #334155;
-  --border-color: #0F172A;
-  --accent-gold: #D97706;
-  --accent-gold-bg: #FEF3C7;
-  --accent-blue: #1E40AF;
-  --accent-blue-bg: #EFF6FF;
-  --accent-green: #047857;
-  --accent-green-bg: #D1FAE5;
-  --accent-red: #B91C1C;
-  --accent-red-bg: #FEE2E2;
-  --accent-purple: #7C3AED;
-  --accent-purple-bg: #F3E8FF;
-  --shadow-elevation: 0 8px 24px 4px rgba(0,0,0,0.16), 0 4px 6px -2px rgba(0,0,0,0.08);
-  --shadow-active: 0 18px 36px 6px rgba(0, 0, 0, 0.3);
-  --font-serif: 'Noto Serif TC', serif;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --widget-width: clamp(280px, 92vw, 360px);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-body.theme-night {
-  --bg-surface: #0B0F17;
-  --bg-card: #151D2A;
-  --text-main: #F8FAFC;
-  --text-muted: #CBD5E1;
-  --border-color: #475569;
-  --shadow-elevation: 0 8px 24px 4px rgba(0, 0, 0, 0.7);
-}
-html, body {
-  width: 100%;
-  height: 100%;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background-color: var(--bg-surface);
-  color: var(--text-main);
-  font-family: var(--font-serif);
-  touch-action: pan-x pan-y;
-  transition: background-color 0.8s ease;
-}
-button, [role="button"] {
-  cursor: pointer;
-}
-.svg-icon {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  vertical-align: middle;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-}
-#app-root {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bottom);
-  padding-left: var(--safe-left);
-  padding-right: var(--safe-right);
-}
-#sidebar-dock {
-  width: 290px;
-  max-width: 85vw;
-  background: var(--bg-card);
-  border-right: 3.5px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  z-index: 4000;
-  box-shadow: 6px 0 20px rgba(0,0,0,0.2);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
-  user-select: none;
-  position: relative;
-  pointer-events: auto;
-}
-@media (max-width: 768px) {
-  #sidebar-dock {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    height: 100%;
-    transform: translateX(-100%);
-  }
-  #sidebar-dock.open {
-    transform: translateX(0);
-  }
-}
-@media (min-width: 769px) {
-  #sidebar-dock.collapsed {
-    transform: translateX(-290px);
-    margin-right: -290px;
-  }
-}
-#sidebar-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(3px);
-  z-index: 3900;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-#sidebar-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-.dock-header {
-  padding: 14px 16px;
-  background: #0F172A;
-  color: #FFF;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 3px solid var(--border-color);
-}
-.dock-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #FBBF24;
-}
-.dock-toggle-btn {
-  background: #334155;
-  color: #FFF;
-  border: 2px solid #FBBF24;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-weight: 900;
-}
-.dock-body {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
-  flex: 1;
-  -webkit-overflow-scrolling: touch;
-}
-.btn-primary-add {
-  background: var(--accent-gold);
-  color: #FFFFFF;
-  border: 3px solid var(--border-color);
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-weight: 900;
-  font-size: 0.95rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-  white-space: nowrap;
-}
-.btn-primary-add:active {
-  transform: scale(0.97);
-  background: #B45309;
-}
-.dock-section-title {
-  font-size: 0.82rem;
-  font-family: var(--font-sans);
-  font-weight: 900;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border-bottom: 2px solid rgba(0,0,0,0.12);
-  padding-bottom: 4px;
-}
-.quick-stickers-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.sticker-btn {
-  background: var(--bg-surface);
-  border: 2.5px solid var(--border-color);
-  border-radius: 10px;
-  padding: 10px 6px;
-  font-size: 0.85rem;
-  font-weight: 900;
-  color: var(--text-main);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  text-align: center;
-}
-.sticker-btn:active {
-  background: var(--accent-gold-bg);
-  border-color: var(--accent-gold);
-}
-#main-canvas {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.12) 1px, transparent 0);
-  background-size: 28px 28px;
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  touch-action: none;
-}
-#main-canvas:active {
-  cursor: grabbing;
-}
-body.theme-night #main-canvas {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0);
-}
-.canvas-top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(250, 248, 245, 0.88);
-  backdrop-filter: blur(10px);
-  border-bottom: 2px solid rgba(0,0,0,0.08);
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  pointer-events: auto;
-}
-body.theme-night .canvas-top-bar {
-  background: rgba(11, 15, 23, 0.88);
-}
-.instruction-guide-banner {
-  background: #0F172A;
-  color: #FBBF24;
-  border: 2px solid #FBBF24;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: var(--shadow-elevation);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events: none;
-}
-#widgets-container {
-  position: absolute;
-  width: 0;
-  height: 0;
-  top: 0;
-  left: 0;
-  transform-origin: 0 0;
-  transition: transform 0.05s ease-out;
-  pointer-events: none;
-}
-#widgets-container .canvas-widget {
-  pointer-events: auto;
-}
-.canvas-widget {
-  position: absolute;
-  width: var(--widget-width);
-  max-width: calc(100vw - 20px);
-  background: var(--bg-card);
-  border: 3.5px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: var(--shadow-elevation);
-  display: flex;
-  flex-direction: column;
-  z-index: 10;
-  touch-action: none;
-  user-select: none;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-  will-change: transform, left, top;
-  cursor: grab;
-}
-.canvas-widget:active {
-  cursor: grabbing;
-}
-.canvas-widget.dragging {
-  box-shadow: var(--shadow-active);
-  border-color: var(--accent-gold);
-  z-index: 3000 !important;
-}
-.canvas-widget.type-meds { border-left: 10px solid var(--accent-red); }
-.canvas-widget.type-clinic { border-left: 10px solid var(--accent-blue); }
-.canvas-widget.type-note { border-left: 10px solid var(--accent-green); }
-.canvas-widget.type-clock { border-left: 10px solid var(--accent-gold); }
-.canvas-widget.type-todo { border-left: 10px solid var(--accent-green); }
-.canvas-widget.type-media { border-left: 10px solid var(--accent-purple); }
+body.eye{--cream:#efe6cf;--cream-2:#f7efdb;--card:#fffdf4;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--cream);color:var(--navy);overflow:hidden;}
 
-.widget-header {
-  padding: 8px 10px;
-  background: rgba(0,0,0,0.04);
-  border-bottom: 2px solid rgba(0,0,0,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: move;
-}
-.widget-category-tag {
-  font-family: var(--font-sans);
-  font-weight: 900;
-  font-size: 0.75rem;
-  padding: 3px 8px;
-  border-radius: 6px;
-  color: #FFF;
-  white-space: nowrap;
-}
-.widget-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.widget-btn {
-  background: rgba(0,0,0,0.06);
-  border: 1.5px solid var(--border-color);
-  color: var(--text-main);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 6px;
-  font-weight: 900;
-  font-size: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.widget-btn:active {
-  background: var(--accent-gold-bg);
-  border-color: var(--accent-gold);
-}
-.widget-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.widget-time-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-sans);
-  font-weight: 900;
-  font-size: 0.95rem;
-  color: var(--accent-gold);
-}
-.widget-content-text {
-  font-weight: 900;
-  line-height: 1.25;
-  color: var(--text-main);
-  word-break: break-all;
-  white-space: pre-wrap;
-  letter-spacing: 0.02em;
-}
-.todo-items-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-.todo-item-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  background: var(--bg-surface);
-  border: 2px solid var(--border-color);
-  border-radius: 10px;
-  cursor: pointer;
-}
-.todo-item-row.completed {
-  opacity: 0.65;
-  background: rgba(0,0,0,0.02);
-}
-.todo-checkbox {
-  width: 24px;
-  height: 24px;
-  border: 2.5px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.todo-item-row.completed .todo-checkbox {
-  background: var(--accent-green);
-  border-color: var(--accent-green);
-  color: #FFF;
-}
-.todo-item-text {
-  font-size: 1rem;
-  font-weight: 900;
-  color: var(--text-main);
-  word-break: break-all;
-  flex: 1;
-}
-.todo-item-row.completed .todo-item-text {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-.media-thumbnail-container {
-  width: 100%;
-  height: 140px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 2px solid var(--border-color);
-  background: #000;
+/* HEADER & TOP BAR */
+header{position:fixed;top:0;left:0;right:0;height:62px;background:var(--cream);display:flex;align-items:center;gap:8px;padding:0 12px;z-index:500;border-bottom:2px solid var(--line);}
+.btn{border:2px solid var(--navy);background:#fff;color:var(--navy);font-weight:800;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:.9rem;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;}
+.btn-orange{background:var(--orange);border:2px solid var(--navy);color:#fff;font-weight:900;border-radius:10px;padding:8px 14px;cursor:pointer;font-size:.9rem;white-space:nowrap;}
+.btn-green{background:var(--green);border:2px solid var(--navy);color:#fff;font-weight:900;border-radius:10px;padding:8px 14px;cursor:pointer;font-size:.9rem;white-space:nowrap;}
+
+#info-banner{flex:1;border:2px solid var(--orange);background:var(--cream-2);color:var(--navy);border-radius:12px;padding:6px 12px;font-weight:800;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#info-banner .ic{color:var(--orange);margin-right:4px;}
+#zoom-pct{font-weight:900;font-size:.9rem;min-width:40px;text-align:center;}
+
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--orange);border:2px solid var(--navy);color:#fff;font-weight:900;padding:8px 20px;border-radius:12px;z-index:990;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);}
+#toast.show{opacity:1;}
+
+/* CANVAS */
+#canvas-wrap{position:fixed;inset:62px 0 0 0;overflow:hidden;background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:26px 26px;cursor:grab;}
+#canvas-wrap.panning{cursor:grabbing;}
+#canvas{position:absolute;top:0;left:0;width:0;height:0;transform-origin:0 0;}
+
+/* CARD STYLES */
+.card{position:absolute;width:290px;background:var(--card);border:2px solid var(--navy);border-left:8px solid var(--purple);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:grab;user-select:none;transition:box-shadow .2s;}
+.card.acked{opacity:.85;border-left-color:var(--green);}
+.card-top{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:2px solid var(--line);background:var(--cream-2);border-radius:12px 12px 0 0;flex-wrap:wrap;}
+.cat-chip{font-size:.75rem;font-weight:900;color:#fff;border-radius:8px;padding:3px 8px;white-space:nowrap;}
+.stk-lbl{display:flex;align-items:center;gap:4px;font-size:.72rem;background:#fff3df;border:2px solid var(--orange);border-radius:8px;padding:2px 6px;cursor:pointer;white-space:nowrap;font-weight:800;}
+.stk-lbl input{margin:0;accent-color:var(--orange);}
+.card-btns{margin-left:auto;display:flex;gap:4px;}
+.cbtn{background:#fff;border:2px solid var(--navy);border-radius:8px;font-size:.72rem;font-weight:800;color:var(--navy);padding:3px 7px;cursor:pointer;}
+.cbtn.x{background:var(--red);border-color:var(--navy);color:#fff;}
+
+.card-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.body-row1{display:flex;align-items:center;gap:6px;}
+.ctime{color:var(--orange-d);font-weight:900;font-size:.82rem;}
+.ctitle{font-weight:900;line-height:1.35;word-break:break-all;color:var(--navy);}
+.cimg{width:100%;max-height:130px;object-fit:cover;border-radius:8px;border:2px solid var(--line);}
+.clink{font-size:.82rem;color:var(--purple);background:#f3efff;border:2px solid #d8ccf6;border-radius:8px;padding:5px 8px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;font-weight:800;}
+
+.cklist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
+.cklist li{display:flex;align-items:center;gap:7px;border:2px solid var(--navy);border-radius:10px;padding:5px 9px;font-size:.85rem;font-weight:700;background:#fff;}
+.cklist li input{accent-color:var(--green);width:16px;height:16px;}
+.cklist li.done{opacity:.6;text-decoration:line-through;}
+.ckprog{font-size:.72rem;color:var(--green);background:var(--green-bg);border-radius:8px;padding:2px 7px;font-weight:900;margin-left:auto;white-space:nowrap;}
+
+.ack-btn{background:#fff3df;border:2px solid var(--orange);color:var(--orange-d);font-weight:900;border-radius:10px;padding:7px;font-size:.8rem;cursor:pointer;}
+.card.acked .ack-btn{background:var(--green);border-color:var(--green);color:#fff;}
+
+/* TWO-ROW LARGE AVATAR FOOTER & COLLAPSED HEADER */
+.card-foot{display:flex;align-items:center;gap:10px;padding:8px 10px;border-top:2px solid var(--line);background:var(--cream-2);border-radius:0 0 12px 12px;}
+.av-badge{display:flex;align-items:center;gap:8px;width:100%;}
+.av-box, .circle-prev{
   position: relative;
-}
-.media-thumbnail-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.media-link-badge {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  background: var(--accent-purple-bg);
-  border: 2px solid var(--accent-purple);
-  border-radius: 10px;
-  color: var(--accent-purple);
-  font-weight: 900;
-  font-size: 0.9rem;
-  text-decoration: none;
-  cursor: pointer;
-}
-.ack-button {
-  width: 100%;
-  height: 48px;
-  background: var(--accent-gold-bg);
-  border: 3px solid var(--accent-gold);
-  border-radius: 10px;
-  color: var(--accent-gold);
-  font-weight: 900;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-}
-.ack-button.acknowledged {
-  background: var(--accent-green);
-  border-color: var(--accent-green);
-  color: #FFFFFF;
-}
-.canvas-widget.collapsed-mode {
-  padding: 2px;
-}
-.collapsed-pill-box {
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  cursor: pointer;
-}
-.collapsed-pill-title {
-  font-weight: 900;
-  font-size: 1.05rem;
-  color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 180px;
-}
-.widget-footer-stamp {
-  padding: 8px 12px;
-  border-top: 2px dashed rgba(0,0,0,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  font-weight: 800;
-}
-.author-avatar-container {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.author-avatar {
-  width: 28px;
-  height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--border-color);
-  background: var(--border-color);
-  color: #FFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 900;
   overflow: hidden;
-  object-fit: cover;
+  box-sizing: border-box;
+  flex: none;
 }
-.author-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.av-box{display:inline-block;width:46px;height:46px;border:2px solid var(--navy);background:#ddd;vertical-align:middle;}
+.av-box img, .circle-prev img{
+  position:absolute;
+  left:calc(50% + calc(var(--dx, 0) * 1%));
+  top:calc(50% + calc(var(--dy, 0) * 1%));
+  display:block;
+  max-width:none !important;
+  max-height:none !important;
+  transform-origin:center center;
+  user-select:none;
+  pointer-events:none;
+  transform: translate(-50%, -50%) scale(var(--zm, 1)) rotate(calc(var(--rot, 0) * 1deg));
 }
-.clock-display-main {
-  font-family: var(--font-sans);
-  font-weight: 900;
-  font-size: clamp(2.5rem, 8vw, 3.6rem);
-  line-height: 1;
-  color: var(--text-main);
-  text-align: center;
-  margin: 4px 0;
-  font-variant-numeric: tabular-nums;
+.av-text{display:flex;flex-direction:column;justify-content:center;line-height:1.2;}
+.av-label{font-size:.7rem;font-weight:800;color:#666;}
+.av-name{font-size:.95rem;font-weight:900;color:var(--navy);}
+
+/* COLLAPSED CARD DESIGN */
+.card.collapsed .card-body,.card.collapsed .card-foot{display:none;}
+.card.collapsed .card-summary{display:flex;flex-direction:column;gap:6px;padding:8px 10px;background:#fff;}
+.card-summary-title{font-size:.88rem;font-weight:900;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* CLOCK CARD SPECIFIC */
+.clock-inner{padding:10px;text-align:center;}
+.clock-period{font-size:1.15rem;font-weight:900;color:var(--orange-d);margin-bottom:2px;}
+.clock-time{font-size:2.6rem;font-weight:900;letter-spacing:1px;color:var(--navy);line-height:1;}
+.clock-date{font-size:.85rem;font-weight:800;color:#5a6b80;margin:6px 0;}
+.clock-box{border:2px solid var(--line);border-radius:10px;padding:4px;background:#fff;}
+.clock-cap{font-size:.68rem;font-weight:900;color:var(--orange-d);margin-top:4px;}
+
+/* TOOLBOX SIDEBAR / BOTTOM SHEET */
+#tb-backdrop{position:fixed;inset:62px 0 0 0;z-index:600;display:none;background:rgba(14,34,56,.3);}
+#tb-backdrop.open{display:block;}
+#toolbox{position:fixed;top:62px;bottom:0;left:0;width:350px;max-width:92vw;background:#fff;border-right:2px solid var(--navy);z-index:601;display:none;flex-direction:column;box-shadow:4px 0 20px rgba(22,50,79,.25);}
+#toolbox.open{display:flex;}
+.tb-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--navy);}
+.tb-head b{color:var(--gold);font-size:1.1rem;font-weight:900;}
+#tb-close{background:transparent;border:2px solid var(--orange);color:#fff;width:34px;height:34px;border-radius:8px;font-size:1.1rem;font-weight:900;cursor:pointer;}
+#tb-scroll{flex:1;overflow-y:auto;padding:12px 16px;}
+.tb-sec{margin-bottom:12px;}
+.tb-sec.dragging{opacity:.45;}
+.tb-sec.over{outline:2px dashed var(--orange);border-radius:10px;}
+.tb-sec-h{display:flex;align-items:center;gap:8px;color:var(--navy);font-weight:900;font-size:.92rem;margin:12px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--line);}
+.tb-sec:first-child .tb-sec-h{margin-top:0;}
+.tb-sec-h .handle{margin-left:auto;cursor:grab;font-size:1.1rem;color:#b9b2a4;padding:0 6px;}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  #toolbox{
+    top:auto;
+    bottom:0;
+    left:0;
+    right:0;
+    width:100%;
+    max-width:100%;
+    height:48vh;
+    max-height:48vh;
+    border-right:none;
+    border-top:3px solid var(--navy);
+    border-radius:18px 18px 0 0;
+  }
 }
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 9000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
+
+/* BUTTONS & FORM ELEMENTS */
+.add-big{width:100%;background:linear-gradient(180deg,#f79b2e,var(--orange));border:2px solid var(--navy);color:#fff;font-weight:900;font-size:1.02rem;padding:12px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow);}
+.box{border:2px solid var(--navy);background:var(--cream-2);border-radius:12px;padding:10px;}
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px;}
+.pchip{width:calc((100% - 32px)/5);display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border-radius:12px;cursor:pointer;border:2px solid transparent;}
+.pchip span{font-size:.72rem;text-align:center;word-break:break-all;font-weight:800;color:var(--navy);}
+.pchip.selected{border-color:var(--orange);background:#fff3df;box-shadow:0 0 0 2px var(--orange);}
+.tin{width:100%;border:2px solid var(--navy);border-radius:10px;padding:8px 10px;background:#fff;color:var(--navy);font-size:.92rem;margin-bottom:8px;font-weight:700;}
+.trow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.btn-s{background:#fff;border:2px solid var(--navy);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:.8rem;font-weight:800;color:var(--navy);}
+.btn-mgr{background:#ffe9c9;border:2px solid var(--orange);color:var(--navy);border-radius:8px;font-weight:900;padding:4px 12px;cursor:pointer;}
+.btn-add{background:var(--green-bg);border:2px solid var(--green);color:var(--green);border-radius:10px;font-weight:900;padding:8px 14px;cursor:pointer;}
+.btn-save{background:var(--orange);border:2px solid var(--navy);color:#fff;border-radius:10px;font-weight:900;padding:10px 14px;cursor:pointer;font-size:.95rem;}
+.btn-load{background:var(--navy);border:2px solid var(--navy);color:#fff;border-radius:10px;font-weight:900;padding:10px 14px;cursor:pointer;font-size:.95rem;}
+.btn-plain{background:var(--cream-2);border:2px solid var(--navy);color:var(--navy);border-radius:10px;font-weight:800;padding:9px 12px;cursor:pointer;font-size:.9rem;width:100%;}
+
+.stk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stk-item{background:#fff;border:2px solid var(--navy);border-radius:12px;padding:10px;text-align:center;font-weight:900;color:var(--navy);cursor:pointer;box-shadow:var(--shadow);}
+.stk-item .ico{display:block;font-size:1.2rem;margin-bottom:2px;}
+
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.cat-edit{display:flex;align-items:center;gap:6px;border:2px solid var(--navy);background:#fff;border-radius:10px;padding:4px 8px;font-weight:900;font-size:.82rem;}
+.cat-edit button{border:2px solid var(--navy);background:#fff;border-radius:50%;cursor:pointer;font-size:.65rem;padding:1px 5px;font-weight:800;}
+
+/* MODALS */
+.modal{position:fixed;inset:0;background:rgba(14,34,56,.55);z-index:900;display:none;justify-content:center;align-items:flex-end;}
+.modal.open{display:flex;}
+.modal-sheet{background:#fff;width:100%;max-width:560px;max-height:88vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:var(--navy);border-top:3px solid var(--navy);}
+.m-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:2px solid var(--line);font-weight:900;font-size:1.05rem;background:var(--cream-2);border-radius:18px 18px 0 0;}
+.m-body{overflow-y:auto;padding:16px;}
+.m-x{background:#fff;border:2px solid var(--navy);border-radius:8px;padding:4px 10px;font-weight:900;cursor:pointer;color:var(--navy);}
+.fl{font-size:.85rem;font-weight:900;color:var(--navy);margin:12px 0 5px;}
+.time-row{display:flex;gap:6px;align-items:center;}
+.time-row input[type=date]{flex:1;border:2px solid var(--navy);border-radius:10px;padding:8px;font-size:.95rem;color:var(--navy);font-weight:700;}
+.hhmm{width:56px;text-align:center;font-size:1.1rem;font-weight:900;padding:7px 4px;border:2px solid var(--navy);border-radius:10px;color:var(--navy);}
+.colon{font-size:1.3rem;font-weight:900;}
+.phase-lbl{font-size:.85rem;font-weight:900;color:var(--orange-d);}
+
+/* PREVIEW BOX */
+.pv{background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:12px;display:flex;justify-content:center;}
+.pv-card{width:290px;max-width:100%;background:#fff;border:2px solid var(--navy);border-left:8px solid var(--purple);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);}
+
+/* LOAD MODAL: CENTER LEFT REPOSITIONED */
+#modal-load.open{
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  padding-left:max(20px, 4vw);
 }
-.modal-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
+#modal-load .modal-sheet{
+  width:380px;
+  max-width:90vw;
 }
-.modal-card {
-  background: var(--bg-card);
-  border: 4px solid var(--border-color);
-  border-radius: 18px;
-  width: min(520px, 94vw);
-  max-height: 88vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-active);
-  display: flex;
-  flex-direction: column;
-  pointer-events: auto;
+/* PROFILES MANAGER MODAL SPECIFIC WIDTH */
+#modal-pm .modal-sheet{
+  max-width:440px;
 }
-.modal-header {
-  padding: 14px;
-  background: #0F172A;
-  color: #FFF;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 3.5px solid var(--border-color);
+
+/* BIG PHOTO BUTTON & CROP PREVIEW */
+.btn-photo-big{
+  width:100%;
+  background:var(--orange);
+  color:#fff;
+  font-weight:900;
+  font-size:1.1rem;
+  padding:14px;
+  border:2px solid var(--navy);
+  border-radius:12px;
+  cursor:pointer;
+  text-align:center;
+  margin-bottom:10px;
+  display:block;
 }
-.modal-title {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #FBBF24;
+.circle-prev{
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#eee;
+  margin:10px auto;
+  border:4px solid var(--navy);
+  position:relative;
+  cursor:grab;
+  touch-action:none;
+  box-shadow:var(--shadow);
 }
-.modal-close-btn {
-  background: #334155;
-  color: #FFF;
-  border: 2px solid #FBBF24;
-  border-radius: 8px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-weight: 900;
+input[type=range]{accent-color:var(--orange);}
+
+#pm-list{max-height:180px;overflow-y:auto;padding-right:4px;}
+.pm-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:2px solid var(--navy);border-radius:10px;margin-bottom:8px;background:var(--cream-2);}
+.pm-item .sp{flex:1;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.load-item{display:flex;justify-content:space-between;align-items:center;border:2px solid var(--navy);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;background:var(--cream-2);font-weight:800;}
+.load-item:hover{background:#fff3df;}
+
+/* MAGNIFY POPUP */
+#modal-mag{align-items:stretch;background:var(--navy-d);}
+.mag-box{background:var(--navy-d);color:#fff;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center;position:relative;}
+#mag-text{font-size:clamp(2rem,6vw,3.8rem);font-weight:900;line-height:1.4;word-break:break-all;white-space:pre-line;}
+#mag-time{color:var(--gold);font-size:1.3rem;font-weight:900;}
+#mag-close{position:absolute;top:16px;right:16px;background:transparent;border:2px solid #fff;color:#fff;border-radius:10px;font-size:1rem;font-weight:900;padding:6px 14px;cursor:pointer;}
+.mag-ack{background:#fff3df;border:2px solid var(--orange);color:var(--orange-d);font-weight:900;border-radius:12px;padding:12px 28px;font-size:1.1rem;cursor:pointer;}
+
+/* HOURLY PRAISE POPUP */
+#modal-praise{
+  align-items:center;
+  justify-content:center;
+  background:rgba(14,34,56,.65);
 }
-.modal-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.praise-sheet{
+  background:var(--cream-2);
+  border:4px solid var(--orange);
+  border-radius:20px;
+  width:90%;
+  max-width:440px;
+  padding:24px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  position:relative;
+  animation:popIn .3s ease-out;
 }
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.form-label {
-  font-weight: 900;
-  font-size: 0.9rem;
-  color: var(--text-main);
-}
-.form-input, .form-textarea, .form-select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 3px solid var(--border-color);
-  border-radius: 10px;
-  background: var(--bg-surface);
-  color: var(--text-main);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 800;
-  outline: none;
-}
-.form-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-.form-type-selector {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-.type-option-btn {
-  border: 2.5px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 4px;
-  background: var(--bg-surface);
-  color: var(--text-main);
-  font-weight: 900;
-  font-size: 0.8rem;
-  cursor: pointer;
-  text-align: center;
-}
-.type-option-btn.selected {
-  background: var(--border-color);
-  color: #FFF;
-}
-#toast-notification {
-  position: fixed;
-  top: clamp(60px, 10vh, 80px);
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: #0F172A;
-  color: #FBBF24;
-  border: 3px solid #FBBF24;
-  border-radius: 30px;
-  padding: 8px 20px;
-  font-weight: 900;
-  font-size: 0.92rem;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.35);
-  z-index: 10000;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-}
-#toast-notification.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-.crop-tool-wrapper {
-  background: var(--bg-surface);
-  border: 2.5px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-.crop-preview-container {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  border: 3px solid var(--accent-gold);
-  overflow: hidden;
-  position: relative;
-  background: #000;
-  cursor: grab;
-  touch-action: none;
-}
-.crop-preview-container:active {
-  cursor: grabbing;
-}
-#crop-canvas-elem {
-  display: block;
-  width: 160px;
-  height: 160px;
-}
+@keyframes popIn{from{transform:scale(.8);opacity:0;}to{transform:scale(1);opacity:1;}}
+.praise-title{font-size:1.2rem;font-weight:900;color:var(--orange-d);margin-bottom:12px;}
+.praise-msg{font-size:1.25rem;font-weight:900;color:var(--navy);line-height:1.5;margin-bottom:16px;word-break:break-all;}
+.praise-timer{font-size:.8rem;font-weight:800;color:#777;}
 </style>
 </head>
 <body>
-<div id="app-root">
-  <div id="ambient-edge-strobe"></div>
-  <div id="toast-notification">備忘錄已更新 UPDATED</div>
-  <div id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
-  
-  <!-- SIDEBAR TOOL DOCK -->
-  <aside id="sidebar-dock">
-    <div class="dock-header">
-      <span class="dock-title">工具箱 TOOLBOX</span>
-      <button class="dock-toggle-btn" id="dockToggleBtn" onclick="toggleSidebar(false)">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="dock-body">
-      <button class="btn-primary-add" onclick="openAddNoteModal()">
-        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>新增自訂叮囑 ADD</span>
-      </button>
-      
-      <div class="dock-section-title">成員檔案與預設 PROFILES</div>
-      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size:0.85rem; font-weight: 900;">多重檔案清單</span>
-          <button class="widget-btn" onclick="openProfileManagerModal()" style="background: var(--accent-gold-bg); color:var(--accent-gold); border-color: var(--accent-gold);">管理檔案</button>
-        </div>
-        <div class="form-group" style="gap:4px;">
-          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">預設對象 (Default To):</label>
-          <select class="form-select" id="default-profile-to" onchange="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"></select>
-        </div>
-        <div class="form-group" style="gap:4px;">
-          <label style="font-size: 0.8rem; font-weight: 900; color: var(--text-main);">預設發起人 (Default From):</label>
-          <select class="form-select" id="default-profile-from" onchange="saveGlobalProfiles()" style="padding: 6px 10px; font-size: 0.9rem;"></select>
-        </div>
-      </div>
 
-      <div class="dock-section-title">分類管理 CATEGORIES</div>
-      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; gap: 4px;">
-          <input type="text" class="form-input" id="new-category-input" placeholder="新分類名稱" style="padding:6px; font-size:0.85rem;"/>
-          <button class="widget-btn" onclick="addNewCategory()" style="background: var(--accent-green-bg); color: var(--accent-green); border-color: var(--accent-green); white-space:nowrap;">新增</button>
-        </div>
-        <div id="categories-row-container" style="display: flex; flex-wrap: wrap; gap: 4px;"></div>
-      </div>
+<header>
+<button id="btn-toolbox" class="btn-orange" onclick="openToolbox()">☰ 工具箱</button>
+<button class="btn-green" onclick="openReminder(null)">＋ 新增叮囑</button>
+<button class="btn" id="btn-filter" onclick="openFilterModal()">🔍 篩選</button>
+<span id="info-banner"><span class="ic">ⓘ</span>拖動卡片與畫布・點擊「＋ 新增叮囑」創建記事</span>
+<span id="zoom-pct">100%</span>
+<button class="btn" style="border-radius:999px;padding:6px 12px;font-weight:900" onclick="setZoom(state.settings.zoom-0.1)">−</button>
+<button class="btn" style="border-radius:999px;padding:6px 12px;font-weight:900" onclick="setZoom(state.settings.zoom+0.1)">＋</button>
+<button id="btn-eye" class="btn" style="border-radius:999px;" onclick="toggleEye()">🌙 護眼</button>
+</header>
 
-      <div class="dock-section-title">快捷貼紙 1-TAP STICKERS</div>
-      <div class="quick-stickers-grid">
-        <button class="sticker-btn" onclick="spawnQuickSticker('water')">
-          <svg class="svg-icon" style="color: var(--accent-blue);" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-          <span>記得飲水</span>
-        </button>
-        <button class="sticker-btn" onclick="spawnQuickSticker('dinner')">
-          <svg class="svg-icon" style="color: var(--accent-gold);" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
-          <span>返嚟食飯</span>
-        </button>
-        <button class="sticker-btn" onclick="spawnQuickSticker('clothes')">
-          <svg class="svg-icon" style="color: var(--accent-red);" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
-          <span>天冷穿衣</span>
-        </button>
-        <button class="sticker-btn" onclick="spawnQuickSticker('bp')">
-          <svg class="svg-icon" style="color: var(--accent-green);" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          <span>量度血壓</span>
-        </button>
-      </div>
+<div id="toast">已更新記錄 ‧ UPDATED</div>
+<div id="canvas-wrap"><div id="canvas"></div></div>
+<div id="tb-backdrop" onclick="closeToolbox()"></div>
 
-      <div class="dock-section-title">資料管理與存檔 SAVE / LOAD</div>
-      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">檔案儲存夾槽位 (Slot):</label>
-        <div style="display: flex; gap: 4px;">
-          <button class="type-option-btn selected" id="slot-btn-1" onclick="switchSaveSlot(1)" style="flex: 1; padding: 6px 2px;">槽位 1</button>
-          <button class="type-option-btn" id="slot-btn-2" onclick="switchSaveSlot(2)" style="flex: 1; padding: 6px 2px;">槽位 2</button>
-          <button class="type-option-btn" id="slot-btn-3" onclick="switchSaveSlot(3)" style="flex: 1; padding: 6px 2px;">槽位 3</button>
-          <button class="type-option-btn" id="slot-btn-auto" onclick="switchSaveSlot('auto')" style="flex: 1; padding: 6px 2px; border-color: var(--accent-purple); color: var(--accent-purple);">自動槽</button>
-        </div>
-        <div style="display: flex; gap: 6px; margin-top: 4px;">
-          <button class="widget-btn" style="flex: 1; background: var(--accent-green-bg); color: var(--accent-green); border-color: var(--accent-green); justify-content: center; padding: 8px;" onclick="triggerManualSave()">手動儲存</button>
-          <button class="widget-btn" style="flex: 1; background: var(--accent-blue-bg); color: var(--accent-blue); border-color: var(--accent-blue); justify-content: center; padding: 8px;" onclick="triggerManualLoad()">讀取槽位</button>
-        </div>
-      </div>
+<aside id="toolbox">
+<div class="tb-head"><b>工具箱 TOOLBOX</b><button id="tb-close" onclick="closeToolbox()">✕</button></div>
+<div id="tb-scroll">
+<div class="tb-sec" data-id="add"><div class="tb-sec-h">新增自訂叮囑 ‧ ADD<span class="handle" draggable="true">⋮⋮</span></div><button class="add-big" onclick="openReminder(null)">＋ 新增自訂叮囑 ADD</button></div>
+<div class="tb-sec" data-id="profiles"><div class="tb-sec-h">成員檔案與預設 ‧ PROFILES<span class="handle" draggable="true">⋮⋮</span></div><div class="box">
+<div class="trow" style="margin-bottom:10px"><b style="flex:1">多重檔案清單</b><button class="btn-mgr" onclick="openProfiles()">管理檔案</button></div>
+<div class="fl" style="margin-top:0">預設對象 (Default To):</div><div class="chip-grid" id="tb-to"></div>
+<div class="fl">預設發起人 (Default From):</div><div class="chip-grid" id="tb-from"></div>
+</div></div>
+<div class="tb-sec" data-id="categories"><div class="tb-sec-h">分類管理 ‧ CATEGORIES<span class="handle" draggable="true">⋮⋮</span></div><div class="box">
+<div class="trow" style="margin-bottom:0"><input class="tin" id="cat-new" style="margin:0;flex:1" placeholder="新分類名稱"><button class="btn-add" onclick="addCategory()">新增</button></div>
+<div class="cat-chips" id="cat-chips"></div>
+</div></div>
+<div class="tb-sec" data-id="stickers"><div class="tb-sec-h">快捷貼紙 ‧ 1-TAP STICKERS<span class="handle" draggable="true">⋮⋮</span></div><div class="stk-grid" id="stk-grid"></div></div>
 
-      <div class="dock-section-title">排版整理 ORGANIZE</div>
-      <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; background: var(--accent-gold-bg); border-color: var(--accent-gold); color: var(--accent-gold);" onclick="resetCardArrangement()">
-        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        <span>自動重設排列卡片 (RESET GRID)</span>
-      </button>
-      <button class="sticker-btn" style="width: 100%; font-size: 0.9rem; padding: 10px; margin-top: 4px;" onclick="toggleCollapseAll()">
-        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/></svg>
-        <span id="collapseAllBtnText">全部折疊/展開(省空間)</span>
-      </button>
+<div class="tb-sec" data-id="praise"><div class="tb-sec-h">讚賞叮囑彈窗 ‧ PRAISE POP-UP<span class="handle" draggable="true">⋮⋮</span></div><div class="box">
+<label style="font-weight:900;display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="pz-enable" onchange="updatePraiseSettings()" style="accent-color:var(--orange)"> 啟用每小時讚賞叮囑彈窗</label>
+<div class="fl">彈窗間隔 (分鐘):</div>
+<input type="number" class="tin" id="pz-interval" min="10" max="1440" value="60" onchange="updatePraiseSettings()">
+<label style="font-weight:800;font-size:.82rem;display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="pz-sleep" checked onchange="updatePraiseSettings()" style="accent-color:var(--orange)"> 預設睡眠時間暫停 (22:00-08:00)</label>
+<button class="btn-plain" onclick="openPraiseEditor()">✏️ 編輯讚賞語錄詞庫 (<span id="pz-count">0</span>條)</button>
+</div></div>
 
-      <div class="dock-section-title">每行字數 TEXT PER ROW</div>
-      <div style="background: var(--bg-surface); border: 2.5px solid var(--border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-        <label style="font-size: 0.82rem; font-weight: 900; color: var(--text-main);">每行顯示字數(預設8個字):</label>
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-          <button class="widget-btn" onclick="changeCharsPerLine(-1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">-</button>
-          <span id="chars-per-line-val" style="font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); min-width: 36px; text-align: center;">8</span>
-          <button class="widget-btn" onclick="changeCharsPerLine(1)" style="padding: 6px 14px; font-size: 1.1rem; font-weight: 900;">+</button>
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <main id="main-canvas">
-    <div class="canvas-top-bar">
-      <button class="btn-primary-add" onclick="toggleSidebar(true)" style="padding: 6px 10px; font-size: 0.82rem; flex-shrink: 0;">
-        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        <span>工具箱</span>
-      </button>
-      <div class="instruction-guide-banner">
-        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span style="overflow: hidden; text-overflow: ellipsis;">自由拖動畫布四周・成員大頭照請至管理檔案設定</span>
-      </div>
-      <button id="zoom-level-indicator" onclick="resetZoom()" title="點擊重置畫面縮放 Click to Reset Zoom" style="font-size: 0.8rem; font-weight: 900; color: var(--text-muted); padding: 5px 8px; background: rgba(0,0,0,0.05); cursor: pointer; user-select: none; border: none; border-radius: 6px; flex-shrink: 0;" role="button">100%</button>
-      <button class="btn-primary-add" id="themeToggleBtn" onclick="toggleTheme()" style="padding: 6px 10px; font-size: 0.82rem; background: var(--bg-card); color: var(--text-main); flex-shrink: 0;">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <span id="themeToggleText">護眼</span>
-      </button>
-    </div>
-    <div id="widgets-container"></div>
-  </main>
+<div class="tb-sec" data-id="save"><div class="tb-sec-h">資料管理與存檔 ‧ SAVE / LOAD<span class="handle" draggable="true">⋮⋮</span></div>
+<div class="fl" style="margin-top:0">8位數記錄編號 ‧ RECORD ID:</div>
+<div class="trow"><input class="tin" id="rec-id" style="margin:0" readonly><button class="btn-s" onclick="newRecId()">新編號</button></div>
+<button class="btn-plain" style="margin-bottom:8px" onclick="pickFolder()">📁 設定儲存資料夾</button>
+<div id="folder-lbl" style="margin-bottom:10px;font-size:.8rem;font-weight:800;color:#5a6b80">儲存位置：瀏覽器預設下載位置</div>
+<div class="trow" style="margin-bottom:6px"><button class="btn-save" style="flex:1" onclick="manualSave()">💾 儲存</button><button class="btn-load" style="flex:1" onclick="openLoad()">📂 讀取</button></div>
+<div style="font-size:.72rem;font-weight:800;color:#5a6b80">關閉瀏覽器時會自動保存 (Auto-save)。</div>
 </div>
+<div class="tb-sec" data-id="organize"><div class="tb-sec-h">排版整理 ‧ ORGANIZE<span class="handle" draggable="true">⋮⋮</span></div>
+<button class="btn-plain" style="margin-bottom:8px" onclick="resetGrid()">自動重設排列卡片 (RESET GRID)</button>
+<button class="btn-plain" id="btn-collapse-toggle" onclick="toggleCollapseAll()">全部折疊 (省空間)</button>
+</div>
+<div class="tb-sec" data-id="textrow"><div class="tb-sec-h">每行字數 ‧ TEXT PER ROW<span class="handle" draggable="true">⋮⋮</span></div>
+<div style="font-weight:800;font-size:.85rem;margin-bottom:6px">每行顯示字數 (預設8個字):</div>
+<div class="trow" style="margin-bottom:0"><button class="btn-s" onclick="chgRow(-1)">-</button><b id="row-val" style="font-size:1.25rem;min-width:32px;text-align:center">8</b><button class="btn-s" onclick="chgRow(1)">+</button></div>
+</div>
+</div>
+</aside>
 
-<div class="modal-backdrop" id="note-modal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <span class="modal-title" id="modal-title-text">編輯叮囑 EDIT REMINDER</span>
-      <button class="modal-close-btn" onclick="closeNoteModal()">關閉 X</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-target-id" value=""/>
-      <div class="form-group">
-        <label class="form-label">選擇分類 CATEGORY</label>
-        <div class="form-type-selector" id="modal-type-selector-container"></div>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <div class="form-group">
-          <label class="form-label">筆記給誰 (Notes For)</label>
-          <select class="form-select" id="note-for-select" onchange="onProfileDropdownChange('for')"></select>
-          <input type="text" class="form-input" id="note-for-input" placeholder="例如:家人" style="margin-top:4px;"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">誰寫的筆記 (Notes From)</label>
-          <select class="form-select" id="note-author-select" onchange="onProfileDropdownChange('from')"></select>
-          <input type="text" class="form-input" id="note-author-input" placeholder="例如:家人" style="margin-top:4px;"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">主要標題 / 內容 TITLE / CONTENT</label>
-        <textarea class="form-textarea" id="note-content-input" placeholder="例如:記得食降血壓藥1丸與胃藥..."></textarea>
-      </div>
-      <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label class="form-label" style="margin-bottom:0;">個別卡片每行字數微調 (FONT SIZE)</label>
-          <span id="card-chars-val" style="font-weight:900; color:var(--accent-gold);">8</span>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" class="widget-btn" onclick="changeCardSpecificChars(-1)" style="padding: 4px 12px;">-</button>
-          <input type="range" id="card-chars-range" min="3" max="20" value="8" style="flex:1;" oninput="onCardCharsRangeInput(this.value)"/>
-          <button type="button" class="widget-btn" onclick="changeCardSpecificChars(1)" style="padding: 4px 12px;">+</button>
-        </div>
-      </div>
-      <div class="form-group" id="group-todo-fields" style="display: none;">
-        <label class="form-label">待辦事項清單(每行一項)</label>
-        <textarea class="form-textarea" id="todo-items-input" placeholder="飲一杯溫開水 客廳散步15分鐘 量度血壓"></textarea>
-      </div>
-      <div class="form-group" id="group-media-fields" style="display: none;">
-        <label class="form-label">相片網址 IMAGE URL (選填)</label>
-        <input type="text" class="form-input" id="media-image-input" placeholder="https://images.unsplash.com/..."/>
-        <label class="form-label" style="margin-top: 4px;">外部網頁連結 URL (選填)</label>
-        <input type="text" class="form-input" id="media-url-input" placeholder="https://www.ha.org.hk"/>
-        <label class="form-label" style="margin-top: 4px;">網頁標題 LINK TITLE (選填)</label>
-        <input type="text" class="form-input" id="media-linktitle-input" placeholder="醫院管理局健康資訊"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">即時預覽 LIVE PREVIEW</label>
-        <div id="modal-live-preview" style="background: var(--bg-surface); border: 3px solid var(--border-color); border-radius: 10px; padding: 12px; font-weight: 900; line-height: 1.25; word-break: break-all; white-space: pre-wrap; color: var(--text-main);">...</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">提示時間 TIME / PHASE</label>
-        <input type="text" class="form-input" id="note-time-input" placeholder="例如:09:00 AM / 今日事項"/>
-      </div>
-      <button class="btn-primary-add" style="margin-top: 6px;" onclick="saveNoteChanges()">
-        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>儲存叮囑 SAVE REMINDER</span>
-      </button>
-    </div>
+<!-- ADD/EDIT REMINDER MODAL -->
+<div class="modal" id="modal-rem"><div class="modal-sheet">
+<div class="m-head"><span id="rem-title-lbl">新增自訂叮囑 ‧ ADD</span><button class="m-x" onclick="closeReminder()">關閉 X</button></div>
+<div class="m-body">
+<div class="fl" style="margin-top:0">選擇分類 CATEGORY</div><select class="tin" id="f-cat"></select>
+<div class="fl">筆記給誰 (Notes For)</div><div class="chip-grid" id="f-to" style="background:var(--cream);border:2px solid var(--line);padding:8px;border-radius:12px"></div>
+<div class="fl">誰寫的筆記 (Notes From)</div><div class="chip-grid" id="f-from" style="background:var(--cream);border:2px solid var(--line);padding:8px;border-radius:12px"></div>
+<div class="fl">主要標題 / 內容 TITLE / CONTENT</div><textarea class="tin" id="f-title" rows="3" oninput="updatePreview()"></textarea>
+<div class="fl">個別卡片每行字數微調 (FONT SIZE)</div>
+<div class="trow"><b id="f-font" style="min-width:26px;text-align:center;font-size:1.1rem">8</b><button class="btn-s" onclick="chgFont(-1)">-</button><button class="btn-s" onclick="chgFont(1)">+</button></div>
+<div class="fl">待辦事項清單 (每行一項)</div><textarea class="tin" id="f-ck" rows="3" oninput="updatePreview()"></textarea>
+<div class="fl">相片網址 IMAGE URL (選填)</div><input class="tin" id="f-img" oninput="updatePreview()">
+<div class="fl">外部網頁連結 URL (選填)</div><input class="tin" id="f-url" oninput="updatePreview()">
+<div class="fl">網頁標題 LINK TITLE (選填)</div><input class="tin" id="f-utitle" oninput="updatePreview()">
+<div class="fl">提示時間 * Till</div>
+<div class="time-row"><input type="date" id="f-date" onchange="updatePreview()"><input class="hhmm" id="f-hh" inputmode="numeric" maxlength="2" placeholder="HH" oninput="updatePreview()"><span class="colon">:</span><input class="hhmm" id="f-mm" inputmode="numeric" maxlength="2" placeholder="MM" oninput="updatePreview()"><span class="phase-lbl" id="f-phase"></span></div>
+<div class="fl">即時預覽 ‧ LIVE PREVIEW</div>
+<div class="pv"><div class="pv-card"><div class="to-chip" id="pv-to"></div><div class="ctime" id="pv-time" style="margin-top:6px"></div><div class="ctitle" id="pv-title" style="margin-top:6px"></div><ul class="cklist" id="pv-ck" style="margin-top:6px"></ul></div></div>
+<button class="btn-save" style="width:100%;margin-top:16px;font-size:1.05rem;padding:13px" onclick="saveReminder()">儲存叮囑 ‧ SAVE REMINDER</button>
+</div></div></div>
+
+<!-- PROFILES MANAGER MODAL -->
+<div class="modal" id="modal-pm"><div class="modal-sheet">
+<div class="m-head"><span>成員檔案管理 ‧ PROFILES MANAGER</span><button class="m-x" onclick="closeProfiles()">關閉 X</button></div>
+<div class="m-body">
+<div class="fl" style="margin-top:0">現有成員清單 ‧ MEMBERS</div>
+<div id="pm-list"></div>
+
+<div class="fl" style="border-top:2px solid var(--line);padding-top:12px;margin-top:16px">新增 / 編輯成員檔案 ‧ ADD / EDIT</div>
+<input type="hidden" id="pm-id">
+<input class="tin" id="pm-name" placeholder="成員名稱" oninput="pmPrevUpdate()">
+<label class="btn-photo-big">📷 加入成員相片<input type="file" id="pm-file" accept="image/*" style="display:none" onchange="pmFile(this)"></label>
+<div id="pm-crop-area">
+  <div class="circle-prev" id="pm-prev-wrap"><img id="pm-prev" src=""></div>
+  <div class="trow">
+    <span style="width:40px;font-weight:900">縮放</span>
+    <input type="range" id="pm-zoom" min="0.2" max="3" step="0.05" value="1" style="flex:1" oninput="pmTemp.zoom=+this.value;pmPrevUpdate()">
+    <span id="pm-zoom-val" style="width:42px;text-align:right;font-weight:800;font-size:.8rem">1.0x</span>
   </div>
-</div>
-
-<!-- Profile Manager Modal with Avatar Upload & Cropping Tool -->
-<div class="modal-backdrop" id="profile-manager-modal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <span class="modal-title">成員檔案與頭像管理 PROFILES & AVATARS</span>
-      <button class="modal-close-btn" onclick="closeProfileManagerModal()">關閉 X</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">新增/編輯成員檔案名稱</label>
-        <input type="text" class="form-input" id="manager-profile-name" placeholder="成員名稱(例如:爸爸,媽媽,兒子)"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">大頭照上傳與圓形裁切(頭像相片)</label>
-        <div class="crop-tool-wrapper">
-          <div class="crop-preview-container" id="cropContainer">
-            <canvas id="crop-canvas-elem" width="160" height="160"></canvas>
-          </div>
-          <div style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <input type="file" id="photoUploadInput" accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)"/>
-            <button type="button" class="widget-btn" onclick="document.getElementById('photoUploadInput').click()" style="padding: 6px 12px; background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold);">上傳相片</button>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; font-weight: 900;">縮放:</span>
-              <input type="range" id="cropScaleRange" min="-80" max="80" step="1" value="0" style="width: 90px;" oninput="updateCropTransform()"/>
-            </div>
-            <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-size: 0.75rem; font-weight: 900;">旋轉:</span>
-              <input type="range" id="cropRotateRange" min="0" max="360" step="1" value="0" style="width: 80px;" oninput="updateCropTransform()"/>
-            </div>
-            <button type="button" class="widget-btn" onclick="resetCropTransforms()" style="padding: 6px 8px;">重置</button>
-          </div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800;">提示:可在預覽圓框內直接用滑鼠或手指拖動影像調整人臉位置</span>
-        </div>
-        <button class="btn-primary-add" style="margin-top:8px;" onclick="saveProfileItem()">儲存此成員檔案與頭像</button>
-      </div>
-      <div class="form-group" style="margin-top:10px;">
-        <label class="form-label">現有成員清單</label>
-        <div id="profile-list-container" style="display: flex; flex-direction: column; gap:6px; max-height: 220px; overflow-y:auto;"></div>
-      </div>
-    </div>
+  <div class="trow">
+    <span style="width:40px;font-weight:900">旋轉</span>
+    <input type="range" id="pm-rot" min="0" max="360" step="1" value="0" style="flex:1" oninput="pmTemp.rot=+this.value;pmPrevUpdate()">
+    <span id="pm-rot-val" style="width:42px;text-align:right;font-weight:800;font-size:.8rem">0°</span>
   </div>
+  <div class="trow"><button class="btn-s" onclick="pmReset()">重置</button><span style="font-size:.75rem;font-weight:800;color:#5a6b80">拖動頭像中心點可調整人臉位置。</span></div>
 </div>
+<button class="btn-save" style="width:100%;margin-top:10px" onclick="saveProfile()">儲存成員檔案</button>
+</div></div></div>
 
-<div class="modal-backdrop" id="magnifier-modal">
-  <div class="modal-card">
-    <div class="modal-header">
-      <span class="modal-title">超大字閱讀 MAGNIFIED VIEW</span>
-      <button class="modal-close-btn" onclick="closeMagnifierModal()">關閉 X</button>
-    </div>
-    <div class="modal-body" style="gap: 14px;">
-      <div style="font-size: 1.1rem; font-weight: 900; color: var(--accent-gold);" id="mag-time-badge">09:00 AM</div>
-      <div style="font-weight: 900; line-height: 1.25; color: #FBBF24; padding: 16px; background: #0F172A; border-radius: 12px; word-break: break-all; white-space: pre-wrap;" id="mag-content-box">---</div>
-      <div style="font-size: 1rem; font-weight: 900; color: var(--text-muted);" id="mag-author-badge">---</div>
-      <button class="ack-button" id="mag-ack-btn" style="height: 52px; font-size: 1.1rem;" onclick="toggleAckFromMagnifier()">
-        <span>【 我看到了 ACKNOWLEDGED 】</span>
-      </button>
-    </div>
+<!-- FILTER MODAL -->
+<div class="modal" id="modal-filter"><div class="modal-sheet" style="max-width:440px">
+<div class="m-head"><span>🔍 篩選卡片 ‧ FILTER</span><button class="m-x" onclick="closeFilterModal()">關閉 X</button></div>
+<div class="m-body">
+<div class="fl" style="margin-top:0">對象 (To):</div><select class="tin" id="fl-to"></select>
+<div class="fl">發起人 (From):</div><select class="tin" id="fl-from"></select>
+<div class="fl">分類 (Category):</div><select class="tin" id="fl-cat"></select>
+<div class="fl">指定日期 (Date):</div><input type="date" class="tin" id="fl-date">
+<div class="trow" style="margin-top:12px">
+  <button class="btn-orange" style="flex:1" onclick="applyFilter(false)">套用篩選</button>
+  <button class="btn-orange" style="flex:1;background:var(--purple);border-color:var(--navy)" onclick="applyFilter(true)">最新 5 張卡片</button>
+  <button class="btn-s" style="padding:10px" onclick="resetFilter()">重設全部</button>
+</div>
+</div></div></div>
+
+<!-- PRAISE EDITOR MODAL -->
+<div class="modal" id="modal-pz-edit"><div class="modal-sheet">
+<div class="m-head"><span>編輯讚賞語錄庫</span><button class="m-x" onclick="closePraiseEditor()">關閉 X</button></div>
+<div class="m-body">
+<div class="trow"><input class="tin" id="pz-new-text" placeholder="新增一句溫馨讚賞語..." style="margin:0"><button class="btn-add" onclick="addPraiseText()">新增</button></div>
+<div id="pz-list"></div>
+</div></div></div>
+
+<!-- STICKER MODAL -->
+<div class="modal" id="modal-stk"><div class="modal-sheet" style="max-width:420px">
+<div class="m-head"><span>替換快捷貼紙 ‧ REPLACE STICKER</span><button class="m-x" onclick="cancelSticker()">關閉 X</button></div>
+<div class="m-body">
+<div class="fl" style="margin-top:0">新貼紙文字</div>
+<input class="tin" id="stk-new">
+<div class="fl">選擇要被取代的舊貼紙：</div>
+<div id="stk-radio"></div>
+<button class="btn-save" style="width:100%;margin-top:12px" onclick="confirmSticker()">確認取代</button>
+</div></div></div>
+
+<!-- LOAD MODAL -->
+<div class="modal" id="modal-load"><div class="modal-sheet">
+<div class="m-head"><span>檔案讀取 ‧ LOAD</span><button class="m-x" onclick="closeLoad()">關閉 X</button></div>
+<div class="m-body"><div id="load-list"></div></div>
+</div></div>
+
+<!-- SAVE CONFIRM MODAL -->
+<div class="modal" id="modal-save-confirm"><div class="modal-sheet" style="max-width:420px;border-radius:16px;">
+<div class="m-head"><span>💾 儲存確認 ‧ SAVE CONFIRM</span></div>
+<div class="m-body" style="text-align:center">
+<p style="font-size:1rem;font-weight:900;color:var(--navy);margin-bottom:18px">目前記錄編號：<b style="color:var(--orange-d)" id="confirm-rec-id"></b><br><br>請選擇要【覆蓋當前記錄】還是【另存為新記錄】？</p>
+<div class="trow">
+  <button class="btn-save" style="flex:1" onclick="doSaveOverride()">覆蓋當前記錄</button>
+  <button class="btn-orange" style="flex:1;background:var(--green)" onclick="doSaveNewRecord()">另存新記錄</button>
+</div>
+<button class="btn-plain" style="margin-top:8px" onclick="closeSaveConfirm()">取消</button>
+</div></div></div>
+
+<!-- MAGNIFY FULLSCREEN MODAL -->
+<div class="modal" id="modal-mag"><div class="mag-box">
+<button id="mag-close" onclick="closeMag()">關閉 X</button>
+<div id="mag-time"></div>
+<div id="mag-text"></div>
+<button class="mag-ack" id="mag-ack">【 我看到了 ‧ ACKNOWLEDGED 】</button>
+</div></div>
+
+<!-- HOURLY PRAISE POPUP MODAL -->
+<div class="modal" id="modal-praise" onclick="closePraiseModalBackdrop(event)">
+  <div class="praise-sheet" onclick="event.stopPropagation()">
+    <div class="praise-title">❤️ 智醒長者溫馨關懷 ❤️</div>
+    <div class="praise-msg" id="pz-pop-msg"></div>
+    <div class="praise-timer">視窗將於 <span id="pz-pop-sec">30</span> 秒後自動關閉（點擊任意處可關閉）</div>
   </div>
 </div>
 
 <script>
-'use strict';
-let canvasScale = 1.0;
-let panX = 10.0;
-let panY = 80;
-let isPanningCanvas = false;
-let activePointers = new Map();
+var LS_CUR = 'elderly_care_current';
+var LS_MAN = 'elderly_care_manual';
+var LS_AUTO = 'elderly_care_auto';
 
-let globalProfiles = [
-  { name: '家人', avatarUrl: '' },
-  { name: '爸爸', avatarUrl: '' },
-  { name: '媽媽', avatarUrl: '' }
-];
-let globalProfileNotesFor = '家人';
-let globalProfileNotesFrom = '家人';
-
-let categoriesState = [
-  { id: 'meds', name: '食藥', color: 'var(--accent-red)' },
-  { id: 'clinic', name: '覆診', color: 'var(--accent-blue)' },
-  { id: 'note', name: '家書', color: 'var(--accent-green)' },
-  { id: 'todo', name: '待辦', color: 'var(--accent-green)' },
-  { id: 'media', name: '網頁', color: 'var(--accent-purple)' }
-];
-
-const DEFAULT_WIDGETS = [
-  {
-    id: 'widget-clock',
-    type: 'clock',
-    x: 40,
-    y: 80,
-    collapsed: false
-  },
-  {
-    id: 'widget-sample-1',
-    type: 'meds',
-    x: 410,
-    y: 80,
-    time: '09:00 AM (早餐後)',
-    content: '食降血壓丸與胃藥',
-    author: '家人',
-    notesFor: '家人',
-    authorRole: '家',
-    avatarUrl: '',
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
-  },
-  {
-    id: 'widget-sample-todo',
-    type: 'todo',
-    x: 780,
-    y: 80,
-    time: '今日日常事項',
-    content: '早晨健康打卡清單',
-    author: '家人',
-    notesFor: '家人',
-    authorRole: '家',
-    avatarUrl: '',
-    tasks: [
-      { id: 't1', text: '飲一杯溫開水', done: true },
-      { id: 't2', text: '客廳散步 15分鐘', done: false },
-      { id: 't3', text: '量度血壓並記錄', done: false }
-    ],
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
-  },
-  {
-    id: 'widget-sample-media',
-    type: 'media',
-    x: 1150,
-    y: 80,
-    time: '健康小百科',
-    content: '降血壓飲食原則:每日鹽分攝取小於5克,多食新鮮蔬菜與高鉀水果。',
-    author: '家人',
-    notesFor: '家人',
-    authorRole: '家',
-    avatarUrl: '',
-    imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
-    linkUrl: 'https://www.ha.org.hk',
-    linkTitle: '醫院管理局健康資訊網',
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
-  },
-  {
-    id: 'widget-sample-2',
-    type: 'clinic',
-    x: 40,
-    y: 460,
-    time: '下午02:30 (眼科)',
-    content: '威爾斯醫院眼科覆診',
-    author: '家人',
-    notesFor: '家人',
-    authorRole: '家',
-    avatarUrl: '',
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
-  },
-  {
-    id: 'widget-sample-3',
-    type: 'note',
-    x: 410,
-    y: 460,
-    time: '08:00 AM 叮囑',
-    content: '水壺已裝滿溫開水',
-    author: '家人',
-    notesFor: '家人',
-    authorRole: '家',
-    avatarUrl: '',
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
+// Helper selector & string utilities
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function rid8(){
+  return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+function uid(prefix){
+  return (prefix || 'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6);
+}
+function todayStr(){
+  var d = new Date();
+  var month = '' + (d.getMonth() + 1);
+  var day = '' + d.getDate();
+  var year = d.getFullYear();
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+  return [year, month, day].join('-');
+}
+function chunk(s, n){
+  if(!s) return [];
+  var res = [];
+  for(var i = 0; i < s.length; i += n){
+    res.push(s.slice(i, i + n));
   }
+  return res;
+}
+
+// Preset praise greetings
+var DEFAULT_GREETINGS = [
+  '天氣轉變，記得穿夠衣服保持溫暖喔！',
+  '辛苦了！記得飲杯溫水，休息一下。',
+  '保持愉快心情，今天也是美好的一天！',
+  '適量做做伸展運動，身體更健康！',
+  '家人一直在關心您，祝您順心如意！'
 ];
 
-let widgetsState = [];
-let selectedNoteType = 'meds';
-let activeMagnifiedCardId = null;
-let maxZIndex = 100;
-let isAllCollapsed = false;
-let charsPerLine = 8;
-let currentSaveSlot = '1';
+// Global runtime variables
+var panX = 0, panY = 0;
+var dirHandle = null;
+var editId = null;
+var curTo = null;
+var curFrom = null;
+var fontAdj = 0;
+var pmTemp = {img:'', aspect:1, zoom:1, rot:0, dx:0, dy:0, imgW:140, imgH:140};
+var stkCardId = null;
+var dragCard = null;
+var panning = false;
+var px0 = 0, py0 = 0;
+var activeFilter = null;
+var praiseTimer = null;
+var praiseCountdown = null;
 
-// Avatar Crop Variables
-let cropImageObj = null;
-let cropFocalX = 80;
-let cropFocalY = 80;
-let cropScale = 1;
-let cropRotate = 0;
-let isDraggingCrop = false;
-let dragCropStartX = 0;
-let dragCropStartY = 0;
-let cropPointers = new Map();
-let managerTempAvatarUrl = '';
-
-function showToast(msg) {
-  const toast = document.getElementById('toast-notification');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.classList.add('visible');
-  setTimeout(() => {
-    toast.classList.remove('visible');
-  }, 2200);
+function fallbackAvatar(name){
+  return '';
 }
 
-function loadWidgetsFromStorage() {
-  try {
-    const savedProfiles = localStorage.getItem('care_canvas_profiles_list');
-    if (savedProfiles) globalProfiles = JSON.parse(savedProfiles);
-    const savedCats = localStorage.getItem('care_canvas_categories_list');
-    if (savedCats) categoriesState = JSON.parse(savedCats);
-    const savedFor = localStorage.getItem('care_canvas_profile_for');
-    const savedFrom = localStorage.getItem('care_canvas_profile_from');
-    if (savedFor !== null) globalProfileNotesFor = savedFor;
-    if (savedFrom !== null) globalProfileNotesFrom = savedFrom;
-    
-    updateProfileDropdownsUI();
-    const activeSlot = localStorage.getItem('care_canvas_active_slot') || '1';
-    currentSaveSlot = activeSlot;
-    updateSlotButtonsUI();
-    
-    const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
-    if (saved) {
-      widgetsState = JSON.parse(saved);
-    } else {
-      const legacy = localStorage.getItem('care_canvas_widgets_v7');
-      if (legacy) {
-        widgetsState = JSON.parse(legacy);
-      } else {
-        widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
-      }
-    }
-  } catch(e) {
-    widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
-  }
-  
-  try {
-    const savedChars = localStorage.getItem('care_canvas_chars_per_line');
-    if (savedChars) {
-      charsPerLine = parseInt(savedChars, 10) || 8;
-    }
-  } catch(e) {
-    charsPerLine = 8;
-  }
-  updateCharsPerLineDisplay();
-  renderCategoriesRow();
+/* AVATAR RENDERER */
+function avatarHTML(p, size){
+  if(!p || !p.avatar) return '';
+  size = size || 46;
+  var avatarSrc = p.avatar;
+  var zm = p.zoom !== undefined ? Math.max(0.1, p.zoom) : 1;
+  var dx = p.dx || 0;
+  var dy = p.dy || 0;
+  var rot = p.rot || 0;
+  return '<span class="av-box" style="width:'+size+'px;height:'+size+'px;--dx:'+dx+';--dy:'+dy+';--zm:'+zm+';--rot:'+rot+'"><img src="'+esc(avatarSrc)+'" style="width:100%;height:100%;object-fit:cover;"></span>';
 }
 
-function saveGlobalProfiles() {
-  const selTo = document.getElementById('default-profile-to');
-  const selFrom = document.getElementById('default-profile-from');
-  if (selTo) globalProfileNotesFor = selTo.value;
-  if (selFrom) globalProfileNotesFrom = selFrom.value;
-  try {
-    localStorage.setItem('care_canvas_profile_for', globalProfileNotesFor);
-    localStorage.setItem('care_canvas_profile_from', globalProfileNotesFrom);
-  } catch(e) {}
-}
-
-function updateProfileDropdownsUI() {
-  ['default-profile-to', 'default-profile-from', 'note-for-select', 'note-author-select'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const currentVal = el.value;
-    el.innerHTML = '';
-    globalProfiles.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.name;
-      opt.textContent = p.name;
-      el.appendChild(opt);
-    });
-    if (id === 'default-profile-to' && globalProfiles.some(p => p.name === globalProfileNotesFor)) {
-      el.value = globalProfileNotesFor;
-    } else if (id === 'default-profile-from' && globalProfiles.some(p => p.name === globalProfileNotesFrom)) {
-      el.value = globalProfileNotesFrom;
-    } else if (currentVal && globalProfiles.some(p => p.name === currentVal)) {
-      el.value = currentVal;
-    }
-  });
-}
-
-function onProfileDropdownChange(type) {
-  if (type === 'for') {
-    const sel = document.getElementById('note-for-select');
-    const input = document.getElementById('note-for-input');
-    if (sel && input) input.value = sel.value;
-  } else if (type === 'from') {
-    const sel = document.getElementById('note-author-select');
-    const input = document.getElementById('note-author-input');
-    if (sel && input) input.value = sel.value;
-  }
-}
-
-function openProfileManagerModal() {
-  renderProfileListInManager();
-  resetCropDefaults();
-  document.getElementById('profile-manager-modal').classList.add('active');
-}
-
-function closeProfileManagerModal() {
-  document.getElementById('profile-manager-modal').classList.remove('active');
-}
-
-function saveProfileItem() {
-  const nameInput = document.getElementById('manager-profile-name');
-  const name = nameInput.value.trim();
-  if (!name) {
-    showToast('請輸入成員名稱');
-    return;
-  }
-  const avatarData = getCroppedAvatarDataURL();
-  const existing = globalProfiles.find(p => p.name === name);
-  if (existing) {
-    if (avatarData) existing.avatarUrl = avatarData;
-  } else {
-    globalProfiles.push({ name, avatarUrl: avatarData || '' });
-  }
-  try {
-    localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
-  } catch(e) {}
-  nameInput.value = '';
-  managerTempAvatarUrl = '';
-  resetCropDefaults();
-  updateProfileDropdownsUI();
-  renderProfileListInManager();
-  renderAllWidgets();
-  showToast('成員檔案與頭像已儲存');
-}
-
-function renderProfileListInManager() {
-  const container = document.getElementById('profile-list-container');
-  if (!container) return;
-  container.innerHTML = '';
-  globalProfiles.forEach(p => {
-    const row = document.createElement('div');
-    row.style.cssText = 'display: flex; align-items:center; justify-content: space-between; padding: 6px 10px; background: var(--bg-surface); border:2px solid var(--border-color); border-radius: 8px;';
-    row.innerHTML = `
-      <div style="display: flex; align-items:center; gap:8px;">
-        <div class="author-avatar">${p.avatarUrl ? `<img src="${p.avatarUrl}"/>` : p.name.charAt(0)}</div>
-        <span style="font-weight:900; font-size:0.9rem;">${escapeHTML(p.name)}</span>
-      </div>
-      <div style="display: flex; gap:4px;">
-        <button class="widget-btn" onclick="loadProfileIntoManagerForEdit('${escapeHTML(p.name)}')">編輯</button>
-        <button class="widget-btn" style="color: var(--accent-red);" onclick="deleteProfileItem('${escapeHTML(p.name)}')">刪除</button>
-      </div>
-    `;
-    container.appendChild(row);
-  });
-}
-
-function loadProfileIntoManagerForEdit(name) {
-  const found = globalProfiles.find(p => p.name === name);
-  if (!found) return;
-  document.getElementById('manager-profile-name').value = found.name;
-  if (found.avatarUrl) {
-    loadCropImageFromUrl(found.avatarUrl);
-  } else {
-    resetCropDefaults();
-  }
-  showToast(`已載入 ${name} 的資料供編輯頭像`);
-}
-
-function deleteProfileItem(name) {
-  if (globalProfiles.length <= 1) {
-    showToast('至少需保留一個成員檔案');
-    return;
-  }
-  globalProfiles = globalProfiles.filter(p => p.name !== name);
-  try {
-    localStorage.setItem('care_canvas_profiles_list', JSON.stringify(globalProfiles));
-  } catch(e) {}
-  updateProfileDropdownsUI();
-  renderProfileListInManager();
-  renderAllWidgets();
-  showToast('成員檔案已刪除');
-}
-
-function addNewCategory() {
-  const input = document.getElementById('new-category-input');
-  const name = input.value.trim();
-  if (!name) {
-    showToast('請輸入分類名稱');
-    return;
-  }
-  const id = 'cat_' + Date.now();
-  const colors = ['var(--accent-red)', 'var(--accent-blue)', 'var(--accent-green)', 'var(--accent-gold)', 'var(--accent-purple)'];
-  const color = colors[categoriesState.length % colors.length];
-  categoriesState.push({ id, name, color });
-  try {
-    localStorage.setItem('care_canvas_categories_list', JSON.stringify(categoriesState));
-  } catch(e) {}
-  input.value = '';
-  renderCategoriesRow();
-  showToast('已新增分類');
-}
-
-function renameCategory(id) {
-  const cat = categoriesState.find(c => c.id === id);
-  if (!cat) return;
-  const newName = prompt('請輸入新的分類名稱:', cat.name);
-  if (newName && newName.trim()) {
-    cat.name = newName.trim();
-    try {
-      localStorage.setItem('care_canvas_categories_list', JSON.stringify(categoriesState));
-    } catch(e) {}
-    renderCategoriesRow();
-    renderAllWidgets();
-    showToast('分類已重新命名');
-  }
-}
-
-function renderCategoriesRow() {
-  const container = document.getElementById('categories-row-container');
-  if (container) {
-    container.innerHTML = categoriesState.map(c => `
-      <div style="display: flex; align-items:center; gap:4px; background: var(--bg-card); border:2px solid var(--border-color); border-radius: 6px; padding: 4px 8px;">
-        <span style="font-weight:900; font-size:0.8rem; color:${c.color};">${escapeHTML(c.name)}</span>
-        <button class="widget-btn" style="padding: 1px 4px; font-size:0.7rem;" onclick="renameCategory('${c.id}')">改</button>
-      </div>
-    `).join('');
-  }
-  const modalTypeContainer = document.getElementById('modal-type-selector-container');
-  if (modalTypeContainer) {
-    const colCount = Math.min(categoriesState.length, 5);
-    modalTypeContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
-    modalTypeContainer.innerHTML = categoriesState.map(c => `
-      <button type="button" class="type-option-btn ${selectedNoteType === c.id ? 'selected' : ''}" data-type="${c.id}" onclick="selectTypeOption(this, '${c.id}')">${escapeHTML(c.name)}</button>
-    `).join('');
-  }
-}
-
-function updateSlotButtonsUI() {
-  ['1', '2', '3', 'auto'].forEach(slot => {
-    const btn = document.getElementById(`slot-btn-${slot}`);
-    if (btn) {
-      if (String(slot) === String(currentSaveSlot)) {
-        btn.classList.add('selected');
-      } else {
-        btn.classList.remove('selected');
-      }
-    }
-  });
-}
-
-function switchSaveSlot(slot) {
-  currentSaveSlot = String(slot);
-  try {
-    localStorage.setItem('care_canvas_active_slot', currentSaveSlot);
-  } catch(e) {}
-  updateSlotButtonsUI();
-  try {
-    const saved = localStorage.getItem(`care_canvas_slot_${currentSaveSlot}`);
-    if (saved) {
-      widgetsState = JSON.parse(saved);
-    } else {
-      widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
-    }
-  } catch(e) {
-    widgetsState = JSON.parse(JSON.stringify(DEFAULT_WIDGETS));
-  }
-  renderAllWidgets();
-  showToast(`已切換至槽位 ${currentSaveSlot}`);
-}
-
-function triggerManualSave() {
-  saveWidgetsToStorage();
-  showToast(`資料已手動儲存至槽位 ${currentSaveSlot}`);
-}
-
-function triggerManualLoad() {
-  loadWidgetsFromStorage();
-  renderAllWidgets();
-  showToast(`已從槽位 ${currentSaveSlot} 讀取資料`);
-}
-
-function updateCharsPerLineDisplay() {
-  const el = document.getElementById('chars-per-line-val');
-  if (el) el.textContent = charsPerLine;
-}
-
-function changeCharsPerLine(delta) {
-  charsPerLine = Math.max(3, Math.min(20, charsPerLine + delta));
-  try {
-    localStorage.setItem('care_canvas_chars_per_line', charsPerLine.toString());
-  } catch(e) {}
-  updateCharsPerLineDisplay();
-  renderAllWidgets();
-  updateModalLivePreview();
-  showToast(`全域預設每行字數已設為 ${charsPerLine} 字`);
-}
-
-function escapeHTML(str) {
-  return String(str || '')
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """)
-    .replace(/'/g, "'");
-}
-
-function formatContentWithDynamicFont(text, maxChars, cardWidthPx) {
-  if (!text) return { html: '', fontSize: '32px' };
-  const limit = maxChars || 8;
-  const width = cardWidthPx || 320;
-  const availableWidth = width - 24;
-  let calculatedFontSizePx = Math.floor(availableWidth / (limit * 0.95));
-  calculatedFontSizePx = Math.max(22, Math.min(52, calculatedFontSizePx));
-  
-  const lines = String(text).split('\n');
-  const formatted = lines.map(line => {
-    let result = '';
-    const cleanLine = line.replace(/\s+/g,'');
-    for (let i = 0; i < cleanLine.length; i += limit) {
-      const chunk = cleanLine.slice(i, i + limit);
-      result += escapeHTML(chunk);
-      if (i + limit < cleanLine.length) {
-        result += '<br>';
-      }
-    }
-    return result;
-  });
+function defaultState(){
   return {
-    html: formatted.join('<br>'),
-    fontSize: `${calculatedFontSizePx}px`
-  };
-}
-
-function updateCanvasTransform() {
-  const container = document.getElementById('widgets-container');
-  if (container) {
-    container.style.transform = `translate(${panX}px, ${panY}px) scale(${canvasScale})`;
-  }
-  const indicator = document.getElementById('zoom-level-indicator');
-  if (indicator) indicator.textContent = `${Math.round(canvasScale * 100)}%`;
-}
-
-function resetZoom() {
-  canvasScale = 1.0;
-  panX = 40;
-  panY = 70;
-  updateCanvasTransform();
-  showToast('畫面縮放與中心已重置');
-}
-
-function resetCardArrangement() {
-  const startX = 40;
-  const startY = 80;
-  const colWidth = 370;
-  const rowHeight = 380;
-  const maxCols = 3;
-  widgetsState.forEach((w, index) => {
-    const col = index % maxCols;
-    const row = Math.floor(index / maxCols);
-    w.x = startX + col * colWidth;
-    w.y = startY + row * rowHeight;
-    w.collapsed = false;
-  });
-  panX = 20;
-  panY = 70;
-  canvasScale = 1.0;
-  saveWidgetsToStorage();
-  renderAllWidgets();
-  updateCanvasTransform();
-  showToast('卡片已自動整齊排列');
-}
-
-function saveWidgetsToStorage() {
-  try {
-    const dataStr = JSON.stringify(widgetsState);
-    localStorage.setItem(`care_canvas_slot_${currentSaveSlot}`, dataStr);
-    localStorage.setItem('care_canvas_slot_auto', dataStr);
-  } catch(e) {
-    console.warn('LocalStorage save skipped', e);
-  }
-}
-
-function renderAllWidgets() {
-  const container = document.getElementById('widgets-container');
-  container.innerHTML = '';
-  widgetsState.forEach(w => {
-    const el = createWidgetDOM(w);
-    container.appendChild(el);
-    initDraggableWidget(el);
-  });
-  updateClock();
-}
-
-function createWidgetDOM(w) {
-  const card = document.createElement('div');
-  card.id = w.id;
-  card.style.left = `${w.x}px`;
-  card.style.top = `${w.y}px`;
-  card.addEventListener('pointerdown', () => bringToFront(card));
-
-  if (w.type === 'clock') {
-    card.className = `canvas-widget type-clock ${w.collapsed ? 'collapsed-mode' : ''}`;
-    if (w.collapsed) {
-      card.innerHTML = `
-        <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
-          <div style="display: flex; align-items:center; gap:6px;">
-            <svg class="svg-icon" style="color:var(--accent-gold);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span class="collapsed-pill-title">智醒大時鐘</span>
-          </div>
-          <button class="widget-btn">展開</button>
-        </div>
-      `;
-    } else {
-      card.innerHTML = `
-        <div class="widget-header">
-          <span class="widget-category-tag">CLOCK 時鐘</span>
-          <div class="widget-controls">
-            <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-          </div>
-        </div>
-        <div class="widget-body">
-          <div class="clock-display-main" id="clock-time-val">00:00</div>
-          <div style="text-align:center; font-weight: 900; color:var(--text-muted); font-size:0.95rem;" id="clock-date-val">2026年9月18日</div>
-          <div style="margin-top: 10px; padding: 8px 6px; background: rgba(0,0,0,0.03); border: 2.5px solid var(--border-color); border-radius: 12px; text-align: center;">
-            <div style="font-size: 0.76rem; font-family: var(--font-sans); font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
-              晝夜太陽軌跡 SOLAR ARC OF THE DAY
-            </div>
-            <svg id="solar-arc-svg" viewBox="0 0 300 115" style="width: 100%; max-width: 280px; height: auto; overflow: visible; display: block; margin: 0 auto;">
-              <line x1="15" y1="85" x2="285" y2="85" stroke="var(--border-color)" stroke-width="2" stroke-dasharray="4" opacity="0.5"/>
-              <path id="day-arc-path" d="M 30 85 A 120 70 0 0 1 270 85" fill="none" stroke="var(--accent-gold)" stroke-width="3.5" stroke-linecap="round"/>
-              <path id="night-arc-path" d="M 270 85 A 120 25 0 0 1 30 85" fill="none" stroke="#64748B" stroke-width="2" stroke-dasharray="3 3" opacity="0.6"/>
-              <g id="solar-indicator-group">
-                <circle id="solar-indicator-glow" cx="30" cy="85" r="13" fill="#FBBF24" opacity="0.45"/>
-                <circle id="solar-indicator-core" cx="30" cy="85" r="7.5" fill="#D97706" stroke="#FFFFFF" stroke-width="2"/>
-              </g>
-              <circle cx="30" cy="85" r="3.5" fill="var(--text-main)"/>
-              <text x="30" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">06:00 晨</text>
-              <circle cx="150" cy="15" r="3.5" fill="var(--accent-gold)"/>
-              <text x="150" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--accent-gold)">12:00 午</text>
-              <circle cx="270" cy="85" r="3.5" fill="var(--text-main)"/>
-              <text x="270" y="103" text-anchor="middle" font-family="var(--font-sans)" font-size="10" font-weight="900" fill="var(--text-main)">18:00 昏</text>
-            </svg>
-            <div id="solar-phase-badge" style="font-size: 0.9rem; font-weight: 900; color: var(--accent-gold); margin-top: 2px;">
-              早上 Morning
-            </div>
-          </div>
-        </div>
-      `;
+    recordId: rid8(),
+    profiles: [
+      {id:'p1', name:'家人', avatar:'', zoom:1, rot:0, dx:0, dy:0},
+      {id:'p2', name:'爺爺', avatar:'', zoom:1, rot:0, dx:0, dy:0},
+      {id:'p3', name:'奶奶', avatar:'', zoom:1, rot:0, dx:0, dy:0}
+    ],
+    categories: [
+      {id:'c1', name:'食藥', color:'#d64545'},
+      {id:'c2', name:'覆診', color:'#7b5cd6'},
+      {id:'c3', name:'家書', color:'#3a7d44'},
+      {id:'c4', name:'待辦', color:'#f28c1b'},
+      {id:'c5', name:'網頁', color:'#4a90e2'}
+    ],
+    stickers: [
+      {ico:'💧', t:'記得飲水', c:'#4a90e2'},
+      {ico:'🔔', t:'返嚟食飯', c:'#f28c1b'},
+      {ico:'👕', t:'天冷穿衣', c:'#d64545'},
+      {ico:'📈', t:'量度血壓', c:'#3a7d44'}
+    ],
+    reminders: [
+      {id:'clock', type:'clock', x:30, y:20, collapsed:false},
+      {id:'r1', catId:'c1', toId:'p1', fromId:'p1', title:'食降血壓丸與胃藥', ck:[], img:'', url:'', ut:'', fontAdj:0, date:todayStr(), hh:'08', mm:'00', stkOn:false, stkIdx:-1, acked:false, x:340, y:20, collapsed:false},
+      {id:'r2', catId:'c4', toId:'p1', fromId:'p1', title:'今日注意事項', ck:[{t:'飲一杯溫開水',done:true},{t:'客廳散步 15 分鐘',done:false},{t:'量血壓並記錄',done:false}], img:'', url:'', ut:'', fontAdj:0, date:todayStr(), hh:'09', mm:'30', stkOn:false, stkIdx:-1, acked:false, x:650, y:20, collapsed:false},
+      {id:'r_health', catId:'c5', toId:'p1', fromId:'p1', title:'健康旦 ‧ 每日健康長壽養生小貼士：保持適度運動，均衡飲食，每天多喝溫開水。', ck:[{t:'觀看健康旦養生影片',done:false},{t:'做簡單伸展運動 10 分鐘',done:true}], img:'', url:'https://www.youtube.com/@HiBossHealthDan', ut:'📺 YouTube 健康旦 - 點擊觀看健康資訊', fontAdj:0, date:todayStr(), hh:'10', mm:'00', stkOn:false, stkIdx:-1, acked:false, x:340, y:380, collapsed:false}
+    ],
+    settings: {
+      defaultTo: 'p1',
+      defaultFrom: 'p1',
+      textPerRow: 8,
+      zoom: 1,
+      eye: false,
+      sectionOrder: ['add','profiles','categories','stickers','praise','save','organize','textrow'],
+      collapseAll: false
+    },
+    praiseSettings: {
+      enabled: true,
+      intervalMins: 60,
+      sleepPause: true,
+      list: DEFAULT_GREETINGS.slice()
     }
-    return card;
-  }
-
-  let tagTitle = 'MESSAGE · 叮囑';
-  let categoryColor = 'var(--accent-green)';
-  const foundCat = categoriesState.find(c => c.id === w.type);
-  if (foundCat) {
-    tagTitle = `${foundCat.name.toUpperCase()} 分類`;
-    categoryColor = foundCat.color;
-  } else if (w.type === 'meds') {
-    tagTitle = 'MEDS · 食藥';
-    categoryColor = 'var(--accent-red)';
-  } else if (w.type === 'clinic') {
-    tagTitle = 'CLINIC · 覆診';
-    categoryColor = 'var(--accent-blue)';
-  } else if (w.type === 'todo') {
-    tagTitle = 'TODO · 待辦';
-    categoryColor = 'var(--accent-green)';
-  } else if (w.type === 'media') {
-    tagTitle = 'MEDIA · 網頁筆記';
-    categoryColor = 'var(--accent-purple)';
-  }
-
-  card.className = `canvas-widget ${w.collapsed ? 'collapsed-mode' : ''}`;
-  card.style.borderLeft = `10px solid ${categoryColor}`;
-  if (w.collapsed) {
-    card.innerHTML = `
-      <div class="collapsed-pill-box" onclick="toggleCardCollapse('${w.id}')">
-        <div style="display: flex; align-items:center; gap: 6px;">
-          <span class="collapsed-pill-title">${escapeHTML(w.content)}</span>
-        </div>
-        <button class="widget-btn">展開</button>
-      </div>
-    `;
-    return card;
-  }
-
-  const ackClass = w.acknowledged ? 'acknowledged' : '';
-  const ackText = w.acknowledged ? '【已收到 ACKNOWLEDGED】' : '【我看到了 ACKNOWLEDGED】';
-  const effectiveChars = w.charsPerLine || charsPerLine;
-  const authorName = w.author || '家人';
-  const notesForName = w.notesFor || '家人';
-
-  let avatarHTML = `<div class="author-avatar">${escapeHTML(authorName.charAt(0) || '家')}</div>`;
-  const authorProfile = globalProfiles.find(p => p.name === authorName);
-  if (authorProfile && authorProfile.avatarUrl && authorProfile.avatarUrl.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(authorProfile.avatarUrl)}" alt="Avatar"/></div>`;
-  } else if (w.avatarUrl && w.avatarUrl.trim() !== '') {
-    avatarHTML = `<div class="author-avatar"><img src="${escapeHTML(w.avatarUrl)}" alt="Avatar"/></div>`;
-  }
-
-  if (w.type === 'todo') {
-    const tasks = w.tasks || [];
-    const completedCount = tasks.filter(t => t.done).length;
-    const totalCount = tasks.length;
-    let tasksHTML = tasks.map(t => `
-      <div class="todo-item-row ${t.done ? 'completed' : ''}" onclick="toggleTaskDone('${w.id}', '${t.id}')">
-        <div class="todo-checkbox">
-          ${t.done ? '<svg class="svg-icon" style="width: 14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-        </div>
-        <span class="todo-item-text">${escapeHTML(t.text)}</span>
-      </div>
-    `).join('');
-
-    card.innerHTML = `
-      <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag" style="background: ${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
-        <div class="widget-controls">
-          <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯待辦">
-            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            <span>編輯</span>
-          </button>
-          <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color:var(--accent-red);">
-            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="widget-body">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div class="widget-time-badge">
-            <span>${escapeHTML(w.time || '待辦事項')}</span>
-          </div>
-          <span style="font-size: 0.85rem; font-weight: 900; color: var(--accent-green); background: var(--accent-green-bg); padding: 3px 8px; border-radius: 6px;">已完成 ${completedCount}/${totalCount}</span>
-        </div>
-        <div style="font-weight: 900; font-size: 1.1rem; color: var(--text-main); margin-top: 2px;">${escapeHTML(w.content)}</div>
-        <div class="todo-items-list">${tasksHTML}</div>
-        <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')" style="margin-top: 4px;">
-          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>${ackText}</span>
-        </button>
-      </div>
-      <div class="widget-footer-stamp">
-        <span>給: ${escapeHTML(notesForName)}</span>
-        <div class="author-avatar-container">
-          ${avatarHTML}
-          <span>${escapeHTML(authorName)}</span>
-        </div>
-      </div>
-    `;
-    return card;
-  }
-
-  if (w.type === 'media') {
-    const hasImg = w.imageUrl && w.imageUrl.trim().length > 0;
-    const hasLink = w.linkUrl && w.linkUrl.trim().length > 0;
-    const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
-    card.innerHTML = `
-      <div class="widget-header" style="cursor: inherit;">
-        <span class="widget-category-tag" style="background: ${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
-        <div class="widget-controls">
-          <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯網頁筆記">
-            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            <span>編輯</span>
-          </button>
-          <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-          <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color: var(--accent-red);">
-            <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="widget-body">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div class="widget-time-badge">
-            <span>${escapeHTML(w.time || '網頁筆記')}</span>
-          </div>
-          <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
-            <svg class="svg-icon" style="width: 13px; height: 13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            <span>放大</span>
-          </button>
-        </div>
-        ${hasImg ? `
-        <div class="media-thumbnail-container">
-          <img src="${escapeHTML(w.imageUrl)}" alt="Media photo" onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80'"/>
-        </div>` : ''}
-        <div class="widget-content-text" style="font-size: ${renderedContent.fontSize};">${renderedContent.html}</div>
-        ${hasLink ? `
-        <a href="${escapeHTML(w.linkUrl)}" target="_blank" rel="noopener noreferrer" class="media-link-badge">
-          <div style="display: flex; align-items:center; gap: 6px; overflow:hidden;">
-            <svg class="svg-icon" style="color:var(--accent-purple);" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            <span style="overflow:hidden; text-overflow:ellipsis; white-space: nowrap;">${escapeHTML(w.linkTitle || w.linkUrl)}</span>
-          </div>
-          <span style="font-size:0.75rem; white-space: nowrap;">開啟</span>
-        </a>` : ''}
-        <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
-          <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>${ackText}</span>
-        </button>
-      </div>
-      <div class="widget-footer-stamp">
-        <span>給: ${escapeHTML(notesForName)}</span>
-        <div class="author-avatar-container">
-          ${avatarHTML}
-          <span>${escapeHTML(authorName)}</span>
-        </div>
-      </div>
-    `;
-    return card;
-  }
-
-  const renderedContent = formatContentWithDynamicFont(w.content, effectiveChars, 320);
-  card.innerHTML = `
-    <div class="widget-header" style="cursor: inherit;">
-      <span class="widget-category-tag" style="background:${categoryColor}">${tagTitle} (給: ${escapeHTML(notesForName)})</span>
-      <div class="widget-controls">
-        <button class="widget-btn" onclick="openEditNoteModal('${w.id}')" title="編輯內容">
-          <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          <span>編輯</span>
-        </button>
-        <button class="widget-btn" onclick="toggleCardCollapse('${w.id}')">折疊</button>
-        <button class="widget-btn" onclick="removeWidget('${w.id}')" style="color: var(--accent-red);">
-          <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="widget-body">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <div class="widget-time-badge">
-          <span>${escapeHTML(w.time || '即時提醒')}</span>
-        </div>
-        <button class="widget-btn" onclick="openMagnifierModal('${w.id}')">
-          <svg class="svg-icon" style="width: 13px; height: 13px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-          <span>放大</span>
-        </button>
-      </div>
-      <div class="widget-content-text" style="font-size: ${renderedContent.fontSize};">${renderedContent.html}</div>
-      <button class="ack-button ${ackClass}" onclick="toggleAck('${w.id}')">
-        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>${ackText}</span>
-      </button>
-    </div>
-    <div class="widget-footer-stamp">
-      <span>給: ${escapeHTML(notesForName)}</span>
-      <div class="author-avatar-container">
-        ${avatarHTML}
-        <span>${escapeHTML(authorName)}</span>
-      </div>
-    </div>
-  `;
-  return card;
-}
-
-function toggleTaskDone(widgetId, taskId) {
-  const w = widgetsState.find(item => item.id === widgetId);
-  if (!w || !w.tasks) return;
-  const task = w.tasks.find(t => t.id === taskId);
-  if (task) {
-    task.done = !task.done;
-    saveWidgetsToStorage();
-    renderAllWidgets();
-    showToast('待辦進度已更新');
-  }
-}
-
-function bringToFront(cardEl) {
-  maxZIndex++;
-  cardEl.style.zIndex = maxZIndex;
-}
-
-function toggleCardCollapse(id) {
-  const target = widgetsState.find(w => w.id === id);
-  if (target) {
-    target.collapsed = !target.collapsed;
-    saveWidgetsToStorage();
-    renderAllWidgets();
-  }
-}
-
-function toggleCollapseAll() {
-  isAllCollapsed = !isAllCollapsed;
-  widgetsState.forEach(w => w.collapsed = isAllCollapsed);
-  saveWidgetsToStorage();
-  renderAllWidgets();
-  showToast(isAllCollapsed ? '已全部折疊成圖標' : '已全部展開大字卡片');
-}
-
-function openAddNoteModal() {
-  document.getElementById('edit-target-id').value = '';
-  document.getElementById('modal-title-text').textContent = '新增叮囑 ADD REMINDER';
-  document.getElementById('note-content-input').value = '';
-  document.getElementById('todo-items-input').value = '飲一杯溫開水\n散步15分鐘\n量度血壓';
-  document.getElementById('media-image-input').value = '';
-  document.getElementById('media-url-input').value = '';
-  document.getElementById('media-linktitle-input').value = '';
-  document.getElementById('note-time-input').value = '';
-  
-  updateProfileDropdownsUI();
-  const selTo = document.getElementById('note-for-select');
-  const selFrom = document.getElementById('note-author-select');
-  if (selTo) selTo.value = globalProfileNotesFor;
-  if (selFrom) selFrom.value = globalProfileNotesFrom;
-  document.getElementById('note-for-input').value = globalProfileNotesFor;
-  document.getElementById('note-author-input').value = globalProfileNotesFrom;
-  
-  const rangeInput = document.getElementById('card-chars-range');
-  if (rangeInput) rangeInput.value = charsPerLine;
-  const charsValEl = document.getElementById('card-chars-val');
-  if (charsValEl) charsValEl.textContent = charsPerLine;
-  
-  selectedNoteType = categoriesState.length > 0 ? categoriesState[0].id : 'meds';
-  renderCategoriesRow();
-  updateModalFormFieldsVisibility();
-  updateModalLivePreview();
-  document.getElementById('note-modal').classList.add('active');
-  toggleSidebar(false);
-}
-
-function openEditNoteModal(id) {
-  const w = widgetsState.find(item => item.id === id);
-  if (!w) return;
-  document.getElementById('edit-target-id').value = w.id;
-  document.getElementById('modal-title-text').textContent = '編輯項目・EDIT CARD';
-  document.getElementById('note-content-input').value = w.content || '';
-  document.getElementById('note-time-input').value = w.time || '';
-  
-  updateProfileDropdownsUI();
-  const selTo = document.getElementById('note-for-select');
-  const selFrom = document.getElementById('note-author-select');
-  if (selTo && w.notesFor) selTo.value = w.notesFor;
-  if (selFrom && w.author) selFrom.value = w.author;
-  document.getElementById('note-for-input').value = w.notesFor || globalProfileNotesFor;
-  document.getElementById('note-author-input').value = w.author || globalProfileNotesFrom;
-  
-  const cardChars = w.charsPerLine || charsPerLine;
-  const rangeInput = document.getElementById('card-chars-range');
-  if (rangeInput) rangeInput.value = cardChars;
-  const charsValEl = document.getElementById('card-chars-val');
-  if (charsValEl) charsValEl.textContent = cardChars;
-  
-  if (w.type === 'todo' && w.tasks) {
-    document.getElementById('todo-items-input').value = w.tasks.map(t => t.text).join('\n');
-  }
-  if (w.type === 'media') {
-    document.getElementById('media-image-input').value = w.imageUrl || '';
-    document.getElementById('media-url-input').value = w.linkUrl || '';
-    document.getElementById('media-linktitle-input').value = w.linkTitle || '';
-  }
-  
-  selectedNoteType = w.type || (categoriesState.length > 0 ? categoriesState[0].id : 'meds');
-  renderCategoriesRow();
-  updateModalFormFieldsVisibility();
-  updateModalLivePreview();
-  document.getElementById('note-modal').classList.add('active');
-}
-
-function closeNoteModal() {
-  document.getElementById('note-modal').classList.remove('active');
-  window.scrollTo(0, 0);
-}
-
-function selectTypeOption(btn, type) {
-  document.querySelectorAll('.type-option-btn').forEach(b => {
-    if (b.dataset.type) b.classList.remove('selected');
-  });
-  btn.classList.add('selected');
-  selectedNoteType = type;
-  updateModalFormFieldsVisibility();
-  updateModalLivePreview();
-}
-
-function onCardCharsRangeInput(val) {
-  const num = parseInt(val, 10) || 8;
-  const charsValEl = document.getElementById('card-chars-val');
-  if (charsValEl) charsValEl.textContent = num;
-  updateModalLivePreview();
-}
-
-function changeCardSpecificChars(delta) {
-  const rangeInput = document.getElementById('card-chars-range');
-  if (!rangeInput) return;
-  let current = parseInt(rangeInput.value, 10) || 8;
-  current = Math.max(3, Math.min(20, current + delta));
-  rangeInput.value = current;
-  onCardCharsRangeInput(current);
-}
-
-function updateModalFormFieldsVisibility() {
-  const todoGroup = document.getElementById('group-todo-fields');
-  const mediaGroup = document.getElementById('group-media-fields');
-  if (todoGroup) todoGroup.style.display = (selectedNoteType === 'todo') ? 'flex' : 'none';
-  if (mediaGroup) mediaGroup.style.display = (selectedNoteType === 'media') ? 'flex' : 'none';
-}
-
-function updateModalLivePreview() {
-  const inputVal = document.getElementById('note-content-input').value;
-  const previewBox = document.getElementById('modal-live-preview');
-  if (!previewBox) return;
-  const rangeInput = document.getElementById('card-chars-range');
-  const currentChars = rangeInput ? parseInt(rangeInput.value, 10) || 8 : charsPerLine;
-  
-  if (selectedNoteType === 'todo') {
-    const todoRaw = document.getElementById('todo-items-input');
-    const tasks = (todoRaw ? todoRaw.value : '').split('\n').filter(Boolean);
-    previewBox.innerHTML = `<b>【待辦清單預覽】</b><br>${escapeHTML(inputVal || '今日事項')}<br>` + tasks.map(t => escapeHTML(t)).join('<br>');
-    previewBox.style.fontSize = '18px';
-  } else if (selectedNoteType === 'media') {
-    const urlVal = document.getElementById('media-url-input').value;
-    const titleVal = document.getElementById('media-linktitle-input').value;
-    previewBox.innerHTML = `<b>【網頁筆記預覽】</b><br>${escapeHTML(inputVal || '文章內容')}<br>` + (urlVal ? `<span style="color: var(--accent-purple);">${escapeHTML(titleVal || urlVal)}</span>` : '');
-    previewBox.style.fontSize = '18px';
-  } else {
-    const rendered = formatContentWithDynamicFont(inputVal || '(請於上方輸入內容)', currentChars, 320);
-    previewBox.innerHTML = rendered.html;
-    previewBox.style.fontSize = rendered.fontSize;
-  }
-}
-
-// Circle-Centered Avatar Crop & Image Handling functions
-function resetCropDefaults() {
-  cropImageObj = null;
-  cropFocalX = 80;
-  cropFocalY = 80;
-  cropScale = 1;
-  cropRotate = 0;
-  cropPointers.clear();
-  const scaleRange = document.getElementById('cropScaleRange');
-  const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) scaleRange.value = 0;
-  if (rotRange) rotRange.value = 0;
-  drawCropCanvas();
-}
-
-function resetCropTransforms() {
-  resetCropDefaults();
-}
-
-function loadCropImageFromUrl(url) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    cropImageObj = img;
-    cropFocalX = 80;
-    cropFocalY = 80;
-    cropScale = 1;
-    cropRotate = 0;
-    const scaleRange = document.getElementById('cropScaleRange');
-    if (scaleRange) scaleRange.value = 0;
-    drawCropCanvas();
   };
-  img.src = url;
 }
 
-function handlePhotoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    loadCropImageFromUrl(e.target.result);
-  };
-  reader.readAsDataURL(file);
-}
+var state = defaultState();
 
-function updateCropTransform() {
-  const scaleRange = document.getElementById('cropScaleRange');
-  const rotRange = document.getElementById('cropRotateRange');
-  if (scaleRange) {
-    const val = parseInt(scaleRange.value, 10) || 0;
-    cropScale = 1 + (val / 40);
-    cropScale = Math.max(0.2, Math.min(3.5, cropScale));
-  }
-  if (rotRange) cropRotate = parseFloat(rotRange.value) || 0;
-  drawCropCanvas();
-}
-
-function drawCropCanvas() {
-  const canvas = document.getElementById('crop-canvas-elem');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  if (cropImageObj) {
-    ctx.save();
-    ctx.translate(cropFocalX, cropFocalY);
-    ctx.rotate((cropRotate * Math.PI) / 180);
-    ctx.scale(cropScale, cropScale);
-    ctx.drawImage(
-      cropImageObj,
-      -cropImageObj.width / 2,
-      -cropImageObj.height / 2
-    );
-    ctx.restore();
-  } else {
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 12px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('點擊上傳頭像', canvas.width / 2, canvas.height / 2);
-  }
-  
-  // 50% Translucent Masking Overlay
-  ctx.save();
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath();
-  ctx.arc(80, 80, 80, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-function initCropInteraction() {
-  const container = document.getElementById('cropContainer');
-  if (!container) return;
-  let initialPinchDist = 0;
-  let initialPinchScale = 1;
-  
-  container.addEventListener('pointerdown', (e) => {
-    if (!cropImageObj) return;
-    container.setPointerCapture(e.pointerId);
-    cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (cropPointers.size === 1) {
-      isDraggingCrop = true;
-      dragCropStartX = e.clientX;
-      dragCropStartY = e.clientY;
-    } else if (cropPointers.size === 2) {
-      isDraggingCrop = false;
-      const pts = Array.from(cropPointers.values());
-      initialPinchDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      initialPinchScale = cropScale;
-    }
-  });
-
-  container.addEventListener('pointermove', (e) => {
-    if (!cropPointers.has(e.pointerId)) return;
-    cropPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (cropPointers.size === 1 && isDraggingCrop) {
-      const dx = e.clientX - dragCropStartX;
-      const dy = e.clientY - dragCropStartY;
-      cropFocalX += dx;
-      cropFocalY += dy;
-      dragCropStartX = e.clientX;
-      dragCropStartY = e.clientY;
-      drawCropCanvas();
-    } else if (cropPointers.size === 2) {
-      const pts = Array.from(cropPointers.values());
-      const currentDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      if (initialPinchDist > 0) {
-        cropScale = Math.max(0.2, Math.min(3.5, initialPinchScale * (currentDist / initialPinchDist)));
-        const scaleRange = document.getElementById('cropScaleRange');
-        if (scaleRange) scaleRange.value = Math.round((cropScale - 1) * 40);
-        drawCropCanvas();
+function saveCurrent(){localStorage.setItem(LS_CUR,JSON.stringify(state));}
+function loadCurrent(){
+  try{
+    var s=localStorage.getItem(LS_CUR);
+    if(s){
+      var p=JSON.parse(s);
+      if(p&&p.settings&&p.reminders){
+        state=p;
+        if(!state.praiseSettings) state.praiseSettings = defaultState().praiseSettings;
       }
     }
+  }catch(e){}
+}
+
+function flash(msg){
+  var b=$('toast');
+  b.textContent = msg || '已更新記錄 ‧ UPDATED';
+  b.classList.add('show');
+  setTimeout(function(){b.classList.remove('show');},1800);
+}
+
+/* SAVE / LOAD WORKFLOW */
+function manualSave(){
+  $('confirm-rec-id').textContent = state.recordId;
+  $('modal-save-confirm').classList.add('open');
+}
+function closeSaveConfirm(){$('modal-save-confirm').classList.remove('open');}
+
+function doSaveOverride(){
+  closeSaveConfirm();
+  executeSave();
+}
+function doSaveNewRecord(){
+  closeSaveConfirm();
+  state.recordId = rid8();
+  $('rec-id').value = state.recordId;
+  executeSave();
+}
+
+function executeSave(){
+  localStorage.setItem(LS_MAN, JSON.stringify({ts:Date.now(), data:JSON.stringify(state)}));
+  var blob=new Blob([JSON.stringify(state)],{type:'application/json'});
+  if(dirHandle&&dirHandle.getFileHandle){
+    dirHandle.getFileHandle('record_'+state.recordId+'.json',{create:true})
+      .then(function(h){return h.createWritable();})
+      .then(function(w){return w.write(blob).then(function(){return w.close();});})
+      .then(function(){flash('檔案已成功儲存至指定資料夾');})
+      .catch(function(){downloadBlob(blob);});
+  }else{
+    downloadBlob(blob);
+  }
+}
+
+function downloadBlob(blob){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='record_'+state.recordId+'.json';
+  a.click();
+  flash('檔案已下載儲存');
+}
+
+function pickFolder(){
+  if(!window.showDirectoryPicker){alert('此瀏覽器不支援資料夾選擇，將使用預設下載位置。');return;}
+  showDirectoryPicker({mode:'readwrite'}).then(function(h){
+    dirHandle=h;
+    $('folder-lbl').textContent='儲存位置：資料夾 '+dirHandle.name;
+  }).catch(function(){});
+}
+
+function openLoad(){
+  var list=$('load-list');
+  list.innerHTML='';
+  [[LS_MAN,'手動儲存記錄 (Manual Save)'],[LS_AUTO,'自動備份記錄 (Auto Save)']].forEach(function(pair){
+    var raw=localStorage.getItem(pair[0]);
+    var it=document.createElement('div');
+    it.className='load-item';
+    if(!raw){
+      it.innerHTML='<span><b>'+pair[1]+'</b></span><span style="color:#999">無記錄</span>';
+    }else{
+      var o=JSON.parse(raw);
+      var recData = JSON.parse(o.data);
+      it.innerHTML='<span><b>'+pair[1]+' (ID: '+(recData.recordId||'未知')+')</b><br><small>時間: '+new Date(o.ts).toLocaleString()+'</small></span><span style="color:var(--orange-d);font-weight:900">載入 ➜</span>';
+      it.onclick=function(){
+        try{
+          state=JSON.parse(o.data);
+          if(!state.praiseSettings) state.praiseSettings = defaultState().praiseSettings;
+          saveCurrent();
+          renderAll();
+          flash('已成功載入記錄');
+        }catch(e){alert('記錄檔損毀，無法讀取');}
+        closeLoad();
+      };
+    }
+    list.appendChild(it);
+  });
+  $('modal-load').classList.add('open');
+}
+function closeLoad(){$('modal-load').classList.remove('open');}
+
+window.addEventListener('beforeunload',function(){
+  saveCurrent();
+  localStorage.setItem(LS_AUTO, JSON.stringify({ts:Date.now(), data:JSON.stringify(state)}));
+});
+
+function prof(id){return state.profiles.find(function(p){return p.id===id;})||{name:'?',avatar:''};}
+function cat(id){return state.categories.find(function(c){return c.id===id;})||{name:'-',color:'#888'};}
+
+function getClockInfo(d){
+  d = d || new Date();
+  var h = d.getHours();
+  var m = String(d.getMinutes()).padStart(2,'0');
+  var period = '';
+  
+  if(h >= 6 && h < 12){
+    period = '早上';
+  } else if(h >= 12 && h < 18){
+    period = '下午';
+  } else {
+    period = '晚上';
+  }
+  
+  var h12 = h % 12 || 12;
+  var hh12Str = String(h12).padStart(2,'0');
+  return {
+    period: period,
+    time12: hh12Str + ':' + m,
+    fullText: period + ' ' + hh12Str + ':' + m
+  };
+}
+
+function fmtTime(r){
+  var hh=parseInt(r.hh||0,10), mm=r.mm||'00';
+  var period = (hh >= 6 && hh < 12) ? '早上' : (hh >= 12 && hh < 18) ? '下午' : '晚上';
+  var h12 = hh % 12 || 12;
+  return period + ' ' + String(h12).padStart(2,'0') + ':' + mm;
+}
+
+function chunkText(s, n){
+  if (!s) return '';
+  return String(s).split('\n').map(function(line){
+    var out = [];
+    for(var i = 0; i < line.length; i += n){
+      out.push(line.slice(i, i + n));
+    }
+    return out.join('<br>');
+  }).join('<br>');
+}
+function wrapTitle(r){var cpr=Math.max(4,state.settings.textPerRow+(r.fontAdj||0));return chunkText(r.title,cpr);}
+function titleFont(r){var cpr=Math.max(4,state.settings.textPerRow+(r.fontAdj||0));return Math.max(14,Math.floor(240/cpr))+'px';}
+
+function chipGrid(el,sel,cb){
+  el.innerHTML='';
+  state.profiles.forEach(function(p){
+    var d=document.createElement('div');
+    d.className='pchip'+(p.id===sel?' selected':'');
+    d.innerHTML=avatarHTML(p,38)+'<span>'+esc(p.name)+'</span>';
+    d.onclick=function(){cb(p.id);};
+    el.appendChild(d);
+  });
+}
+
+function renderToolbox(){
+  var order=state.settings.sectionOrder||[];
+  var scroll=$('tb-scroll');
+  order.forEach(function(id){var s=scroll.querySelector('[data-id="'+id+'"]');if(s)scroll.appendChild(s);});
+  
+  chipGrid($('tb-to'),state.settings.defaultTo,function(id){state.settings.defaultTo=id;saveCurrent();renderToolbox();});
+  chipGrid($('tb-from'),state.settings.defaultFrom,function(id){state.settings.defaultFrom=id;saveCurrent();renderToolbox();});
+  
+  var cc=$('cat-chips');
+  cc.innerHTML='';
+  state.categories.forEach(function(c){
+    var d=document.createElement('span');
+    d.className='cat-edit';
+    d.style.color=c.color;
+    d.innerHTML=esc(c.name)+' <button onclick="renCat(\''+c.id+'\')">改</button>';
+    cc.appendChild(d);
+  });
+  
+  var sg=$('stk-grid');
+  sg.innerHTML='';
+  state.stickers.forEach(function(s,i){
+    var d=document.createElement('div');
+    d.className='stk-item';
+    d.innerHTML='<span class="ico" style="color:'+s.c+'">'+s.ico+'</span>'+esc(s.t);
+    d.onclick=function(){quickAdd(i);};
+    sg.appendChild(d);
   });
 
-  const handlePointerEnd = (e) => {
-    cropPointers.delete(e.pointerId);
-    if (cropPointers.size < 2) initialPinchDist = 0;
-    if (cropPointers.size === 0) isDraggingCrop = false;
+  var ps = state.praiseSettings;
+  $('pz-enable').checked = ps.enabled;
+  $('pz-interval').value = ps.intervalMins;
+  $('pz-sleep').checked = ps.sleepPause;
+  $('pz-count').textContent = ps.list.length;
+
+  $('rec-id').value=state.recordId;
+  $('row-val').textContent=state.settings.textPerRow;
+}
+
+function updatePraiseSettings(){
+  var ps = state.praiseSettings;
+  ps.enabled = $('pz-enable').checked;
+  ps.intervalMins = Math.max(5, parseInt($('pz-interval').value||'60',10));
+  ps.sleepPause = $('pz-sleep').checked;
+  saveCurrent();
+  startPraiseTimer();
+}
+
+function newRecId(){state.recordId=rid8();saveCurrent();renderToolbox();}
+function addCategory(){
+  var v=$('cat-new').value.trim();if(!v)return;
+  var cols=['#d64545','#7b5cd6','#3a7d44','#f28c1b','#4a90e2','#c2578f'];
+  state.categories.push({id:uid('c'),name:v,color:cols[state.categories.length%cols.length]});
+  $('cat-new').value='';saveCurrent();renderToolbox();
+}
+function renCat(id){
+  var c=cat(id);var v=prompt('修改分類名稱:',c.name);
+  if(v&&v.trim()){c.name=v.trim();saveCurrent();renderToolbox();renderCards();}
+}
+function chgRow(d){
+  state.settings.textPerRow=Math.min(16,Math.max(4,state.settings.textPerRow+d));
+  saveCurrent();renderToolbox();renderCards();
+}
+
+function toggleEye(){
+  state.settings.eye=!state.settings.eye;
+  document.body.classList.toggle('eye',state.settings.eye);
+  saveCurrent();
+}
+function setZoom(z){
+  state.settings.zoom=Math.min(2,Math.max(0.4,Math.round(z*10)/10));
+  applyTransform();saveCurrent();
+}
+function applyTransform(){
+  $('canvas').style.transform='translate('+panX+'px,'+panY+'px) scale('+state.settings.zoom+')';
+  $('zoom-pct').textContent=Math.round(state.settings.zoom*100)+'%';
+}
+
+function openToolbox(){$('toolbox').classList.add('open');$('tb-backdrop').classList.add('open');renderToolbox();}
+function closeToolbox(){$('toolbox').classList.remove('open');$('tb-backdrop').classList.remove('open');saveCurrent();}
+
+function resetGrid(){
+  var w=$('canvas-wrap').clientWidth;
+  var cols=Math.max(1,Math.floor(w/(310*state.settings.zoom)));
+  state.reminders.forEach(function(r,i){
+    r.x=20+(i%cols)*310;
+    r.y=20+Math.floor(i/cols)*380;
+  });
+  saveCurrent();renderCards();
+}
+
+function toggleCollapseAll(){
+  state.settings.collapseAll = !state.settings.collapseAll;
+  var isCol = state.settings.collapseAll;
+  
+  var btn = $('btn-collapse-toggle');
+  if(btn) btn.textContent = isCol ? '展開全部 (恢復位置)' : '全部折疊 (省空間)';
+
+  if(isCol){
+    state.reminders.forEach(function(r){
+      r._origX = r.x;
+      r._origY = r.y;
+      r.collapsed = true;
+    });
+    
+    var w = $('canvas-wrap').clientWidth;
+    var cols = Math.max(1, Math.floor(w / (310 * state.settings.zoom)));
+    state.reminders.forEach(function(r, i){
+      r.x = 20 + (i % cols) * 310;
+      r.y = 20 + Math.floor(i / cols) * 110;
+    });
+  } else {
+    state.reminders.forEach(function(r){
+      if(r._origX !== undefined) r.x = r._origX;
+      if(r._origY !== undefined) r.y = r._origY;
+      r.collapsed = false;
+    });
+  }
+  
+  saveCurrent();
+  renderCards();
+}
+
+function centerPos(){
+  var wr=$('canvas-wrap').getBoundingClientRect();
+  var z=state.settings.zoom;
+  return{x:(wr.width/2-panX)/z-145, y:(wr.height/2-panY)/z-110};
+}
+
+function quickAdd(i){
+  var c=centerPos();var now=new Date();
+  state.reminders.push({
+    id:uid('r'),catId:state.categories[0]?state.categories[0].id:'',
+    toId:state.settings.defaultTo,fromId:state.settings.defaultFrom,
+    title:state.stickers[i].t,ck:[],img:'',url:'',ut:'',fontAdj:0,
+    date:todayStr(),hh:String(now.getHours()).padStart(2,'0'),mm:String(now.getMinutes()).padStart(2,'0'),
+    stkOn:true,stkIdx:i,acked:false,x:Math.max(0,c.x),y:Math.max(0,c.y),collapsed:false
+  });
+  saveCurrent();renderCards();flash();
+}
+
+function clockContent(){
+  var info = getClockInfo();
+  var n = new Date();
+  var days=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  var h=n.getHours()+n.getMinutes()/60;
+  var t=(h-6)/12;
+  var sun='';
+  if(t>=0&&t<=1){
+    var x=Math.pow(1-t,2)*10+2*(1-t)*t*120+t*t*230;
+    var y=Math.pow(1-t,2)*80+2*(1-t)*t*8+t*t*80;
+    sun='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="#f7b500" stroke="#fff" stroke-width="2"/>';
+  }
+  var svg='<svg width="240" height="92" viewBox="0 0 240 92"><path d="M10,80 Q120,8 230,80" fill="none" stroke="#f28c1b" stroke-width="2" stroke-dasharray="4 4"/>'+sun+'<text x="6" y="91" font-size="9" fill="#777">06:00 日出</text><text x="103" y="91" font-size="9" fill="#777">12:00 中午</text><text x="183" y="91" font-size="9" fill="#777">18:00 日落</text></svg>';
+  
+  return '<div class="clock-period">'+info.period+'</div><div class="clock-time">'+info.time12+'</div><div class="clock-date">'+n.getFullYear()+'年'+(n.getMonth()+1)+'月'+n.getDate()+'日 '+days[n.getDay()]+'</div><div class="clock-box">'+svg+'</div><div class="clock-cap">晝夜太陽軌跡 ‧ SOLAR ARC OF THE DAY</div>';
+}
+
+function cardEl(r){
+  var d=document.createElement('div');
+  d.className='card'+(r.acked?' acked':'')+(r.collapsed?' collapsed':'');
+  d.dataset.id=r.id;
+  d.style.left=r.x+'px';
+  d.style.top=r.y+'px';
+  
+  if(r.type==='clock'){
+    d.style.borderLeftColor='#f28c1b';
+    d.innerHTML='<div class="card-top"><span class="cat-chip" style="background:#f28c1b">時鐘・CLOCK</span><span class="card-btns"><button class="cbtn" data-act="mag-clock">🔍 放大</button><button class="cbtn" data-act="col">折疊</button><button class="cbtn x" data-act="del">✕</button></span></div><div class="card-body clock-inner">'+clockContent()+'</div>';
+    return d;
+  }
+  
+  var c=cat(r.catId), to=prof(r.toId), fr=prof(r.fromId);
+  d.style.borderLeftColor=c.color;
+  var done=r.ck.filter(function(x){return x.done;}).length;
+  var stk='<label class="stk-lbl"><input type="checkbox" data-act="stk" '+(r.stkOn?'checked':'')+'>'+esc(r.stkOn&&r.stkIdx>=0?state.stickers[r.stkIdx].t:'貼紙')+'</label>';
+  var ck='';
+  if(r.ck.length){
+    ck='<ul class="cklist">'+r.ck.map(function(x,i){return '<li class="'+(x.done?'done':'')+'"><input type="checkbox" data-act="ck" data-i="'+i+'" '+(x.done?'checked':'')+'><span>'+esc(x.t)+'</span></li>';}).join('')+'<span class="ckprog">已完成 '+done+'/'+r.ck.length+'</span></ul>';
+  }
+
+  var summaryHTML = '<div class="card-summary"><div class="card-summary-title">📝 '+esc(r.title)+'</div></div>';
+
+  d.innerHTML='<div class="card-top"><span class="cat-chip" style="background:'+c.color+'">'+esc(c.name)+'</span>'+stk+'<span class="card-btns"><button class="cbtn" data-act="edit">編輯</button><button class="cbtn" data-act="col">折疊</button><button class="cbtn x" data-act="del">✕</button></span></div>'+
+    summaryHTML +
+    '<div class="card-body"><div class="body-row1"><span class="ctime">⏰ '+fmtTime(r)+(r.date!==todayStr()?' ・ '+r.date:'')+'</span><button class="cbtn" style="margin-left:auto" data-act="mag">🔍 放大</button></div>'+(r.img?'<img class="cimg" src="'+esc(r.img)+'">':'')+'<div class="ctitle" style="font-size:'+titleFont(r)+'">'+wrapTitle(r)+'</div>'+(r.url?'<a class="clink" href="'+esc(r.url)+'" target="_blank">🔗 '+esc(r.ut||r.url)+'</a>':'')+ck+'<button class="ack-btn" data-act="ack">✓ 【 我看到了 ‧ ACKNOWLEDGED 】</button></div>'+
+    '<div class="card-foot">'+
+      '<div class="av-badge">'+avatarHTML(to,42)+'<div class="av-text"><span class="av-label">給 (To):</span><span class="av-name">'+esc(to.name)+'</span></div></div>'+
+      '<div class="av-badge">'+avatarHTML(fr,42)+'<div class="av-text"><span class="av-label">來自 (From):</span><span class="av-name">'+esc(fr.name)+'</span></div></div>'+
+    '</div>';
+  return d;
+}
+
+function renderCards(){
+  var cv=$('canvas');
+  cv.innerHTML='';
+  
+  var list = state.reminders;
+  if(activeFilter){
+    list = list.filter(activeFilter);
+  }
+  
+  list.forEach(function(r){cv.appendChild(cardEl(r));});
+  applyTransform();
+}
+
+$('canvas').addEventListener('click',function(e){
+  var btn=e.target.closest('[data-act]');if(!btn)return;
+  var cEl=e.target.closest('.card');
+  var r=state.reminders.find(function(x){return x.id===cEl.dataset.id;});
+  if(!r)return;
+  var act=btn.dataset.act;
+  
+  if(act==='edit') openReminder(r.id);
+  else if(act==='col'){r.collapsed=!r.collapsed;saveCurrent();renderCards();}
+  else if(act==='mag') openMag(r.id);
+  else if(act==='mag-clock') openClockMag();
+  else if(act==='del'){
+    if(confirm('確定刪除這張卡片？')){
+      state.reminders=state.reminders.filter(function(x){return x.id!==r.id;});
+      saveCurrent();renderCards();
+    }
+  }
+  else if(act==='ack'){r.acked=!r.acked;saveCurrent();renderCards();}
+  else if(act==='ck'){r.ck[+btn.dataset.i].done=btn.checked;saveCurrent();renderCards();}
+  else if(act==='stk'){
+    if(btn.checked){stkCardId=r.id;openStickerModal(r);}
+    else{r.stkOn=false;saveCurrent();renderCards();}
+  }
+  e.stopPropagation();
+});
+
+var wrap=$('canvas-wrap');
+wrap.addEventListener('pointerdown',function(e){
+  if(e.target.closest('[data-act]')||e.target.closest('a')||e.target.closest('input'))return;
+  wrap.setPointerCapture(e.pointerId);
+  px0=e.clientX;py0=e.clientY;
+  var cEl=e.target.closest('.card');
+  if(cEl){
+    dragCard=state.reminders.find(function(x){return x.id===cEl.dataset.id;});
+    dragCard._el=cEl;dragCard._ox=e.clientX;dragCard._oy=e.clientY;
+  }else{
+    panning=true;wrap.classList.add('panning');
+  }
+});
+
+wrap.addEventListener('pointermove',function(e){
+  if(dragCard){
+    var z=state.settings.zoom;
+    dragCard.x+=(e.clientX-dragCard._ox)/z;
+    dragCard.y+=(e.clientY-dragCard._oy)/z;
+    dragCard._el.style.left=dragCard.x+'px';
+    dragCard._el.style.top=dragCard.y+'px';
+    dragCard._ox=e.clientX;dragCard._oy=e.clientY;
+  }else if(panning){
+    panX+=e.clientX-px0;panY+=e.clientY-py0;
+    px0=e.clientX;py0=e.clientY;
+    applyTransform();
+  }
+});
+
+wrap.addEventListener('pointerup',function(){
+  if(dragCard){delete dragCard._el;delete dragCard._ox;delete dragCard._oy;dragCard=null;saveCurrent();}
+  panning=false;wrap.classList.remove('panning');
+});
+
+function openReminder(id){
+  editId=id;
+  var r=id?state.reminders.find(function(x){return x.id===id;}):null;
+  $('rem-title-lbl').textContent=r?'編輯叮囑 ‧ EDIT REMINDER':'新增自訂叮囑 ADD';
+  var sel=$('f-cat');sel.innerHTML='';
+  state.categories.forEach(function(c){sel.add(new Option(c.name,c.id));});
+  curTo=r?r.toId:state.settings.defaultTo;
+  curFrom=r?r.fromId:state.settings.defaultFrom;
+  refreshToFrom();
+  $('f-title').value=r?r.title:'';
+  fontAdj=r?r.fontAdj:0;
+  $('f-font').textContent=state.settings.textPerRow+fontAdj;
+  $('f-ck').value=r?r.ck.map(function(x){return x.t;}).join('\n'):'';
+  $('f-img').value=r?r.img:'';
+  $('f-url').value=r?r.url:'';
+  $('f-utitle').value=r?r.ut:'';
+  $('f-date').value=r?r.date:todayStr();
+  var now=new Date();
+  $('f-hh').value=r?r.hh:String(now.getHours()).padStart(2,'0');
+  $('f-mm').value=r?r.mm:String(now.getMinutes()).padStart(2,'0');
+  updatePreview();
+  $('modal-rem').classList.add('open');
+}
+
+function refreshToFrom(){
+  chipGrid($('f-to'),curTo,function(i){curTo=i;refreshToFrom();});
+  chipGrid($('f-from'),curFrom,function(i){curFrom=i;refreshToFrom();});
+  updatePreview();
+}
+
+function chgFont(d){
+  fontAdj=Math.min(8,Math.max(-4,fontAdj+d));
+  $('f-font').textContent=state.settings.textPerRow+fontAdj;
+  updatePreview();
+}
+
+function updatePreview(){
+  var to=prof(curTo), fr=prof(curFrom);
+  if($('pv-to')) $('pv-to').innerHTML='給: '+esc(to.name)+' ｜ 發起人: '+esc(fr.name);
+  var hh=$('f-hh').value||'0', mm=$('f-mm').value||'00';
+  var hNum = parseInt(hh, 10);
+  var phase = (hNum>=6&&hNum<12)?'早上':(hNum>=12&&hNum<18)?'下午':'晚上';
+  var h12 = hNum % 12 || 12;
+  $('f-phase').textContent=phase;
+  $('pv-time').textContent=phase + ' ' + String(h12).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+  var t=$('f-title').value||'...';
+  var cpr=Math.max(4,state.settings.textPerRow+fontAdj);
+  $('pv-title').innerHTML=chunkText(t,cpr);
+  $('pv-title').style.fontSize=Math.max(14,Math.floor(240/cpr))+'px';
+  var lines=$('f-ck').value.split('\n').filter(function(x){return x.trim();});
+  $('pv-ck').innerHTML=lines.map(function(l){return '<li><span>'+esc(l)+'</span></li>';}).join('');
+}
+
+function closeReminder(){$('modal-rem').classList.remove('open');}
+
+function saveReminder(){
+  var title=$('f-title').value.trim();
+  if(!title){alert('標題不能為空');return;}
+  var hh=String(Math.min(23,Math.max(0,parseInt($('f-hh').value||'0',10)||0))).padStart(2,'0');
+  var mm=String(Math.min(59,Math.max(0,parseInt($('f-mm').value||'0',10)||0))).padStart(2,'0');
+  var ck=$('f-ck').value.split('\n').filter(function(x){return x.trim();}).map(function(l){return{t:l.trim(),done:false};});
+  var obj={
+    catId:$('f-cat').value,toId:curTo,fromId:curFrom,title:title,ck:ck,
+    img:$('f-img').value.trim(),url:$('f-url').value.trim(),ut:$('f-utitle').value.trim(),
+    fontAdj:fontAdj,date:$('f-date').value||todayStr(),hh:hh,mm:mm
   };
-  container.addEventListener('pointerup', handlePointerEnd);
-  container.addEventListener('pointercancel', handlePointerEnd);
+  if(editId){
+    var r=state.reminders.find(function(x){return x.id===editId;});
+    Object.assign(r,obj);
+  }else{
+    var c=centerPos();
+    state.reminders.push(Object.assign({id:uid('r'),stkOn:false,stkIdx:-1,acked:false,x:Math.max(0,c.x),y:Math.max(0,c.y),collapsed:false},obj));
+  }
+  saveCurrent();renderCards();closeReminder();flash();
 }
 
-function getCroppedAvatarDataURL() {
-  if (!cropImageObj) return '';
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = 160;
-  outCanvas.height = 160;
-  const ctx = outCanvas.getContext('2d');
-  ctx.beginPath();
-  ctx.arc(80, 80, 80, 0, Math.PI * 2);
-  ctx.clip();
-  ctx.translate(cropFocalX, cropFocalY);
-  ctx.rotate((cropRotate * Math.PI) / 180);
-  ctx.scale(cropScale, cropScale);
-  ctx.drawImage(cropImageObj, -cropImageObj.width / 2, -cropImageObj.height / 2);
-  return outCanvas.toDataURL('image/png');
+function openProfiles(){
+  $('pm-id').value='';$('pm-name').value='';
+  pmTemp={img:'',aspect:1,zoom:1,rot:0,dx:0,dy:0,imgW:140,imgH:140};
+  $('pm-file').value='';$('pm-zoom').value=1;$('pm-rot').value=0;
+  pmPrevUpdate();renderPmList();
+  $('modal-pm').classList.add('open');
+}
+function closeProfiles(){$('modal-pm').classList.remove('open');saveCurrent();renderToolbox();renderCards();}
+
+function pmFile(inp){
+  var f=inp.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var maxDim=1024;
+      var w=img.width, h=img.height;
+      var aspect = w / h;
+      
+      var canvas=document.createElement('canvas');
+      if(w>maxDim || h>maxDim){
+        if(w>=h){ h=Math.round(h*maxDim/w); w=maxDim; }
+        else { w=Math.round(w*maxDim/h); h=maxDim; }
+      }
+      canvas.width=w; canvas.height=h;
+      var ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      
+      pmTemp.img=canvas.toDataURL('image/jpeg',0.92);
+      pmTemp.aspect=aspect;
+      pmTemp.dx=0; pmTemp.dy=0; pmTemp.zoom=1; pmTemp.rot=0;
+      pmPrevUpdate();
+    };
+    img.src=e.target.result;
+  };
+  rd.readAsDataURL(f);
 }
 
-function saveNoteChanges() {
-  const editId = document.getElementById('edit-target-id').value;
-  const content = document.getElementById('note-content-input').value.trim();
-  const time = document.getElementById('note-time-input').value.trim() || '即時提醒';
-  const notesFor = document.getElementById('note-for-input').value.trim() || globalProfileNotesFor;
-  const author = document.getElementById('note-author-input').value.trim() || globalProfileNotesFrom;
-  const rangeInput = document.getElementById('card-chars-range');
-  const cardChars = rangeInput ? parseInt(rangeInput.value, 10) || 8 : charsPerLine;
+function pmReset(){
+  pmTemp.zoom=1;pmTemp.rot=0;pmTemp.dx=0;pmTemp.dy=0;
+  pmPrevUpdate();
+}
 
-  if (!content) {
-    showToast('請輸入內容');
+function pmPrevUpdate(){
+  var cropArea = $('pm-crop-area');
+  if(!pmTemp.img){
+    if(cropArea) cropArea.style.display = 'none';
     return;
   }
+  if(cropArea) cropArea.style.display = 'block';
 
-  if (editId) {
-    const target = widgetsState.find(w => w.id === editId);
-    if (target) {
-      target.type = selectedNoteType;
-      target.content = content;
-      target.time = time;
-      target.notesFor = notesFor;
-      target.author = author;
-      target.authorRole = author.charAt(0) || '家';
-      target.charsPerLine = cardChars;
-      if (selectedNoteType === 'todo') {
-        const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
-        target.tasks = rawTasks.map((t, idx) => ({ id: 't-edit-' + idx, text: t.trim(), done: false }));
-      } else if (selectedNoteType === 'media') {
-        target.imageUrl = document.getElementById('media-image-input').value.trim();
-        target.linkUrl = document.getElementById('media-url-input').value.trim();
-        target.linkTitle = document.getElementById('media-linktitle-input').value.trim();
-      }
-    }
+  var zm = pmTemp.zoom !== undefined ? Math.max(0.1, pmTemp.zoom) : 1;
+  $('pm-zoom').value=zm;
+  $('pm-rot').value=pmTemp.rot||0;
+  if($('pm-zoom-val')) $('pm-zoom-val').textContent=zm.toFixed(1)+'x';
+  if($('pm-rot-val')) $('pm-rot-val').textContent=(pmTemp.rot||0)+'°';
+  
+  var wrap=$('pm-prev-wrap');
+  wrap.style.setProperty('--dx', pmTemp.dx||0);
+  wrap.style.setProperty('--dy', pmTemp.dy||0);
+  wrap.style.setProperty('--zm', zm);
+  wrap.style.setProperty('--rot', pmTemp.rot||0);
+
+  var img=$('pm-prev');
+  var src=pmTemp.img;
+  if(img.src!==src){
+    img.src=src;
+  }
+
+  var aspect = pmTemp.aspect;
+  if(!aspect && img.naturalWidth && img.naturalHeight){
+    aspect = img.naturalWidth / img.naturalHeight;
+    pmTemp.aspect = aspect;
+  }
+  aspect = aspect || 1;
+
+  if(aspect >= 1){
+    img.style.width = (100 * aspect) + '%';
+    img.style.height = '100%';
   } else {
-    const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
-    const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
-    const newWidget = {
-      id: 'widget-custom-' + Date.now(),
-      type: selectedNoteType,
-      x: spawnX,
-      y: spawnY,
-      time: time,
-      content: content,
-      notesFor: notesFor,
-      author: author,
-      authorRole: author.charAt(0) || '家',
-      avatarUrl: '',
-      acknowledged: false,
-      collapsed: false,
-      charsPerLine: cardChars
+    img.style.width = '100%';
+    img.style.height = (100 / aspect) + '%';
+  }
+}
+
+(function(){
+  var w=$('pm-prev-wrap'), sx=0, sy=0, drag=false;
+  w.addEventListener('pointerdown',function(e){
+    drag=true;
+    sx=e.clientX;
+    sy=e.clientY;
+    w.setPointerCapture(e.pointerId);
+  });
+  w.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    var dxPx=e.clientX-sx;
+    var dyPx=e.clientY-sy;
+    sx=e.clientX; sy=e.clientY;
+    
+    // Convert drag movement to percentage shift relative to 140px container
+    pmTemp.dx=(pmTemp.dx||0)+(dxPx/140)*100;
+    pmTemp.dy=(pmTemp.dy||0)+(dyPx/140)*100;
+    
+    // Clamp offset to reasonable bounds (-150% to +150%)
+    pmTemp.dx=Math.min(150,Math.max(-150,pmTemp.dx));
+    pmTemp.dy=Math.min(150,Math.max(-150,pmTemp.dy));
+    
+    pmPrevUpdate();
+  });
+  w.addEventListener('pointerup',function(){drag=false;});
+  w.addEventListener('pointercancel',function(){drag=false;});
+})();
+
+function getCroppedSquareAvatar(img, pmTemp, targetSize){
+  targetSize = targetSize || 400;
+  var canvas = document.createElement('canvas');
+  canvas.width = targetSize;
+  canvas.height = targetSize;
+  var ctx = canvas.getContext('2d');
+
+  var w = img.naturalWidth || img.width || targetSize;
+  var h = img.naturalHeight || img.height || targetSize;
+  var aspect = pmTemp.aspect || (w / h) || 1;
+
+  var drawW, drawH;
+  if(aspect >= 1){
+    drawH = targetSize;
+    drawW = targetSize * aspect;
+  } else {
+    drawW = targetSize;
+    drawH = targetSize / aspect;
+  }
+
+  var zm = pmTemp.zoom !== undefined ? pmTemp.zoom : 1;
+  var rot = ((pmTemp.rot || 0) * Math.PI) / 180;
+  var shiftX = ((pmTemp.dx || 0) / 100) * targetSize;
+  var shiftY = ((pmTemp.dy || 0) / 100) * targetSize;
+
+  ctx.save();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, targetSize, targetSize);
+
+  ctx.translate(targetSize / 2 + shiftX, targetSize / 2 + shiftY);
+  ctx.rotate(rot);
+  ctx.scale(zm, zm);
+
+  ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+  ctx.restore();
+
+  return canvas.toDataURL('image/jpeg', 0.92);
+}
+
+function saveProfile(){
+  var name=$('pm-name').value.trim();
+  if(!name){alert('名稱不能為空');return;}
+  var id=$('pm-id').value;
+
+  function doSave(finalAvatarUrl){
+    if(id){
+      var p=prof(id);
+      p.name=name;
+      if(finalAvatarUrl) p.avatar=finalAvatarUrl;
+      p.zoom=1; p.rot=0; p.dx=0; p.dy=0;
+    }else{
+      state.profiles.push({
+        id:uid('p'),
+        name:name,
+        avatar:finalAvatarUrl||'',
+        zoom:1, rot:0, dx:0, dy:0
+      });
+    }
+    pmTemp={img:'',aspect:1,zoom:1,rot:0,dx:0,dy:0,imgW:140,imgH:140};
+    $('pm-id').value='';$('pm-name').value='';$('pm-file').value='';
+    pmPrevUpdate();renderPmList();
+    saveCurrent();renderToolbox();renderCards();
+  }
+
+  if(pmTemp.img){
+    var img=new Image();
+    img.onload=function(){
+      var croppedUrl=getCroppedSquareAvatar(img, pmTemp, 400);
+      doSave(croppedUrl);
     };
-    if (selectedNoteType === 'todo') {
-      const rawTasks = document.getElementById('todo-items-input').value.split('\n').filter(Boolean);
-      newWidget.tasks = rawTasks.map((t, idx) => ({ id: 't-new-' + idx, text: t.trim(), done: false }));
-    } else if (selectedNoteType === 'media') {
-      newWidget.imageUrl = document.getElementById('media-image-input').value.trim();
-      newWidget.linkUrl = document.getElementById('media-url-input').value.trim();
-      newWidget.linkTitle = document.getElementById('media-linktitle-input').value.trim();
-    }
-    widgetsState.push(newWidget);
-  }
-  saveWidgetsToStorage();
-  renderAllWidgets();
-  closeNoteModal();
-  showToast('卡片資料已儲存');
-}
-
-function removeWidget(id) {
-  widgetsState = widgetsState.filter(w => w.id !== id);
-  saveWidgetsToStorage();
-  renderAllWidgets();
-  showToast('卡片已刪除');
-}
-
-function toggleAck(id) {
-  const target = widgetsState.find(w => w.id === id);
-  if (target) {
-    target.acknowledged = !target.acknowledged;
-    saveWidgetsToStorage();
-    renderAllWidgets();
-    showToast(target.acknowledged ? '已確認收到' : '已取消確認');
+    img.onerror=function(){
+      doSave(pmTemp.img);
+    };
+    img.src=pmTemp.img;
+  }else{
+    var existingP=id?prof(id):null;
+    doSave(existingP?existingP.avatar:'');
   }
 }
 
-function spawnQuickSticker(type) {
-  const spawnX = Math.abs(panX) + 60 + ((widgetsState.length % 3) * 370);
-  const spawnY = Math.abs(panY) + 80 + (Math.floor(widgetsState.length / 3) * 60);
-  const presets = {
-    water: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '記得多飲溫水補充水分', time: '全日叮囑' },
-    dinner: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '今晚返嚟一齊食晚飯', time: '下午06:30' },
-    clothes: { type: categoriesState[0] ? categoriesState[0].id : 'note', content: '天冷出門記得穿外套', time: '早晚叮囑' },
-    bp: { type: categoriesState[0] ? categoriesState[0].id : 'meds', content: '記得量血壓並記錄數據', time: '早晚一次' }
-  };
-  const item = presets[type] || presets.water;
-  const newWidget = {
-    id: 'widget-sticker-' + Date.now(),
-    type: item.type,
-    x: spawnX,
-    y: spawnY,
-    time: item.time,
-    content: item.content,
-    notesFor: globalProfileNotesFor,
-    author: globalProfileNotesFrom,
-    authorRole: globalProfileNotesFrom.charAt(0) || '家',
-    avatarUrl: '',
-    acknowledged: false,
-    collapsed: false,
-    charsPerLine: 8
-  };
-  widgetsState.push(newWidget);
-  saveWidgetsToStorage();
-  renderAllWidgets();
-  showToast('已新增快捷貼紙');
+function renderPmList(){
+  var l=$('pm-list');l.innerHTML='';
+  state.profiles.forEach(function(p){
+    var d=document.createElement('div');
+    d.className='pm-item';
+    d.innerHTML=avatarHTML(p,38)+'<span class="sp">'+esc(p.name)+'</span><button class="btn-s" onclick="editProfile(\''+p.id+'\')">編輯</button><button class="btn-s" style="background:#d64545;border-color:#d64545;color:#fff" onclick="delProfile(\''+p.id+'\')">刪</button>';
+    l.appendChild(d);
+  });
 }
 
-let activeWidget = null;
-let startX = 0, startY = 0;
-let initialLeft = 0, initialTop = 0;
-
-function initDraggableWidget(widgetEl) {
-  widgetEl.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('button, input, textarea, a, select, [role="button"]')) return;
-    activeWidget = widgetEl;
-    bringToFront(activeWidget);
-    activeWidget.classList.add('dragging');
-    startX = e.clientX;
-    startY = e.clientY;
-    const targetState = widgetsState.find(w => w.id === widgetEl.id);
-    if (targetState) {
-      initialLeft = targetState.x;
-      initialTop = targetState.y;
-    }
-    widgetEl.setPointerCapture(e.pointerId);
-    e.stopPropagation();
-  });
-
-  widgetEl.addEventListener('pointermove', (e) => {
-    if (!activeWidget || activeWidget !== widgetEl) return;
-    const dx = (e.clientX - startX) / canvasScale;
-    const dy = (e.clientY - startY) / canvasScale;
-    const newLeft = initialLeft + dx;
-    const newTop = initialTop + dy;
-    activeWidget.style.left = `${newLeft}px`;
-    activeWidget.style.top = `${newTop}px`;
-    const targetState = widgetsState.find(w => w.id === widgetEl.id);
-    if (targetState) {
-      targetState.x = newLeft;
-      targetState.y = newTop;
-    }
-  });
-
-  const endDrag = (e) => {
-    if (activeWidget === widgetEl) {
-      activeWidget.classList.remove('dragging');
-      activeWidget = null;
-      saveWidgetsToStorage();
-    }
-  };
-  widgetEl.addEventListener('pointerup', endDrag);
-  widgetEl.addEventListener('pointercancel', endDrag);
-}
-
-function initCanvasPanAndZoom() {
-  const canvas = document.getElementById('main-canvas');
-  let initialPinchDistance = null;
-  let initialScaleOnPinch = 1.0;
-
-  canvas.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.canvas-widget, #sidebar-dock, .canvas-top-bar, .modal-backdrop')) return;
-    canvas.setPointerCapture(e.pointerId);
-    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (activePointers.size === 1) {
-      isPanningCanvas = true;
-      startX = e.clientX - panX;
-      startY = e.clientY - panY;
-    } else if (activePointers.size === 2) {
-      isPanningCanvas = false;
-      const pts = Array.from(activePointers.values());
-      initialPinchDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      initialScaleOnPinch = canvasScale;
-    }
-  });
-
-  canvas.addEventListener('pointermove', (e) => {
-    if (!activePointers.has(e.pointerId)) return;
-    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (activePointers.size === 1 && isPanningCanvas) {
-      panX = e.clientX - startX;
-      panY = e.clientY - startY;
-      updateCanvasTransform();
-    } else if (activePointers.size === 2 && initialPinchDistance) {
-      const pts = Array.from(activePointers.values());
-      const currentDistance = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-      const scaleFactor = currentDistance / initialPinchDistance;
-      canvasScale = Math.min(2.5, Math.max(0.5, initialScaleOnPinch * scaleFactor));
-      updateCanvasTransform();
-    }
-  });
-
-  const endPan = (e) => {
-    activePointers.delete(e.pointerId);
-    if (activePointers.size < 2) {
-      initialPinchDistance = null;
-    }
-    if (activePointers.size === 0) {
-      isPanningCanvas = false;
-    }
-  };
-  canvas.addEventListener('pointerup', endPan);
-  canvas.addEventListener('pointercancel', endPan);
-
-  canvas.addEventListener('wheel', (e) => {
-    if (e.target.closest('.canvas-widget, #sidebar-dock, .modal-backdrop')) return;
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-    canvasScale = Math.min(2.5, Math.max(0.5, canvasScale * zoomFactor));
-    updateCanvasTransform();
-  }, { passive: false });
-}
-
-function openMagnifierModal(id) {
-  const w = widgetsState.find(item => item.id === id);
-  if (!w) return;
-  activeMagnifiedCardId = id;
-  document.getElementById('mag-time-badge').textContent = `時間: ${w.time || '即時'} | 給: ${w.notesFor || '家人'}`;
-  const effectiveChars = w.charsPerLine || charsPerLine;
-  const renderedMag = formatContentWithDynamicFont(w.content, effectiveChars, 450);
-  const magBox = document.getElementById('mag-content-box');
-  magBox.innerHTML = renderedMag.html;
-  magBox.style.fontSize = `calc(${renderedMag.fontSize} * 1.35)`;
-  document.getElementById('mag-author-badge').textContent = `叮囑者: ${w.author || '家人'}`;
+function editProfile(id){
+  var p=prof(id);
+  $('pm-id').value=p.id;
+  $('pm-name').value=p.name;
+  pmTemp={img:p.avatar||'', aspect:1, zoom:p.zoom!==undefined?p.zoom:1, rot:p.rot||0, dx:p.dx||0, dy:p.dy||0, imgW:140, imgH:140};
+  $('pm-zoom').value=pmTemp.zoom;
+  $('pm-rot').value=pmTemp.rot;
   
-  const ackBtn = document.getElementById('magnifier-modal').querySelector('#mag-ack-btn');
-  if (w.acknowledged) {
-    ackBtn.classList.add('acknowledged');
-    ackBtn.querySelector('span').textContent = '【已確認收到 ACKNOWLEDGED】';
+  if(p.avatar){
+    var tempImg = new Image();
+    tempImg.onload = function(){
+      pmTemp.aspect = tempImg.width / tempImg.height;
+      pmPrevUpdate();
+    };
+    tempImg.src = p.avatar;
+  }
+  pmPrevUpdate();
+}
+
+function delProfile(id){
+  if(!confirm('確定刪除成員？'))return;
+  state.profiles=state.profiles.filter(function(p){return p.id!==id;});
+  saveCurrent();renderPmList();renderToolbox();renderCards();
+}
+
+function openFilterModal(){
+  var toSel=$('fl-to'), frSel=$('fl-from'), catSel=$('fl-cat');
+  toSel.innerHTML='<option value="">全部對象 (All)</option>';
+  frSel.innerHTML='<option value="">全部發起人 (All)</option>';
+  catSel.innerHTML='<option value="">全部分類 (All)</option>';
+  
+  state.profiles.forEach(function(p){
+    toSel.add(new Option(p.name, p.id));
+    frSel.add(new Option(p.name, p.id));
+  });
+  state.categories.forEach(function(c){
+    catSel.add(new Option(c.name, c.id));
+  });
+  $('fl-date').value='';
+  $('modal-filter').classList.add('open');
+}
+
+function closeFilterModal(){$('modal-filter').classList.remove('open');}
+
+function applyFilter(recentFiveOnly){
+  closeFilterModal();
+  var btn = $('btn-filter');
+  
+  if(recentFiveOnly){
+    var recentIds = state.reminders.slice(-5).map(function(r){return r.id;});
+    activeFilter = function(r){ return recentIds.indexOf(r.id) >= 0 || r.type === 'clock'; };
+    btn.style.background = 'var(--purple)';
+    btn.style.color = '#fff';
+    btn.textContent = '🔍 篩選中 (最新5張)';
   } else {
-    ackBtn.classList.remove('acknowledged');
-    ackBtn.querySelector('span').textContent = '【我看到了 ACKNOWLEDGED】';
+    var toVal = $('fl-to').value;
+    var frVal = $('fl-from').value;
+    var catVal = $('fl-cat').value;
+    var dateVal = $('fl-date').value;
+    
+    if(!toVal && !frVal && !catVal && !dateVal){
+      resetFilter();
+      return;
+    }
+    
+    activeFilter = function(r){
+      if(r.type === 'clock') return true;
+      if(toVal && r.toId !== toVal) return false;
+      if(frVal && r.fromId !== frVal) return false;
+      if(catVal && r.catId !== catVal) return false;
+      if(dateVal && r.date !== dateVal) return false;
+      return true;
+    };
+    
+    btn.style.background = 'var(--orange)';
+    btn.style.color = '#fff';
+    btn.textContent = '🔍 已套用篩選';
   }
-  document.getElementById('magnifier-modal').classList.add('active');
+  renderCards();
 }
 
-function closeMagnifierModal() {
-  document.getElementById('magnifier-modal').classList.remove('active');
+function resetFilter(){
+  activeFilter = null;
+  var btn = $('btn-filter');
+  btn.style.background = '#fff';
+  btn.style.color = 'var(--navy)';
+  btn.textContent = '🔍 篩選';
+  closeFilterModal();
+  renderCards();
 }
 
-function toggleAckFromMagnifier() {
-  if (activeMagnifiedCardId) {
-    toggleAck(activeMagnifiedCardId);
-    openMagnifierModal(activeMagnifiedCardId);
-  }
+/* STICKER MODAL */
+function openStickerModal(r){
+  $('stk-new').value=r.stkIdx>=0?state.stickers[r.stkIdx].t:'';
+  var box=$('stk-radio');box.innerHTML='';
+  state.stickers.forEach(function(s,i){
+    var d=document.createElement('label');
+    d.style.cssText='display:flex;gap:8px;align-items:center;padding:8px;border-bottom:2px solid var(--line);cursor:pointer;font-weight:800';
+    d.innerHTML='<input type="radio" name="stkpick" value="'+i+'" '+(i===(r.stkIdx>=0?r.stkIdx:0)?'checked':'')+' style="accent-color:var(--orange)"><span><span style="color:'+s.c+'">'+s.ico+'</span> '+esc(s.t)+'</span>';
+    box.appendChild(d);
+  });
+  $('modal-stk').classList.add('open');
+}
+function cancelSticker(){$('modal-stk').classList.remove('open');stkCardId=null;renderCards();}
+function confirmSticker(){
+  var r=state.reminders.find(function(x){return x.id===stkCardId;});
+  if(!r){cancelSticker();return;}
+  var nt=$('stk-new').value.trim();
+  if(!nt){alert('請輸入新貼紙文字');return;}
+  var sel=document.querySelector('input[name=stkpick]:checked');
+  var idx=sel?+sel.value:0;
+  state.stickers[idx].t=nt;
+  r.stkIdx=idx;r.stkOn=true;
+  saveCurrent();renderToolbox();renderCards();
+  $('modal-stk').classList.remove('open');stkCardId=null;flash();
 }
 
-const WD = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-const pad = n => String(n).padStart(2, '0');
-
-function updateClock() {
-  const now = new Date();
-  const hrs = now.getHours();
-  const mins = now.getMinutes();
-  const clockVal = document.getElementById('clock-time-val');
-  if (clockVal) clockVal.textContent = `${pad(hrs)}:${pad(mins)}`;
-  const dateVal = document.getElementById('clock-date-val');
-  if (dateVal) dateVal.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 ${WD[now.getDay()]}`;
-  updateSolarArcPosition(hrs, mins);
+function openMag(id){
+  var r=state.reminders.find(function(x){return x.id===id;});if(!r)return;
+  $('mag-time').textContent=fmtTime(r)+(r.date?' ・ '+r.date:'');
+  $('mag-text').textContent=chunk(r.title,state.settings.textPerRow).join('\n');
+  $('mag-ack').onclick=function(){r.acked=true;saveCurrent();renderCards();closeMag();};
+  $('modal-mag').classList.add('open');
 }
 
-function updateSolarArcPosition(hrs, mins) {
-  const dayPath = document.getElementById('day-arc-path');
-  const nightPath = document.getElementById('night-arc-path');
-  const indicatorGlow = document.getElementById('solar-indicator-glow');
-  const indicatorCore = document.getElementById('solar-indicator-core');
-  const phaseBadge = document.getElementById('solar-phase-badge');
-  if (!dayPath || !nightPath || !indicatorGlow || !indicatorCore || !phaseBadge) return;
+function openClockMag(){
+  var info = getClockInfo();
+  $('mag-time').textContent = info.period;
+  $('mag-text').textContent = info.time12;
+  $('mag-ack').onclick = function(){ closeMag(); };
+  $('modal-mag').classList.add('open');
+}
+
+function closeMag(){$('modal-mag').classList.remove('open');}
+
+/* HOURLY PRAISE POPUP SYSTEM */
+function startPraiseTimer(){
+  if(praiseTimer) clearInterval(praiseTimer);
+  var ps = state.praiseSettings;
+  if(!ps || !ps.enabled) return;
   
-  const currentMin = hrs * 60 + mins;
-  let pt = { x: 30, y: 85 };
-  let isDaytime = currentMin >= 360 && currentMin < 1080;
+  var intervalMs = Math.max(5, ps.intervalMins) * 60 * 1000;
+  praiseTimer = setInterval(function(){
+    triggerPraisePopup();
+  }, intervalMs);
+}
+
+function triggerPraisePopup(){
+  var ps = state.praiseSettings;
+  if(!ps || !ps.enabled || !ps.list || !ps.list.length) return;
   
-  if (isDaytime) {
-    const dayRatio = (currentMin - 360) / 720;
-    const len = dayPath.getTotalLength();
-    pt = dayPath.getPointAtLength(dayRatio * len);
-    indicatorGlow.setAttribute('fill', '#FBBF24');
-    indicatorGlow.setAttribute('opacity', '0.45');
-    indicatorCore.setAttribute('fill', '#D97706');
-    if (hrs >= 6 && hrs < 9) {
-      phaseBadge.textContent = '清晨(晨起食早餐) EARLY MORNING';
-    } else if (hrs >= 9 && hrs < 12) {
-      phaseBadge.textContent = '上午(日間活動) MORNING';
-    } else if (hrs >= 12 && hrs < 14) {
-      phaseBadge.textContent = '正午(午膳休息) NOON';
-    } else {
-      phaseBadge.textContent = '下午(午後茶段) AFTERNOON';
-    }
-  } else {
-    let nightMin = currentMin >= 1080 ? currentMin - 1080 : currentMin + 360;
-    const nightRatio = nightMin / 720;
-    const len = nightPath.getTotalLength();
-    pt = nightPath.getPointAtLength(nightRatio * len);
-    indicatorGlow.setAttribute('fill', '#60A5FA');
-    indicatorGlow.setAttribute('opacity', '0.35');
-    indicatorCore.setAttribute('fill', '#1D4ED8');
-    if (hrs >= 18 && hrs < 21) {
-      phaseBadge.textContent = '黃昏(晚飯時間) EVENING';
-    } else if (hrs >= 21 && hrs < 24) {
-      phaseBadge.textContent = '深夜(準備入睡) BEDTIME';
-    } else {
-      phaseBadge.textContent = '凌晨(靜夜休息) NIGHT';
-    }
-  }
-  indicatorGlow.setAttribute('cx', pt.x);
-  indicatorGlow.setAttribute('cy', pt.y);
-  indicatorCore.setAttribute('cx', pt.x);
-  indicatorCore.setAttribute('cy', pt.y);
-}
-
-setInterval(updateClock, 1000);
-
-function toggleSidebar(forceState) {
-  const dock = document.getElementById('sidebar-dock');
-  const backdrop = document.getElementById('sidebar-backdrop');
-  const isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    const nextState = forceState !== undefined ? forceState : !dock.classList.contains('open');
-    if (nextState) {
-      dock.classList.add('open');
-      backdrop.classList.add('active');
-    } else {
-      dock.classList.remove('open');
-      backdrop.classList.remove('active');
-    }
-  } else {
-    const nextState = forceState !== undefined ? !forceState : !dock.classList.contains('collapsed');
-    if (nextState) {
-      dock.classList.remove('collapsed');
-    } else {
-      dock.classList.add('collapsed');
-    }
-  }
-}
-
-function toggleTheme() {
-  document.body.classList.toggle('theme-night');
-  const isNight = document.body.classList.contains('theme-night');
-  const text = document.getElementById('themeToggleText');
-  if (text) text.textContent = isNight ? '日標' : '護眼';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadWidgetsFromStorage();
-  initCanvasPanAndZoom();
-  initCropInteraction();
-  drawCropCanvas();
+  var now = new Date();
+  var h = now.getHours();
+  if(ps.sleepPause && (h >= 22 || h < 8)) return;
   
-  const textarea = document.getElementById('note-content-input');
-  if (textarea) textarea.addEventListener('input', updateModalLivePreview);
-  const todoTextarea = document.getElementById('todo-items-input');
-  if (todoTextarea) todoTextarea.addEventListener('input', updateModalLivePreview);
-  const mediaUrlInput = document.getElementById('media-url-input');
-  if (mediaUrlInput) mediaUrlInput.addEventListener('input', updateModalLivePreview);
-  const mediaTitleInput = document.getElementById('media-linktitle-input');
-  if (mediaTitleInput) mediaTitleInput.addEventListener('input', updateModalLivePreview);
-});
+  var msg = ps.list[Math.floor(Math.random() * ps.list.length)];
+  $('pz-pop-msg').textContent = msg;
+  
+  var secLeft = 30;
+  $('pz-pop-sec').textContent = secLeft;
+  $('modal-praise').classList.add('open');
+  
+  if(praiseCountdown) clearInterval(praiseCountdown);
+  praiseCountdown = setInterval(function(){
+    secLeft--;
+    $('pz-pop-sec').textContent = secLeft;
+    if(secLeft <= 0){
+      closePraiseModal();
+    }
+  }, 1000);
+}
+
+function closePraiseModal(){
+  if(praiseCountdown) clearInterval(praiseCountdown);
+  $('modal-praise').classList.remove('open');
+}
+
+function closePraiseModalBackdrop(e){
+  closePraiseModal();
+}
+
+function openPraiseEditor(){
+  renderPraiseList();
+  $('modal-pz-edit').classList.add('open');
+}
+function closePraiseEditor(){$('modal-pz-edit').classList.remove('open');}
+
+function renderPraiseList(){
+  var l = $('pz-list'); l.innerHTML = '';
+  state.praiseSettings.list.forEach(function(txt, i){
+    var d = document.createElement('div');
+    d.style.cssText = 'display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:.85rem;font-weight:800;';
+    d.innerHTML = '<span style="flex:1">'+esc(txt)+'</span><button class="btn-s" style="background:#d64545;color:#fff;border-color:#d64545" onclick="delPraiseText('+i+')">刪</button>';
+    l.appendChild(d);
+  });
+}
+
+function addPraiseText(){
+  var inp = $('pz-new-text');
+  var txt = inp.value.trim();
+  if(!txt) return;
+  state.praiseSettings.list.push(txt);
+  inp.value = '';
+  saveCurrent();
+  renderPraiseList();
+  renderToolbox();
+}
+
+function delPraiseText(idx){
+  state.praiseSettings.list.splice(idx, 1);
+  saveCurrent();
+  renderPraiseList();
+  renderToolbox();
+}
+
+function renderAll(){
+  if(state.settings.eye) document.body.classList.add('eye');
+  renderToolbox();
+  renderCards();
+  startPraiseTimer();
+}
+
+window.onload = function(){
+  loadCurrent();
+  renderAll();
+  
+  setInterval(function(){
+    var clockCards = document.querySelectorAll('.card[data-id="clock"] .clock-inner');
+    clockCards.forEach(function(el){
+      el.innerHTML = clockContent();
+    });
+  }, 10000);
+};
 </script>
 </body>
 </html>
-
-
