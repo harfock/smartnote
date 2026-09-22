@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>智醒長者・自由空間數位照護日誌</title>
+
 <style>
 :root{
   --navy:#16324f;
@@ -39,13 +40,49 @@ header{position:fixed;top:0;left:0;right:0;height:62px;background:var(--cream);d
 #toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--orange);border:2px solid var(--navy);color:#fff;font-weight:900;padding:8px 20px;border-radius:12px;z-index:990;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:var(--shadow);}
 #toast.show{opacity:1;}
 
-/* CANVAS */
-#canvas-wrap{position:fixed;inset:62px 0 0 0;overflow:hidden;background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:26px 26px;cursor:grab;}
+/* CANVAS & DRAG OPTIMIZATION FOR CHROME / BLINK ENGINE */
+#canvas-wrap{
+  position:fixed;
+  inset:62px 0 0 0;
+  overflow:hidden;
+  background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);
+  background-size:26px 26px;
+  cursor:grab;
+  touch-action:none; /* Prevents Chrome default scroll/gesture interference */
+  user-select:none;
+  -webkit-user-select:none;
+}
 #canvas-wrap.panning{cursor:grabbing;}
-#canvas{position:absolute;top:0;left:0;width:0;height:0;transform-origin:0 0;}
+#canvas{
+  position:absolute;
+  top:0;
+  left:0;
+  width:0;
+  height:0;
+  transform-origin:0 0;
+  will-change:transform; /* Chrome rendering optimization */
+}
 
 /* CARD STYLES */
-.card{position:absolute;width:290px;background:var(--card);border:2px solid var(--navy);border-left:8px solid var(--purple);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:grab;user-select:none;transition:box-shadow .2s;}
+.card{
+  position:absolute;
+  width:290px;
+  background:var(--card);
+  border:2px solid var(--navy);
+  border-left:8px solid var(--purple);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  cursor:grab;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-user-drag:none;
+  touch-action:none; /* Enables smooth drag in Chrome/Android */
+  will-change:left, top; /* Prevents frame drops during high-frequency move events */
+  transition:box-shadow .2s;
+}
+.card.dragging{cursor:grabbing;}
 .card.acked{opacity:.85;border-left-color:var(--green);}
 .card-top{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:2px solid var(--line);background:var(--cream-2);border-radius:12px 12px 0 0;flex-wrap:wrap;}
 .cat-chip{font-size:.75rem;font-weight:900;color:#fff;border-radius:8px;padding:3px 8px;white-space:nowrap;}
@@ -59,7 +96,16 @@ header{position:fixed;top:0;left:0;right:0;height:62px;background:var(--cream);d
 .body-row1{display:flex;align-items:center;gap:6px;}
 .ctime{color:var(--orange-d);font-weight:900;font-size:.82rem;}
 .ctitle{font-weight:900;line-height:1.35;word-break:break-all;color:var(--navy);}
-.cimg{width:100%;max-height:130px;object-fit:cover;border-radius:8px;border:2px solid var(--line);}
+.cimg{
+  width:100%;
+  max-height:130px;
+  object-fit:cover;
+  border-radius:8px;
+  border:2px solid var(--line);
+  -webkit-user-drag:none;
+  user-select:none;
+  pointer-events:none; /* Prevents native image drag in Chrome */
+}
 .clink{font-size:.82rem;color:var(--purple);background:#f3efff;border:2px solid #d8ccf6;border-radius:8px;padding:5px 8px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;font-weight:800;}
 
 .cklist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
@@ -91,6 +137,7 @@ header{position:fixed;top:0;left:0;right:0;height:62px;background:var(--cream);d
   max-height:none !important;
   transform-origin:center center;
   user-select:none;
+  -webkit-user-drag:none;
   pointer-events:none;
   transform: translate(-50%, -50%) scale(var(--zm, 1)) rotate(calc(var(--rot, 0) * 1deg));
 }
@@ -961,39 +1008,105 @@ $('canvas').addEventListener('click',function(e){
   e.stopPropagation();
 });
 
-var wrap=$('canvas-wrap');
-wrap.addEventListener('pointerdown',function(e){
-  if(e.target.closest('[data-act]')||e.target.closest('a')||e.target.closest('input'))return;
-  wrap.setPointerCapture(e.pointerId);
-  px0=e.clientX;py0=e.clientY;
-  var cEl=e.target.closest('.card');
-  if(cEl){
-    dragCard=state.reminders.find(function(x){return x.id===cEl.dataset.id;});
-    dragCard._el=cEl;dragCard._ox=e.clientX;dragCard._oy=e.clientY;
-  }else{
-    panning=true;wrap.classList.add('panning');
+/* OPTIMIZED DRAG & PAN LOGIC (CHROME & SAFARI COMPATIBLE) */
+var wrap = $('canvas-wrap');
+var pendingUpdate = false;
+
+// Prevent native browser dragging (e.g. image/text dragging) in Chrome
+wrap.addEventListener('dragstart', function(e) {
+  e.preventDefault();
+});
+
+wrap.addEventListener('pointerdown', function(e) {
+  // Ignore interactive elements
+  if(e.target.closest('[data-act]') || e.target.closest('a') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('button') || e.target.closest('select')) {
+    return;
+  }
+  
+  // Prevent Chrome from starting default text selection or browser gestures
+  if (e.cancelable) {
+    e.preventDefault();
+  }
+
+  try {
+    wrap.setPointerCapture(e.pointerId);
+  } catch (err) {}
+
+  px0 = e.clientX;
+  py0 = e.clientY;
+  
+  var cEl = e.target.closest('.card');
+  if(cEl) {
+    dragCard = state.reminders.find(function(x){ return x.id === cEl.dataset.id; });
+    if(dragCard) {
+      dragCard._el = cEl;
+      dragCard._ox = e.clientX;
+      dragCard._oy = e.clientY;
+      cEl.classList.add('dragging');
+    }
+  } else {
+    panning = true;
+    wrap.classList.add('panning');
   }
 });
 
-wrap.addEventListener('pointermove',function(e){
-  if(dragCard){
-    var z=state.settings.zoom;
-    dragCard.x+=(e.clientX-dragCard._ox)/z;
-    dragCard.y+=(e.clientY-dragCard._oy)/z;
-    dragCard._el.style.left=dragCard.x+'px';
-    dragCard._el.style.top=dragCard.y+'px';
-    dragCard._ox=e.clientX;dragCard._oy=e.clientY;
-  }else if(panning){
-    panX+=e.clientX-px0;panY+=e.clientY-py0;
-    px0=e.clientX;py0=e.clientY;
-    applyTransform();
+wrap.addEventListener('pointermove', function(e) {
+  if(!dragCard && !panning) return;
+
+  if(dragCard) {
+    var z = state.settings.zoom || 1;
+    dragCard.x += (e.clientX - dragCard._ox) / z;
+    dragCard.y += (e.clientY - dragCard._oy) / z;
+    dragCard._ox = e.clientX;
+    dragCard._oy = e.clientY;
+  } else if(panning) {
+    panX += e.clientX - px0;
+    panY += e.clientY - py0;
+    px0 = e.clientX;
+    py0 = e.clientY;
+  }
+
+  // Batch DOM updates using requestAnimationFrame for smooth 60fps/120fps motion in Chrome
+  if(!pendingUpdate) {
+    pendingUpdate = true;
+    requestAnimationFrame(function() {
+      if(dragCard && dragCard._el) {
+        dragCard._el.style.left = dragCard.x + 'px';
+        dragCard._el.style.top = dragCard.y + 'px';
+      }
+      if(panning) {
+        applyTransform();
+      }
+      pendingUpdate = false;
+    });
   }
 });
 
-wrap.addEventListener('pointerup',function(){
-  if(dragCard){delete dragCard._el;delete dragCard._ox;delete dragCard._oy;dragCard=null;saveCurrent();}
-  panning=false;wrap.classList.remove('panning');
-});
+function endDrag(e) {
+  if(e && e.pointerId && wrap.hasPointerCapture && wrap.hasPointerCapture(e.pointerId)) {
+    try {
+      wrap.releasePointerCapture(e.pointerId);
+    } catch(err) {}
+  }
+  if(dragCard) {
+    if(dragCard._el) {
+      dragCard._el.classList.remove('dragging');
+    }
+    delete dragCard._el;
+    delete dragCard._ox;
+    delete dragCard._oy;
+    dragCard = null;
+    saveCurrent();
+  }
+  if(panning) {
+    panning = false;
+    wrap.classList.remove('panning');
+  }
+}
+
+// Attach both pointerup and pointercancel for full Chrome gesture support
+wrap.addEventListener('pointerup', endDrag);
+wrap.addEventListener('pointercancel', endDrag);
 
 function openReminder(id){
   editId=id;
@@ -1170,11 +1283,9 @@ function pmPrevUpdate(){
     var dyPx=e.clientY-sy;
     sx=e.clientX; sy=e.clientY;
     
-    // Convert drag movement to percentage shift relative to 140px container
     pmTemp.dx=(pmTemp.dx||0)+(dxPx/140)*100;
     pmTemp.dy=(pmTemp.dy||0)+(dyPx/140)*100;
     
-    // Clamp offset to reasonable bounds (-150% to +150%)
     pmTemp.dx=Math.min(150,Math.max(-150,pmTemp.dx));
     pmTemp.dy=Math.min(150,Math.max(-150,pmTemp.dy));
     
